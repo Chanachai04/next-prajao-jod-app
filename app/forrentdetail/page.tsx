@@ -5,7 +5,6 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -16,10 +15,9 @@ export default function ForRentDetail() {
   return (
     <>
       {/* --ส่วนหัว */}
-      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-10">
-        <h1 className="text-2xl pt-10">ปล่อยเช่าที่จอดรถ</h1>
+      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
+        <h1 className="text-3xl pt-10">ปล่อยเช่าที่จอดรถ</h1>
         <p className="py-2">ข้อมูลทั่วไปที่จอดรถ</p>
-
         {/* --ส่วน field */}
         <div className="flex flex-col space-y-6">
           {/* บรรทัด: ชื่อที่จอด + ประเภท */}
@@ -58,7 +56,6 @@ export default function ForRentDetail() {
               </Select>
             </div>
           </div>
-
           {/* คำบรรยาย */}
           <Field>
             <FieldLabel htmlFor="Description">คำบรรยาย</FieldLabel>
@@ -68,6 +65,65 @@ export default function ForRentDetail() {
               className="resize-none border-2 border-gray-400 w-full"
             />
           </Field>
+        </div>
+        {/* --จำนวน/บ้านเลขที่ */}
+        <div className="flex gap-10 pt-3">
+          <Field>
+            <FieldLabel htmlFor="name">จำนวนที่จอด (คัน) *</FieldLabel>
+            <Input
+              id="amout"
+              placeholder=""
+              required
+              className="border-2 border-gray-400"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="surname">
+              ที่อยู่ (บ้านเลขที่ หมู่บ้าน ซอย ถนน) *
+            </FieldLabel>
+            <Input
+              id="้houseno"
+              placeholder=""
+              required
+              className="border-2 border-gray-400"
+            />
+          </Field>
+        </div>
+        {/* --แขวง/เขต */}
+        <div className="flex gap-10 pt-3">
+          <Field>
+            <FieldLabel htmlFor="name">แขวง / ตำบล *</FieldLabel>
+            <Input
+              id="district"
+              placeholder=""
+              required
+              className="border-2 border-gray-400"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="surname">เขต / อำเภอ *</FieldLabel>
+            <Input
+              id="country"
+              placeholder=""
+              required
+              className="border-2 border-gray-400"
+            />
+          </Field>
+        </div>
+        <div className="flex gap-10 pt-3">
+          <Field>
+            <FieldLabel htmlFor="name">จุดสังเกต *</FieldLabel>
+            <Input
+              id="landmark"
+              placeholder="จะหาที่จอดรถคุณได้อย่างไร"
+              required
+              className="border-2 border-gray-400"
+            />
+          </Field>
+        </div>
+        {/* --checkbox */}
+        <div className="">
+          <div></div>
         </div>
       </div>
     </>
