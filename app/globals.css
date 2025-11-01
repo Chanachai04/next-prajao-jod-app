@@ -120,3 +120,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+.no-picker-icon[type="date"],
+.no-picker-icon[type="time"] {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.no-picker-icon[type="date"]::-webkit-calendar-picker-indicator,
+.no-picker-icon[type="time"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
