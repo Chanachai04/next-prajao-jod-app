@@ -1,4 +1,3 @@
-import React from "react";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ export default function ForRent() {
   return (
     <>
       {/* --ส่วนหัว */}
-      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-10">
+      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-10 container mx-auto">
         <h1 className="text-2xl pt-10">ปล่อยเช่าที่จอดรถ</h1>
         <p className="py-2">
           กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ

@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${prompt.className} antialiased bg-[#F4F4F4]`}>
         <Navbar />
-        <main className="container mx-auto">{children}</main>
+        <main>{children}</main>
         <Footer />
       </body>
     </html>
