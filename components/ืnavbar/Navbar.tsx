@@ -34,7 +34,7 @@ export default function Navbar() {
                 variant={"outline"}
                 className="cursor-pointer text-sm  px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 md:text-lg"
               >
-                เปล่อยเช่าที่จอดรถ
+                ปล่อยเช่าที่จอดรถ
               </Button>
             </Link>
             <Link href="/" className="sm:hidden">
