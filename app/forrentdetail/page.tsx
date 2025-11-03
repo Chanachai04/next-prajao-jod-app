@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -13,8 +13,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import MapPicker from "@/components/map/MapPicker";
 
 export default function ForRentDetail() {
+  const [images, setImages] = useState<File[]>([]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    const updated = [...images, ...files].slice(0, 10);
+    setImages(updated);
+  };
+
   return (
     <>
       <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
@@ -204,11 +215,44 @@ export default function ForRentDetail() {
         </div>
         {/* --รูปภาพ */}
         <div className="py-5">
-          <Label>รูปภาพ(ไม่เกิน10รูป)</Label>
+          <Label>รูปภาพ (ไม่เกิน 10 รูป)</Label>
         </div>
-        <div className="image-container">
-          <p className="overlay-text">เลือกรูปที่ต้องการ</p>
-        </div>
+
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+          className="image-container"
+        />
+        {images.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {images.map((file, index) => (
+              <div
+                key={index}
+                className="relative border rounded-md overflow-hidden group"
+              >
+                <Image
+                  width={150}
+                  height={100}
+                  src={URL.createObjectURL(file)}
+                  alt={`preview-${index}`}
+                  className="object-cover w-full h-40"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setImages((prev) => prev.filter((_, i) => i !== index))
+                  }
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* --map */}
         <div className="py-5">
           <Label>ตำแหน่งที่จอดรถ *</Label>
@@ -216,6 +260,7 @@ export default function ForRentDetail() {
             พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
             และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
           </p>
+          <MapPicker></MapPicker>
         </div>
         <hr className="border-gray-300" />
         {/* --ราคา */}
@@ -253,14 +298,79 @@ export default function ForRentDetail() {
             </Field>
           </div>
           <p className="text-sm">
-            พระเจ้าจอด ทำการเก็บเงินสัญญา และอุปกรณ์การเข้าจอด
+            *พระเจ้าจอด ทำการเก็บเงินสัญญา และอุปกรณ์การเข้าจอด
             จากผู้เช่าโดยจะทำการส่งมอบให้
+            <br />
             เจ้าของพื้นที่เมื่อผู้เช่าผิดสัญญาหรือทำอุปกรณ์เข้าจอดชำรุดหรือสูญหาย
           </p>
         </div>
+        {/* --สิ่งอำนวยความสะดวก */}
         <hr className="border-gray-300" />
         <div className="py-5">
           <Label className="text-2xl">สิ่งอำนวยความสะดวก</Label>
+
+          <div className="grid grid-cols-4 gap-y-3 py-3">
+            {" "}
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="ประตูเปิดปิด" />
+              <Label htmlFor="ประตูเปิดปิด" className="text-base">
+                มีประตูเปิดปิด
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="ระบบรักษาความปลอดภัย" />
+              <Label htmlFor="ระบบรักษาความปลอดภัย" className="text-base">
+                มีระบบรักษาความปลอดภัย
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="หลังคา" />
+              <Label className="text-base" htmlFor="หลังคา">
+                มีหลังคา
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="เจ้าหน้าที่ดูแล" />
+              <Label className="text-base" htmlFor="เจ้าหน้าที่ดูแล">
+                มีเจ้าหน้าที่ดูแล
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="จอดค้างคืน" />
+              <Label htmlFor="จอดค้างคืน" className="text-base">
+                จอดค้างคืน
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="บริการรับรถ" />
+              <Label htmlFor="บริการรับรถ" className="text-base">
+                มีบริการรับรถ
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="กล้องวงจรปิด" />
+              <Label htmlFor="กล้องวงจรปิด" className="text-base">
+                กล้องวงจรปิด
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="ห้องน้ำ" />
+              <Label htmlFor="ห้องน้ำ" className="text-base">
+                ห้องน้ำ
+              </Label>
+            </div>
+          </div>
+        </div>
+        <div className="py-5">
+          <Button className="rounded-none h-12">ส่งข้อมูล</Button>
         </div>
       </div>
     </>
