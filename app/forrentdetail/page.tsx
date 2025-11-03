@@ -122,10 +122,10 @@ export default function ForRentDetail() {
               <Label htmlFor="everyday">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
             </div>
             <div className="col-span-6 sm:col-span-2"></div>
-            <Label className="col-span-6 sm:col-span-3 flex justify-start px-9">
+            <Label className="col-span-6 sm:col-span-4 flex justify-start px-25">
               เวลาเปิด
             </Label>
-            <Label className="col-span-6 sm:col-span-3 flex justify-start px-9">
+            <Label className="col-span-6 sm:col-span-3 flex justify-start px-25">
               เวลาปิด
             </Label>
           </div>
@@ -157,9 +157,9 @@ export default function ForRentDetail() {
                 </div>
 
                 {/* เวลาเปิด */}
-                <div className="col-span-6 sm:col-span-3 flex justify-start mt-2 sm:mt-0">
+                <div className="col-span-6 sm:col-span-4 flex justify-start mt-2 sm:mt-0">
                   <Select>
-                    <SelectTrigger className="border-2 border-gray-300 w-full sm:w-[130px]">
+                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="06:00" />
                     </SelectTrigger>
                     <SelectContent>
@@ -180,7 +180,7 @@ export default function ForRentDetail() {
                 {/* เวลาปิด */}
                 <div className="col-span-6 sm:col-span-3 flex justify-start mt-2 sm:mt-0">
                   <Select>
-                    <SelectTrigger className="border-2 border-gray-300 w-full sm:w-[130px]">
+                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="20:00" />
                     </SelectTrigger>
                     <SelectContent>
@@ -202,8 +202,65 @@ export default function ForRentDetail() {
             </div>
           ))}
         </div>
+        {/* --รูปภาพ */}
         <div className="py-5">
           <Label>รูปภาพ(ไม่เกิน10รูป)</Label>
+        </div>
+        <div className="image-container">
+          <p className="overlay-text">เลือกรูปที่ต้องการ</p>
+        </div>
+        {/* --map */}
+        <div className="py-5">
+          <Label>ตำแหน่งที่จอดรถ *</Label>
+          <p className="py-3 text-sm">
+            พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
+            และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
+          </p>
+        </div>
+        <hr className="border-gray-300" />
+        {/* --ราคา */}
+        <div className="py-5">
+          <Label className="text-2xl">ราคา</Label>
+
+          <div className="flex flex-col md:flex-row gap-6 pt-3">
+            <Field className="flex-1">
+              <FieldLabel htmlFor="priceperhour">ราคาต่อชั่วโมง</FieldLabel>
+              <Input
+                id="district"
+                className="border-2 border-gray-400 w-full"
+              />
+            </Field>
+            <Field className="flex-1">
+              <FieldLabel htmlFor="priceperday">ราคาต่อวัน</FieldLabel>
+              <Input id="country" className="border-2 border-gray-400 w-full" />
+            </Field>
+            <Field className="flex-1">
+              <FieldLabel htmlFor="pricepermonth">ราคาต่อเดือน</FieldLabel>
+              <Input id="country" className="border-2 border-gray-400 w-full" />
+            </Field>
+          </div>
+          <div className="py-3">
+            <Field className="flex-1 w-[1155px]">
+              <FieldLabel htmlFor="rentname">
+                ค่าประกันบัตร อุปกรณ์ที่เข้าจอด และสติ๊กเกอร์ (เฉพาะรายเดือน)
+              </FieldLabel>
+              <Input
+                id=""
+                placeholder="1000"
+                required
+                className="border-2 border-gray-400 w-full"
+              />
+            </Field>
+          </div>
+          <p className="text-sm">
+            พระเจ้าจอด ทำการเก็บเงินสัญญา และอุปกรณ์การเข้าจอด
+            จากผู้เช่าโดยจะทำการส่งมอบให้
+            เจ้าของพื้นที่เมื่อผู้เช่าผิดสัญญาหรือทำอุปกรณ์เข้าจอดชำรุดหรือสูญหาย
+          </p>
+        </div>
+        <hr className="border-gray-300" />
+        <div className="py-5">
+          <Label className="text-2xl">สิ่งอำนวยความสะดวก</Label>
         </div>
       </div>
     </>

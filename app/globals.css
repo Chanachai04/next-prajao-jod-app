@@ -132,3 +132,24 @@
 .no-picker-icon[type="time"]::-webkit-calendar-picker-indicator {
   opacity: 0; /* ซ่อนไอคอน */
 }
+
+.image-container {
+    width: 250px;
+    height: 150px;
+
+    border: 2px dotted #aaa; 
+    border-radius: 5px; 
+    
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    
+    background-color: #f7f7f7; 
+}
+
+.overlay-text {
+    color: #666; 
+    font-size: 14px;
+    text-align: center; 
+    position: absolute;
+}
