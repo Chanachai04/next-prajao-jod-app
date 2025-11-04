@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import MapPicker from "@/components/map/MapPicker";
 
-export default function ForRentDetail() {
+export default function RentDetail() {
   const [images, setImages] = useState<File[]>([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

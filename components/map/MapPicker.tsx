@@ -1,60 +1,60 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+// ✅ dynamic imports เฉพาะ component จริง ๆ
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
 
-// Component ย่อย ใช้จับคลิกบนแผนที่
+// ✅ ส่วนนี้ import ปกติได้ (เพราะเป็น hook)
+import { useMapEvents } from "react-leaflet";
+
 function LocationMarker({
-  onSelect,
+  setPosition,
 }: {
-  onSelect: (lat: number, lng: number) => void;
+  setPosition: (pos: [number, number]) => void;
 }) {
-  const [position, setPosition] = useState<[number, number] | null>(null);
+  const [position, setLocalPosition] = useState<[number, number] | null>(null);
 
   useMapEvents({
     click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
-      onSelect(e.latlng.lat, e.latlng.lng);
+      const newPos: [number, number] = [e.latlng.lat, e.latlng.lng];
+      setLocalPosition(newPos);
+      setPosition(newPos);
     },
   });
 
-  return position === null ? null : <Marker position={position} />;
+  return position ? <Marker position={position} /> : null;
 }
 
-// Component หลัก
 export default function MapPicker() {
-  const [latlng, setLatlng] = useState<[number, number] | null>(null);
+  const [position, setPosition] = useState<[number, number] | null>(null);
 
   return (
-    <div className="w-full h-[400px] rounded-lg overflow-hidden border">
+    <div className="h-[400px] w-full">
       <MapContainer
-        center={[13.736717, 100.523186]} // Bangkok
+        center={[13.7563, 100.5018]}
         zoom={13}
-        style={{ height: "100%", width: "100%" }}
+        className="h-full w-full z-0"
       >
         <TileLayer
-          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="&copy; OpenStreetMap contributors"
         />
-        <LocationMarker onSelect={(lat, lng) => setLatlng([lat, lng])} />
+        <LocationMarker setPosition={setPosition} />
       </MapContainer>
-
-      {/* แสดงค่าพิกัด */}
-      {latlng && (
-        <p className="text-sm mt-2">
-          📍 Latitude: {latlng[0].toFixed(6)}, Longitude: {latlng[1].toFixed(6)}
-        </p>
-      )}
     </div>
   );
 }

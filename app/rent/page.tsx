@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function ForRent() {
+export default function Rent() {
   return (
     <>
       {/* --ส่วนหัว */}
