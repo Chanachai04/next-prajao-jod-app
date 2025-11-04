@@ -21,7 +21,7 @@ export default function Navbar() {
             </Link>
           </div>
           <div className="text-white flex gap-2 sm:gap-4">
-            <Link href="/">
+            <Link href="/login">
               <Button
                 variant={"outline"}
                 className="cursor-pointer text-sm  px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 md:text-lg"
