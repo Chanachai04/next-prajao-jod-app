@@ -263,6 +263,7 @@ export default function RentDetail() {
           <div className="h-[400px] w-full relative">
             <MapPicker
               height="400px"
+              zoom={13}
               onMapReady={() => console.log("Map loaded")}
             />
           </div>
