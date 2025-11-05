@@ -12,7 +12,7 @@ type SearchInputProps = {
   className?: string;
 };
 
-export default function LabelAndInput({
+export default function LabelAndInputForm({
   title,
   type,
   placeholder,
@@ -24,7 +24,7 @@ export default function LabelAndInput({
 }: SearchInputProps) {
   return (
     <div>
-      <Label htmlFor={id} className={` ${textLabelSize} `}>
+      <Label htmlFor={id} className={`${textLabelSize} `}>
         {title}
       </Label>
       <div className="relative mt-2">

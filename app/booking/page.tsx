@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import DateForm from "@/components/search_form/DateForm";
-import LabelAndInput from "@/components/search_form/LabelAndInput";
-import SelectForm from "@/components/search_form/SelectForm";
-import TimeForm from "@/components/search_form/TimeForm";
+import DateForm from "@/components/form/DateForm";
+import LabelAndInput from "@/components/form/LabelAndInputForm";
+import SelectForm from "@/components/form/SelectForm";
+import TimeForm from "@/components/form/TimeForm";
 import { Button } from "@/components/ui/button";
 import {
   Card,

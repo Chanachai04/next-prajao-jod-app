@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { MapPin, MapPlus, MousePointerClick, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import LabelAndInput from "@/components/search_form/LabelAndInput";
-import DateForm from "@/components/search_form/DateForm";
-import TimeForm from "@/components/search_form/TimeForm";
-import SelectForm from "@/components/search_form/SelectForm";
+import LabelAndInput from "@/components/form/LabelAndInputForm";
+import DateForm from "@/components/form/DateForm";
+import TimeForm from "@/components/form/TimeForm";
+import SelectForm from "@/components/form/SelectForm";
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState("hourly");
