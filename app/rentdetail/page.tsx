@@ -260,7 +260,9 @@ export default function RentDetail() {
             พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
             และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
           </p>
-          <MapPicker></MapPicker>
+          <div className="h-[400px] w-full">
+            <MapPicker height="400px" />
+          </div>
         </div>
         <hr className="border-gray-300" />
         {/* --ราคา */}
