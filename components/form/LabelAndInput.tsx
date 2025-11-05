@@ -10,7 +10,7 @@ type SearchInputProps = {
   trailingIcon?: React.ReactNode;
 };
 
-export default function LocationInput({
+export default function LabelAndInput({
   title,
   type,
   placeholder,
