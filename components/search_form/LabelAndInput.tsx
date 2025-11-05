@@ -8,6 +8,8 @@ type SearchInputProps = {
   id?: string;
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
+  textLabelSize?: string;
+  className?: string;
 };
 
 export default function LabelAndInput({
@@ -17,10 +19,12 @@ export default function LabelAndInput({
   id,
   leadingIcon,
   trailingIcon,
+  textLabelSize = "text-lg",
+  className,
 }: SearchInputProps) {
   return (
     <div>
-      <Label htmlFor={id} className="text-lg">
+      <Label htmlFor={id} className={` ${textLabelSize} `}>
         {title}
       </Label>
       <div className="relative mt-2">
@@ -35,7 +39,7 @@ export default function LabelAndInput({
           id={id}
           type={type}
           placeholder={placeholder}
-          className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+          className={`pl-10 pr-10 w-full text-sm md:text-lg h-12 ${className}`}
         />
 
         {/* ด้านหลัง */}

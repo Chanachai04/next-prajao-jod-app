@@ -12,12 +12,14 @@ import {
 type SelectFormProps = {
   title?: string;
   placeholder?: string;
-  itemList: Record<string, string>; // เปลี่ยนจาก JSON[] เป็น object
+  itemList: Record<string, string>;
+  className?: string;
 };
 export default function SelectForm({
   title,
   placeholder,
   itemList,
+  className,
 }: SelectFormProps) {
   return (
     <div>
@@ -27,7 +29,9 @@ export default function SelectForm({
       <div className="relative ">
         <Minimize2 className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
         <Select>
-          <SelectTrigger className="pl-10 text-lg h-12! w-full cursor-pointer">
+          <SelectTrigger
+            className={`pl-10 text-lg h-12! w-full cursor-pointer ${className}`}
+          >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
           <SelectContent className="z-50">

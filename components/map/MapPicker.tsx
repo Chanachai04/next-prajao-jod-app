@@ -1,13 +1,34 @@
 "use client";
+
+import { useEffect } from "react";
 import dynamic from "next/dynamic";
 import "leaflet/dist/leaflet.css";
 
-// ✅ import MapPickerInner ผ่าน dynamic ทั้งหมด (ไม่มี SSR)
-const MapPickerInner = dynamic(() => import("./MapPickerInner"), {
-  ssr: false,
-  loading: () => <div>Loading map...</div>,
-});
+// ✅ ต้องระบุว่าใช้ default export ของไฟล์
+const LeafletMap = dynamic(
+  () => import("./LeafletMap").then((mod) => mod.default),
+  {
+    ssr: false,
+  }
+);
 
-export default function MapPicker({ height }: { height?: string }) {
-  return <MapPickerInner height={height ?? "400px"} />;
+type MapPickerProps = {
+  height?: string;
+  onMapReady?: () => void;
+};
+
+export default function MapPicker({
+  height = "400px",
+  onMapReady,
+}: MapPickerProps) {
+  useEffect(() => {
+    const timer = setTimeout(() => onMapReady?.(), 500);
+    return () => clearTimeout(timer);
+  }, [onMapReady]);
+
+  return (
+    <div style={{ height }}>
+      <LeafletMap onMapReady={onMapReady} />
+    </div>
+  );
 }

@@ -260,8 +260,11 @@ export default function RentDetail() {
             พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
             และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
           </p>
-          <div className="h-[400px] w-full">
-            <MapPicker height="400px" />
+          <div className="h-[400px] w-full relative">
+            <MapPicker
+              height="400px"
+              onMapReady={() => console.log("Map loaded")}
+            />
           </div>
         </div>
         <hr className="border-gray-300" />

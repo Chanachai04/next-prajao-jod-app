@@ -9,9 +9,10 @@ import { format } from "date-fns";
 type DateProps = {
   title?: string;
   date?: Date;
-  setDate: (date: Date) => void;
+  setDate?: (date: Date) => void;
   placeholder?: string;
   id: string;
+  className?: string;
 };
 
 export default function DateForm({
@@ -20,11 +21,12 @@ export default function DateForm({
   setDate,
   placeholder,
   id,
+  className,
 }: DateProps) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (selectedDate: Date) => {
-    setDate(selectedDate);
+    setDate!(selectedDate);
     setOpen(false); // ปิด Popover อัตโนมัติ
   };
 
@@ -37,7 +39,7 @@ export default function DateForm({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="w-full h-12 justify-start text-left font-normal"
+            className={`w-full h-12 justify-start text-left font-normal ${className}`}
           >
             <CalendarIcon className="text-gray-500 w-6! h-6!" />
             {date ? (
