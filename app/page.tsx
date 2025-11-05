@@ -1,13 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
 
-import { MapPlus, MousePointerClick } from "lucide-react";
+import { MapPin, MapPlus, MousePointerClick, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import LocationInput from "@/components/search_form/LocationInput";
-import DateForm from "@/components/search_form/DateForm";
-import TimeForm from "@/components/search_form/TimeForm";
-import SelectForm from "@/components/search_form/SelectForm";
+import LabelAndInput from "@/components/form/LabelAndInput";
+import DateForm from "@/components/form/DateForm";
+import TimeForm from "@/components/form/TimeForm";
+import SelectForm from "@/components/form/SelectForm";
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState("hourly");
@@ -72,11 +72,13 @@ export default function Home() {
           <form action="" className="w-full  mt-4 space-y-4">
             {selectedOption === "hourly" ? (
               <>
-                <LocationInput
+                <LabelAndInput
                   title="สถานที่"
                   id="location"
                   type="text"
                   placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
+                  leadingIcon={<MapPin className="w-6 h-6" />}
+                  trailingIcon={<X className="w-6 h-6" />}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   <DateForm
@@ -107,11 +109,13 @@ export default function Home() {
               </>
             ) : selectedOption === "daily" ? (
               <>
-                <LocationInput
+                <LabelAndInput
                   title="สถานที่"
                   id="location"
                   type="text"
                   placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
+                  leadingIcon={<MapPin className="w-6 h-6" />}
+                  trailingIcon={<X className="w-6 h-6" />}
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -133,11 +137,13 @@ export default function Home() {
               </>
             ) : (
               <>
-                <LocationInput
+                <LabelAndInput
                   title="สถานที่"
                   id="location"
                   type="text"
                   placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
+                  leadingIcon={<MapPin className="w-6 h-6" />}
+                  trailingIcon={<X className="w-6 h-6" />}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <DateForm
