@@ -7,9 +7,16 @@ import LabelAndInput from "@/components/search_form/LabelAndInput";
 import SelectForm from "@/components/search_form/SelectForm";
 import TimeForm from "@/components/search_form/TimeForm";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import Loading from "./loading";
+import Image from "next/image";
 
 // โหลด MapPicker แบบ dynamic (ไม่ SSR)
 const MapPicker = dynamic(() => import("@/components/map/MapPicker"), {
@@ -44,7 +51,7 @@ export default function Booking() {
       {/* แสดง UI เฉพาะตอนแผนที่โหลดเสร็จ */}
       {isMapLoaded && (
         <div className="w-xl bg-[#EBEBEB] p-4">
-          <form>
+          <form className="">
             <h1 className="text-4xl my-4">กรุงเทพมหานคร</h1>
             <LabelAndInput
               title="ค้นหาที่จอดรถในบริเวณ"
@@ -138,8 +145,34 @@ export default function Booking() {
                 </div>
               </>
             )}
-
-            <Card></Card>
+            <div className="mt-2 flex-1 overflow-y-auto pr-2">
+              {/* card ทั้งหมด */}
+              {[...Array(10)].map((_, i) => (
+                <Card key={i} className="mt-4">
+                  <CardHeader>
+                    <div className="flex">
+                      <Image
+                        src="/image.jpg"
+                        alt="รูปที่จอดรถ"
+                        width={200}
+                        height={100}
+                        className="rounded-xl mr-2"
+                      />
+                      <div>
+                        <CardTitle className="text-xl">ABC</CardTitle>
+                        <CardDescription className="p-2 rounded-md text-white bg-blue-600">
+                          รายวัน/ชม
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex flex-col justify-center items-end">
+                      <p>฿ 1,000/เดือน</p>
+                      <Button className="ml-2">จองทันที</Button>
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
           </form>
         </div>
       )}
