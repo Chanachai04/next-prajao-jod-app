@@ -1,14 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 
-import {
-  CalendarIcon,
-  MapPin,
-  MapPlus,
-  Minimize2,
-  MousePointerClick,
-  X,
-} from "lucide-react";
+import { MapPin, MapPlus, Minimize2, MousePointerClick, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
