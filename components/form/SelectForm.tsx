@@ -1,4 +1,3 @@
-import { Minimize2 } from "lucide-react";
 import { Label } from "../ui/label";
 import {
   Select,
@@ -14,11 +13,13 @@ type SelectFormProps = {
   placeholder?: string;
   itemList: Record<string, string>;
   className?: string;
+  leadingIcon?: React.ReactNode;
 };
 export default function SelectForm({
   title,
   placeholder,
   itemList,
+  leadingIcon,
   className,
 }: SelectFormProps) {
   return (
@@ -26,11 +27,15 @@ export default function SelectForm({
       <Label htmlFor="dateOut" className="text-lg">
         {title}
       </Label>
-      <div className="relative ">
-        <Minimize2 className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
+      <div className="relative mt-2">
+        {leadingIcon && (
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6">
+            {leadingIcon}
+          </span>
+        )}
         <Select>
           <SelectTrigger
-            className={`pl-10 text-lg h-12! w-full cursor-pointer ${className}`}
+            className={`pl-10 text-lg h-10! w-full cursor-pointer ${className}`}
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>

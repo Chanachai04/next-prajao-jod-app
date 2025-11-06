@@ -29,11 +29,11 @@ export default function TimeForm({
   return (
     <div>
       <Label className="text-lg">{title}</Label>
-      <div className="relative ">
+      <div className="relative mt-2">
         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
         <Select value={time} onValueChange={setTime}>
           <SelectTrigger
-            className={`w-full h-12! pl-10 pr-3 text-lg ${className}`}
+            className={`w-full h-10! pl-10 pr-3 text-lg ${className}`}
           >
             <SelectValue placeholder="เลือกเวลา" />
           </SelectTrigger>

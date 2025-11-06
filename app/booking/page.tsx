@@ -8,7 +8,7 @@ import SelectForm from "@/components/form/SelectForm";
 import TimeForm from "@/components/form/TimeForm";
 import { Button } from "@/components/ui/button";
 
-import { ArrowLeft, ArrowRight, MapPin, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Minimize2, X } from "lucide-react";
 import Loading from "./loading";
 import BookingCard from "@/components/card/BookingCar";
 import Image from "next/image";
@@ -22,6 +22,7 @@ export default function Booking() {
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [dateIn, setDateIn] = useState<Date>();
   const [selectedOption, setSelectedOption] = useState("hourly");
+  const [timeIn, setTimeIn] = useState("00:00");
   const [timeOut, setTimeOut] = useState("01:00");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionDetail, setSelectedOptionDetail] = useState("hourly");
@@ -216,6 +217,7 @@ export default function Booking() {
                         <SelectForm
                           itemList={timeOption}
                           className="bg-white"
+                          leadingIcon={<Minimize2 />}
                         />
                       </div>
                       <div className="flex justify-between">
@@ -250,8 +252,8 @@ export default function Booking() {
                           className="bg-white "
                         />
                         <TimeForm
-                          time={timeOut}
-                          setTime={setTimeOut}
+                          time={timeIn}
+                          setTime={setTimeIn}
                           className="bg-white"
                         />
                       </div>
@@ -325,6 +327,7 @@ export default function Booking() {
                         <SelectForm
                           itemList={timeOption}
                           className="bg-white"
+                          leadingIcon={<Minimize2 />}
                         />
                       </div>
                       <div className="flex justify-between">
@@ -359,8 +362,8 @@ export default function Booking() {
                           className="bg-white "
                         />
                         <TimeForm
-                          time={timeOut}
-                          setTime={setTimeOut}
+                          time={timeIn}
+                          setTime={setTimeIn}
                           className="bg-white"
                         />
                       </div>

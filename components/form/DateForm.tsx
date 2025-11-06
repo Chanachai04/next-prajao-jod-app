@@ -39,7 +39,7 @@ export default function DateForm({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={`w-full h-12 justify-start text-left font-normal ${className}`}
+            className={`w-full h-10 justify-start text-left font-normal ${className} mt-2`}
           >
             <CalendarIcon className="text-gray-500 w-6! h-6!" />
             {date ? (
