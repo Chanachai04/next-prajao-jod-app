@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -9,16 +9,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import MapPicker from "@/components/map/MapPicker";
+import LabelAndInput from "@/components/form/LabelAndInputForm";
+import SelectForm from "@/components/form/SelectForm";
 
 export default function RentDetail() {
   const [images, setImages] = useState<File[]>([]);
+  const type = {
+    ที่จอดรถในบ้าน: "ที่จอดรถในบ้าน",
+    ที่จอดรถในคอนโด: "ที่จอดรถในคอนโด",
+    ที่จอดรถในห้าง: "ที่จอดรถในห้าง",
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -30,101 +35,110 @@ export default function RentDetail() {
     <>
       <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
         {/* --ส่วนหัว */}
-        <h1 className="text-3xl pt-10">ปล่อยเช่าที่จอดรถ</h1>
-        <p className="py-2">ข้อมูลทั่วไปที่จอดรถ</p>
+        <div className="space-y-3">
+          <h1 className="text-5xl pt-5">ปล่อยเช่าที่จอดรถ</h1>
+          <h1 className="pb-3 text-2xl">ข้อมูลทั่วไปที่จอดรถ</h1>
+        </div>
 
         {/* --ส่วน field */}
         <div className="flex flex-col space-y-6">
           {/* บรรทัด: ชื่อที่จอด + ประเภท */}
           <div className="flex flex-col md:flex-row gap-6">
-            <Field className="flex-1">
-              <FieldLabel htmlFor="rentname">
-                ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร) *
-              </FieldLabel>
-              <Input
-                id="rentname"
-                placeholder="ชื่อที่จะแสดงในหน้าเว็บ"
-                required
-                className="border-2 border-gray-400 w-full"
-              />
-            </Field>
+            <LabelAndInput
+              title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร)"
+              id="parkingname"
+              type="text"
+              placeholder="ชื่อที่จะแสดงในหน้าเว็บ"
+              leadingIcon={""}
+              trailingIcon={""}
+              className="border-gray-600 w-full"
+            />
 
             <div className="flex flex-col w-full md:w-[250px] pt-3 md:pt-0">
-              <FieldLabel className="pb-3">ประเภท *</FieldLabel>
-              <Select>
-                <SelectTrigger className="border-2 border-gray-400 w-full">
-                  <SelectValue placeholder="เลือกประเภทที่จอด" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="ที่จอดรถในบ้าน">
-                      ที่จอดรถในบ้าน
-                    </SelectItem>
-                    <SelectItem value="ที่จอดรถในคอนโด">
-                      ที่จอดรถในคอนโด
-                    </SelectItem>
-                    <SelectItem value="ที่จอดรถในห้าง">
-                      ที่จอดรถในห้าง
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              <SelectForm
+                title="จํานวนวัน"
+                placeholder="เลือกจํานวนวัน"
+                itemList={type}
+                className="border-gray-600"
+              />
             </div>
           </div>
+        </div>
 
+        <div className="pt-3">
+          {" "}
           {/* คำบรรยาย */}
-          <Field>
-            <FieldLabel htmlFor="Description">คำบรรยาย</FieldLabel>
-            <Textarea
-              id="Description"
-              placeholder="รายละเอียดที่จอด"
-              className="resize-none border-2 border-gray-400 w-full"
-            />
-          </Field>
+          <LabelAndInput
+            title="คำบรรยาย"
+            id="description"
+            type="text"
+            placeholder="รายละเอียดของที่จอดรถ"
+            leadingIcon={""}
+            trailingIcon={""}
+            className="resize-none border-gray-600 w-full"
+          />
         </div>
 
         {/* --จำนวน/บ้านเลขที่ */}
-        <div className="flex flex-col md:flex-row gap-6 pt-3">
-          <Field className="flex-1">
-            <FieldLabel htmlFor="amout">จำนวนที่จอด (คัน) *</FieldLabel>
-            <Input id="amout" className="border-2 border-gray-400 w-full" />
-          </Field>
-          <Field className="flex-1">
-            <FieldLabel htmlFor="houseno">
-              ที่อยู่ (บ้านเลขที่ หมู่บ้าน ซอย ถนน) *
-            </FieldLabel>
-            <Input id="houseno" className="border-2 border-gray-400 w-full" />
-          </Field>
+        <div className="flex flex-col gap-6 pt-3">
+          <LabelAndInput
+            title="จำนวนที่จอด(คัน) *"
+            id="amount"
+            type="text"
+            placeholder=""
+            leadingIcon={""}
+            trailingIcon={""}
+            className="border-gray-600 w-full"
+          />
+          <LabelAndInput
+            title="ที่อยู่(บ้านเลขที่ หมู่บ้าน ซอย ถนน) *"
+            id="location"
+            type="text"
+            placeholder=""
+            leadingIcon={""}
+            trailingIcon={""}
+            className="border-gray-600 w-full"
+          />
         </div>
 
         {/* --แขวง/เขต */}
-        <div className="flex flex-col md:flex-row gap-6 pt-3">
-          <Field className="flex-1">
-            <FieldLabel htmlFor="district">แขวง / ตำบล *</FieldLabel>
-            <Input id="district" className="border-2 border-gray-400 w-full" />
-          </Field>
-          <Field className="flex-1">
-            <FieldLabel htmlFor="country">เขต / อำเภอ *</FieldLabel>
-            <Input id="country" className="border-2 border-gray-400 w-full" />
-          </Field>
+        <div className="flex gap-6 pt-3 flex-col">
+          <LabelAndInput
+            title="แขวง / ตำบล *"
+            id="subdistrict"
+            type="text"
+            placeholder=""
+            leadingIcon={""}
+            trailingIcon={""}
+            className="border-gray-600 w-full"
+          />
+          <LabelAndInput
+            title="เขต / อำเภอ *"
+            id="county"
+            type="text"
+            placeholder=""
+            leadingIcon={""}
+            trailingIcon={""}
+            className="border-gray-600 w-full"
+          />
         </div>
 
         {/* --จุดสังเกต */}
         <div className="flex flex-col pt-3">
-          <Field>
-            <FieldLabel htmlFor="landmark">จุดสังเกต *</FieldLabel>
-            <Input
-              id="landmark"
-              placeholder="จะหาที่จอดรถคุณได้อย่างไร"
-              required
-              className="border-2 border-gray-400 w-full"
-            />
-          </Field>
+          <LabelAndInput
+            title="จุดสังเกต *"
+            id="Landmark"
+            type="text"
+            placeholder="จะหาที่จอดรถของคุณได้อย่างไร"
+            leadingIcon={""}
+            trailingIcon={""}
+            className="border-gray-600 w-full"
+          />
         </div>
 
         {/* --checkbox */}
         <div className="py-5">
-          <Label>เวลาเปิดปิดที่จอด *</Label>
+          <Label className="text-lg">เวลาเปิดปิดที่จอด *</Label>
 
           {/* หัวข้อ: วัน / เวลาเปิด / เวลาปิด */}
           <div className="grid grid-cols-12 items-center py-2 gap-2">
@@ -215,7 +229,7 @@ export default function RentDetail() {
         </div>
         {/* --รูปภาพ */}
         <div className="py-5">
-          <Label>รูปภาพ (ไม่เกิน 10 รูป)</Label>
+          <Label className="text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
         </div>
 
         <input
@@ -255,12 +269,21 @@ export default function RentDetail() {
 
         {/* --map */}
         <div className="py-5">
-          <Label>ตำแหน่งที่จอดรถ *</Label>
+          <Label className="text-lg">ตำแหน่งที่จอดรถ *</Label>
           <p className="py-3 text-sm">
             พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
             และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
           </p>
-          <div className="h-[400px] w-full relative">
+          <LabelAndInput
+            title=""
+            id="Landmark"
+            type="text"
+            placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
+            leadingIcon={<MapPin className="w-6 h-6" />}
+            trailingIcon={""}
+            className="border-gray-600 w-full "
+          />
+          <div className="h-[400px] w-full relative pt-3">
             <MapPicker
               height="400px"
               zoom={13}
@@ -271,37 +294,47 @@ export default function RentDetail() {
         <hr className="border-gray-300" />
         {/* --ราคา */}
         <div className="py-5">
-          <Label className="text-2xl">ราคา</Label>
+          <h1 className="pb-3 text-2xl">ราคา</h1>
 
-          <div className="flex flex-col md:flex-row gap-6 pt-3">
-            <Field className="flex-1">
-              <FieldLabel htmlFor="priceperhour">ราคาต่อชั่วโมง</FieldLabel>
-              <Input
-                id="district"
-                className="border-2 border-gray-400 w-full"
-              />
-            </Field>
-            <Field className="flex-1">
-              <FieldLabel htmlFor="priceperday">ราคาต่อวัน</FieldLabel>
-              <Input id="country" className="border-2 border-gray-400 w-full" />
-            </Field>
-            <Field className="flex-1">
-              <FieldLabel htmlFor="pricepermonth">ราคาต่อเดือน</FieldLabel>
-              <Input id="country" className="border-2 border-gray-400 w-full" />
-            </Field>
+          <div className="flex flex-col md:flex-row gap-10 pt-3">
+            <LabelAndInput
+              title="ราคาต่อชั่วโมง"
+              id="priceperhour"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="border-gray-600 w-full"
+            />
+            <LabelAndInput
+              title="ราคาต่อวัน"
+              id="priceperday"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="border-gray-600 w-full"
+            />
+            <LabelAndInput
+              title="ราคาต่อเดือน"
+              id="pricepermonth"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="border-gray-600 w-full"
+            />
           </div>
           <div className="py-3">
-            <Field className="flex-1 w-[1155px]">
-              <FieldLabel htmlFor="rentname">
-                ค่าประกันบัตร อุปกรณ์ที่เข้าจอด และสติ๊กเกอร์ (เฉพาะรายเดือน)
-              </FieldLabel>
-              <Input
-                id=""
-                placeholder="1000"
-                required
-                className="border-2 border-gray-400 w-full"
-              />
-            </Field>
+            <LabelAndInput
+              title="ค่าประกันบัตร อุปกรณ์เข้าจอด และสติ๊กเกอร์ (เฉพาะรายเดือน)"
+              id="pricepermonth"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="border-gray-600 w-full"
+            />
           </div>
           <p className="text-sm">
             *พระเจ้าจอด ทำการเก็บเงินสัญญา และอุปกรณ์การเข้าจอด
@@ -313,7 +346,7 @@ export default function RentDetail() {
         {/* --สิ่งอำนวยความสะดวก */}
         <hr className="border-gray-300" />
         <div className="py-5">
-          <Label className="text-2xl">สิ่งอำนวยความสะดวก</Label>
+          <h1 className="pb-3 text-2xl">สิ่งอำนวยความสะดวก</h1>
 
           <div className="grid grid-cols-4 gap-y-3 py-3">
             {" "}

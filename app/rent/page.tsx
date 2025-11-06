@@ -2,6 +2,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import LabelAndInput from "@/components/form/LabelAndInputForm";
 
 export default function Rent() {
   return (
@@ -16,64 +17,64 @@ export default function Rent() {
         {/* --ส่วนfield */}
         <div className="flex flex-col space-y-6">
           <div className="flex gap-30">
-            <Field>
-              <FieldLabel htmlFor="name">ชื่อ *</FieldLabel>
-              <Input
-                id="name"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="surname">นามสกุล *</FieldLabel>
-              <Input
-                id="surname"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
+            <LabelAndInput
+              title="ชื่อ *"
+              id="name"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
+            <LabelAndInput
+              title="นามสกุล *"
+              id="surname"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
           </div>
           <div className="flex gap-30">
-            <Field>
-              <FieldLabel htmlFor="email">อีเมล *</FieldLabel>
-              <Input
-                id="email"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="name">รหัสประจำตัวประชาชน *</FieldLabel>
-              <Input
-                id="id"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
+            <LabelAndInput
+              title="อีเมล *"
+              id="email"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
+            <LabelAndInput
+              title="รหัสประจำตัวประชาชน *"
+              id="id"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
           </div>
           <div className="flex gap-30">
-            <Field>
-              <FieldLabel htmlFor="email">Line ID *</FieldLabel>
-              <Input
-                id="lineid"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="name">เบอร์โทรติดต่อ *</FieldLabel>
-              <Input
-                id="phonenumber"
-                placeholder=""
-                required
-                className="border-2 border-gray-400"
-              />
-            </Field>
+            <LabelAndInput
+              title="Line ID *"
+              id="lineid"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
+            <LabelAndInput
+              title="เบอร์โทรศัพท์ *"
+              id="phonenumber"
+              type="text"
+              placeholder=""
+              leadingIcon={""}
+              trailingIcon={""}
+              className="resize-none border-gray-300 w-full"
+            />
           </div>
         </div>
         {/* --ปุ่มบันทึก */}
