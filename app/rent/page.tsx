@@ -1,91 +1,66 @@
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 
 export default function Rent() {
   return (
-    <>
-      {/* --ส่วนหัว */}
-      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
-        <h1 className="text-3xl pt-10">ปล่อยเช่าที่จอดรถ</h1>
-        <p className="py-2">
-          กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ
-        </p>
+    <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5 bg-gray-50 space-y-5">
+      {/* ส่วนหัว */}
+      <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
+      <h1 className="text-xl">
+        กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ
+      </h1>
 
-        {/* --ส่วนfield */}
-        <div className="flex flex-col space-y-6">
-          <div className="flex gap-30">
-            <LabelAndInput
-              title="ชื่อ *"
-              id="name"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-            <LabelAndInput
-              title="นามสกุล *"
-              id="surname"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-          </div>
-          <div className="flex gap-30">
-            <LabelAndInput
-              title="อีเมล *"
-              id="email"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-            <LabelAndInput
-              title="รหัสประจำตัวประชาชน *"
-              id="id"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-          </div>
-          <div className="flex gap-30">
-            <LabelAndInput
-              title="Line ID *"
-              id="lineid"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-            <LabelAndInput
-              title="เบอร์โทรศัพท์ *"
-              id="phonenumber"
-              type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
-            />
-          </div>
-        </div>
-        {/* --ปุ่มบันทึก */}
-        <div className="pt-7 flex justify-end">
-          <Button className="w-full md:w-auto md:px-30">
-            <Link href="/forrentdetail">
+      {/* ฟอร์ม */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mt-6">
+        <LabelAndInput
+          title="ชื่อ *"
+          id="name"
+          type="text"
+          className="w-full border-gray-600"
+        />
+        <LabelAndInput
+          title="นามสกุล *"
+          id="surname"
+          type="text"
+          className="w-full border-gray-600"
+        />
+
+        <LabelAndInput
+          title="อีเมล *"
+          id="email"
+          type="text"
+          className="w-full border-gray-600"
+        />
+        <LabelAndInput
+          title="รหัสประจำตัวประชาชน *"
+          id="id"
+          type="text"
+          className="w-full border-gray-600"
+        />
+
+        <LabelAndInput
+          title="Line ID *"
+          id="lineid"
+          type="text"
+          className="w-full border-gray-600"
+        />
+        <LabelAndInput
+          title="เบอร์โทรศัพท์ *"
+          id="phonenumber"
+          type="text"
+          className="w-full border-gray-600"
+        />
+
+        {/* ปุ่มบันทึก (อยู่ใต้คอลัมน์ขวา) */}
+        <div className="md:col-start-2 flex justify-end pt-4">
+          <Button className="px-10 text-white bg-blue-600 hover:bg-blue-700">
+            <Link href="/rentdetail">
               <div className="text-lg font-light">บันทึกข้อมูล</div>
             </Link>
           </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }

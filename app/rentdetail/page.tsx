@@ -36,80 +36,62 @@ export default function RentDetail() {
       <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
         {/* --ส่วนหัว */}
         <div className="space-y-3">
-          <h1 className="text-5xl pt-5">ปล่อยเช่าที่จอดรถ</h1>
-          <h1 className="pb-3 text-2xl">ข้อมูลทั่วไปที่จอดรถ</h1>
+          <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
+          <h1 className="text-xl">ข้อมูลทั่วไปที่จอดรถ</h1>
         </div>
 
-        {/* --ส่วน field */}
-        <div className="flex flex-col space-y-6">
-          {/* บรรทัด: ชื่อที่จอด + ประเภท */}
-          <div className="flex flex-col md:flex-row gap-6">
+        {/* --ฟอร์มข้อมูลทั่วไป */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-5">
+          {/* ชื่อที่จอดรถ */}
+          <LabelAndInput
+            title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร) *"
+            id="parkingname"
+            type="text"
+            placeholder="ชื่อที่จะแสดงในหน้าเว็บ"
+            className="border-gray-600 w-full"
+          />
+
+          {/* ประเภท */}
+          <SelectForm
+            title="ประเภท *"
+            placeholder="เลือกประเภท"
+            itemList={type}
+            className="border-gray-600"
+          />
+
+          {/* คำบรรยาย */}
+          <div className="md:col-span-2">
             <LabelAndInput
-              title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร)"
-              id="parkingname"
-              type="text"
-              placeholder="ชื่อที่จะแสดงในหน้าเว็บ"
-              leadingIcon={""}
-              trailingIcon={""}
+              title="คำบรรยาย"
+              id="description"
+              type="textarea"
+              placeholder="รายละเอียดของที่จอดรถ"
               className="border-gray-600 w-full"
             />
-
-            <div className="flex flex-col w-full md:w-[250px] pt-3 md:pt-0">
-              <SelectForm
-                title="จํานวนวัน"
-                placeholder="เลือกจํานวนวัน"
-                itemList={type}
-                className="border-gray-600"
-              />
-            </div>
           </div>
-        </div>
 
-        <div className="pt-3">
-          {" "}
-          {/* คำบรรยาย */}
+          {/* จำนวนที่จอด + ที่อยู่ */}
           <LabelAndInput
-            title="คำบรรยาย"
-            id="description"
-            type="text"
-            placeholder="รายละเอียดของที่จอดรถ"
-            leadingIcon={""}
-            trailingIcon={""}
-            className="resize-none border-gray-600 w-full"
-          />
-        </div>
-
-        {/* --จำนวน/บ้านเลขที่ */}
-        <div className="flex flex-col gap-6 pt-3">
-          <LabelAndInput
-            title="จำนวนที่จอด(คัน) *"
+            title="จำนวนที่จอด (คัน) *"
             id="amount"
             type="text"
             placeholder=""
-            leadingIcon={""}
-            trailingIcon={""}
             className="border-gray-600 w-full"
           />
           <LabelAndInput
-            title="ที่อยู่(บ้านเลขที่ หมู่บ้าน ซอย ถนน) *"
+            title="ที่อยู่ (บ้านเลขที่ หมู่บ้าน ซอย ถนน) *"
             id="location"
             type="text"
             placeholder=""
-            leadingIcon={""}
-            trailingIcon={""}
             className="border-gray-600 w-full"
           />
-        </div>
 
-        {/* --แขวง/เขต */}
-        <div className="flex gap-6 pt-3 flex-col">
+          {/* แขวง / เขต */}
           <LabelAndInput
             title="แขวง / ตำบล *"
             id="subdistrict"
             type="text"
             placeholder=""
-            leadingIcon={""}
-            trailingIcon={""}
             className="border-gray-600 w-full"
           />
           <LabelAndInput
@@ -117,23 +99,19 @@ export default function RentDetail() {
             id="county"
             type="text"
             placeholder=""
-            leadingIcon={""}
-            trailingIcon={""}
             className="border-gray-600 w-full"
           />
-        </div>
 
-        {/* --จุดสังเกต */}
-        <div className="flex flex-col pt-3">
-          <LabelAndInput
-            title="จุดสังเกต *"
-            id="Landmark"
-            type="text"
-            placeholder="จะหาที่จอดรถของคุณได้อย่างไร"
-            leadingIcon={""}
-            trailingIcon={""}
-            className="border-gray-600 w-full"
-          />
+          {/* จุดสังเกต */}
+          <div className="md:col-span-2">
+            <LabelAndInput
+              title="จุดสังเกต *"
+              id="Landmark"
+              type="text"
+              placeholder="จะหาที่จอดรถของคุณได้อย่างไร"
+              className="border-gray-600 w-full"
+            />
+          </div>
         </div>
 
         {/* --checkbox */}
