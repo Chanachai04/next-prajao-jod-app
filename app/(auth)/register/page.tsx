@@ -3,17 +3,37 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { registerUser } from "@/lib/userService";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
+import { useRouter } from "next/navigation";
 export default function Register() {
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const router = useRouter();
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length < 6) {
+      alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+    try {
+      await registerUser({ email, password, phone });
+      alert("สมัครสำเร็จ!");
+      router.push("/login");
+    } catch (err) {
+      console.log(err);
+      return;
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col justify-center items-center ">
       <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px] ">
         <p className="text-4xl">สมัครสมาชิกใหม่</p>
-        <form action="">
+        <form onSubmit={handleRegister}>
           <div className="my-2">
             <Label htmlFor="phone" className="text-lg">
               หมายเลขโทรศัพท์
@@ -24,7 +44,10 @@ export default function Register() {
                 id="phone"
                 type="tel"
                 placeholder="กรอกหมายเลขโทรศัพท์ของคุณ"
-                className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+                className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -38,7 +61,10 @@ export default function Register() {
                 id="email"
                 type="email"
                 placeholder="กรอกอีเมลของคุณ"
-                className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+                className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -52,7 +78,10 @@ export default function Register() {
                 id="password"
                 type={isShowPassword ? "text" : "password"}
                 placeholder="กรอกรหัสผ่านของคุณ"
-                className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+                className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
               <button
                 type="button"
@@ -68,7 +97,11 @@ export default function Register() {
             </div>
           </div>
           <div className="flex items-center mt-4">
-            <Checkbox id="terms" className="mr-2 h-5 w-5 border-black" />
+            <Checkbox
+              id="terms"
+              className="mr-2 h-4 w-4 border-black"
+              required
+            />
             <Label htmlFor="terms" className="text-lg">
               ฉันยอมรับ{" "}
               <Link href="/terms" className="text-blue-600 hover:underline">
@@ -77,11 +110,10 @@ export default function Register() {
               .
             </Label>
           </div>
-          <Link href="/">
-            <Button className="my-4 w-full text-lg py-6 cursor-pointer">
-              สมัครสมาชิก
-            </Button>
-          </Link>
+
+          <Button className="my-4 w-full text-lg py-5 cursor-pointer">
+            สมัครสมาชิก
+          </Button>
         </form>
       </div>
     </div>

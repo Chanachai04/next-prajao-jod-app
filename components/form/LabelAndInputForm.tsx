@@ -10,6 +10,9 @@ type SearchInputProps = {
   trailingIcon?: React.ReactNode;
   textLabelSize?: string;
   className?: string;
+  onClick?: () => void;
+  onChange?: () => void;
+  value?: string;
 };
 
 export default function LabelAndInputForm({
@@ -21,6 +24,9 @@ export default function LabelAndInputForm({
   trailingIcon,
   textLabelSize = "text-lg",
   className,
+  onClick,
+  onChange,
+  value,
 }: SearchInputProps) {
   return (
     <div>
@@ -39,6 +45,10 @@ export default function LabelAndInputForm({
           id={id}
           type={type}
           placeholder={placeholder}
+          value={value}
+          onClick={onClick}
+          onChange={onChange}
+          required
           className={
             leadingIcon
               ? `pl-10 pr-10 w-full text-sm md:text-lg h-10 ${className}`

@@ -13,6 +13,9 @@ type DateProps = {
   placeholder?: string;
   id: string;
   className?: string;
+  onClick?: () => void;
+  onChange?: () => void;
+  value?: string;
 };
 
 export default function DateForm({
@@ -22,6 +25,9 @@ export default function DateForm({
   placeholder,
   id,
   className,
+  onClick,
+  onChange,
+  value,
 }: DateProps) {
   const [open, setOpen] = useState(false);
 
@@ -40,6 +46,9 @@ export default function DateForm({
           <Button
             variant="outline"
             className={`w-full h-10 justify-start text-left font-normal ${className} mt-2`}
+            onClick={onClick}
+            onChange={onChange}
+            value={value}
           >
             <CalendarIcon className="text-gray-500 w-6! h-6!" />
             {date ? (

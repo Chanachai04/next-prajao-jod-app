@@ -2,17 +2,45 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { loginUser } from "@/lib/userService";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      await loginUser({ email, password });
+
+      alert("เข้าสู่ระบบสำเร็จ");
+      // ให้ Navbar จะอัพเดทโดยอัตโนมัติ
+      window.dispatchEvent(new Event("loginStatusChanged"));
+      router.push("/");
+    } catch (err) {
+      console.log(err);
+      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center  ">
-      <div className="border rounded-2xl p-10 shadow-2xl  sm:w-[500px]  ">
+    <div className="min-h-screen flex flex-col justify-center items-center">
+      <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px]">
         <p className="text-4xl">เข้าสู่ระบบ</p>
-        <form action="">
+        <form onSubmit={handleSubmit}>
           <div className="my-2">
             <Label htmlFor="email" className="text-lg">
               อีเมล
@@ -23,7 +51,9 @@ export default function Login() {
                 id="email"
                 type="email"
                 placeholder="กรอกอีเมลของคุณ"
-                className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
               />
             </div>
           </div>
@@ -37,7 +67,9 @@ export default function Login() {
                 id="password"
                 type={isShowPassword ? "text" : "password"}
                 placeholder="กรอกรหัสผ่านของคุณ"
-                className="pl-10 pr-10 w-full text-sm md:text-lg h-12"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
               />
               <button
                 type="button"
@@ -60,12 +92,17 @@ export default function Login() {
               ลืมรหัสผ่าน?
             </Link>
           </div>
-          <Link href="/">
-            <Button className="my-2 w-full text-lg py-6 cursor-pointer">
-              เข้าสู่ระบบ
-            </Button>
-          </Link>
-          <div className=" my-2">
+
+          {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
+
+          <Button
+            className="my-2 w-full text-lg py-5 cursor-pointer"
+            disabled={loading}
+          >
+            {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+          </Button>
+
+          <div className="my-2">
             ยังไม่ได้เป็นสมาชิก?{" "}
             <Link href="/register" className="hover:underline text-blue-600">
               สมัครเลยตอนนี้

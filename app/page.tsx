@@ -9,6 +9,7 @@ import DateForm from "@/components/form/DateForm";
 import TimeForm from "@/components/form/TimeForm";
 import SelectForm from "@/components/form/SelectForm";
 import Link from "next/link";
+import useGeolocation from "@/hook/useGeolocation";
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState("hourly");
@@ -26,6 +27,9 @@ export default function Home() {
     { key: "daily", label: "รายวัน" },
     { key: "monthly", label: "รายเดือน" },
   ];
+
+  useGeolocation();
+
   return (
     <div className="min-h-screen ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
