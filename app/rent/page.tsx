@@ -17,39 +17,39 @@ export default function Rent() {
           title="ชื่อ *"
           id="name"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
         <LabelAndInput
           title="นามสกุล *"
           id="surname"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
 
         <LabelAndInput
           title="อีเมล *"
           id="email"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
         <LabelAndInput
           title="รหัสประจำตัวประชาชน *"
           id="id"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
 
         <LabelAndInput
           title="Line ID *"
           id="lineid"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
         <LabelAndInput
           title="เบอร์โทรศัพท์ *"
           id="phonenumber"
           type="text"
-          className="w-full border-gray-600"
+          className="w-full"
         />
 
         {/* ปุ่มบันทึก (อยู่ใต้คอลัมน์ขวา) */}

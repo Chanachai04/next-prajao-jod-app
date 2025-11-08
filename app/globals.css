@@ -134,8 +134,23 @@
   opacity: 0; /* ซ่อนไอคอน */
 }
 
-.image-container {
+
+.image-container-horizontal {
     width: 250px;
+    height: 150px;
+
+    border: 2px dotted #aaa; 
+    border-radius: 5px; 
+    
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+    
+    background-color: #f7f7f7; 
+}
+
+.image-container-vertical {
+    width: 150px;
     height: 150px;
 
     border: 2px dotted #aaa; 

@@ -16,6 +16,7 @@ import Image from "next/image";
 import MapPicker from "@/components/map/MapPicker";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import SelectForm from "@/components/form/SelectForm";
+import Link from "next/link";
 
 export default function RentDetail() {
   const [images, setImages] = useState<File[]>([]);
@@ -48,7 +49,7 @@ export default function RentDetail() {
             id="parkingname"
             type="text"
             placeholder="ชื่อที่จะแสดงในหน้าเว็บ"
-            className="border-gray-600 w-full"
+            className="w-full"
           />
 
           {/* ประเภท */}
@@ -56,7 +57,7 @@ export default function RentDetail() {
             title="ประเภท *"
             placeholder="เลือกประเภท"
             itemList={type}
-            className="border-gray-600"
+            className=""
           />
 
           {/* คำบรรยาย */}
@@ -66,7 +67,7 @@ export default function RentDetail() {
               id="description"
               type="textarea"
               placeholder="รายละเอียดของที่จอดรถ"
-              className="border-gray-600 w-full"
+              className="w-full"
             />
           </div>
 
@@ -76,14 +77,14 @@ export default function RentDetail() {
             id="amount"
             type="text"
             placeholder=""
-            className="border-gray-600 w-full"
+            className="w-full"
           />
           <LabelAndInput
             title="ที่อยู่ (บ้านเลขที่ หมู่บ้าน ซอย ถนน) *"
             id="location"
             type="text"
             placeholder=""
-            className="border-gray-600 w-full"
+            className="w-full"
           />
 
           {/* แขวง / เขต */}
@@ -92,14 +93,14 @@ export default function RentDetail() {
             id="subdistrict"
             type="text"
             placeholder=""
-            className="border-gray-600 w-full"
+            className="w-full"
           />
           <LabelAndInput
             title="เขต / อำเภอ *"
             id="county"
             type="text"
             placeholder=""
-            className="border-gray-600 w-full"
+            className="w-full"
           />
 
           {/* จุดสังเกต */}
@@ -109,7 +110,7 @@ export default function RentDetail() {
               id="Landmark"
               type="text"
               placeholder="จะหาที่จอดรถของคุณได้อย่างไร"
-              className="border-gray-600 w-full"
+              className="w-full"
             />
           </div>
         </div>
@@ -215,7 +216,7 @@ export default function RentDetail() {
           accept="image/*"
           multiple
           onChange={handleImageChange}
-          className="image-container"
+          className="image-container-horizontal"
         />
         {images.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -259,7 +260,7 @@ export default function RentDetail() {
             placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
             leadingIcon={<MapPin className="w-6 h-6" />}
             trailingIcon={""}
-            className="border-gray-600 w-full "
+            className="w-full "
           />
           <div className="h-[400px] w-full relative pt-3">
             <MapPicker
@@ -282,7 +283,7 @@ export default function RentDetail() {
               placeholder=""
               leadingIcon={""}
               trailingIcon={""}
-              className="border-gray-600 w-full"
+              className="w-full"
             />
             <LabelAndInput
               title="ราคาต่อวัน"
@@ -291,7 +292,7 @@ export default function RentDetail() {
               placeholder=""
               leadingIcon={""}
               trailingIcon={""}
-              className="border-gray-600 w-full"
+              className="w-full"
             />
             <LabelAndInput
               title="ราคาต่อเดือน"
@@ -300,7 +301,7 @@ export default function RentDetail() {
               placeholder=""
               leadingIcon={""}
               trailingIcon={""}
-              className="border-gray-600 w-full"
+              className="w-full"
             />
           </div>
           <div className="py-3">
@@ -311,7 +312,7 @@ export default function RentDetail() {
               placeholder=""
               leadingIcon={""}
               trailingIcon={""}
-              className="border-gray-600 w-full"
+              className="w-full"
             />
           </div>
           <p className="text-sm">
@@ -382,6 +383,32 @@ export default function RentDetail() {
               <Checkbox id="ห้องน้ำ" />
               <Label htmlFor="ห้องน้ำ" className="text-base">
                 ห้องน้ำ
+              </Label>
+            </div>
+          </div>
+
+          {/* --term */}
+          <div className="grid grid-cols-4 gap-y-3 py-3">
+            {" "}
+            <div className="flex items-center gap-2">
+              {" "}
+              <Checkbox id="ข้อตกลง" />
+              <Label htmlFor="ข้อตกลง" className="text-base">
+                อ่านและยอมรับ{" "}
+                <Link href="/terms" className="text-blue-500">
+                  ข้อตกลงและเงื่อนไขในการให้บริการ
+                </Link>
+              </Label>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-y-3">
+            {" "}
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              {" "}
+              <Checkbox id="ข้อตกลง" />
+              <Label htmlFor="ข้อตกลง" className="text-base">
+                รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
+                ตาม คู่มือการใช้งาน
               </Label>
             </div>
           </div>
