@@ -38,7 +38,7 @@ export default function Sidebar({ currentPathname }: SidebarProps) {
   };
 
   return (
-    <div className="w-[300px] bg-[#333333] text-white h-3/4 flex flex-col shadow-xl rounded overflow-hidden m-2">
+    <div className="w-[300px] bg-[#333333] text-white h-full flex flex-col shadow-xl rounded overflow-hidden m-2">
       {/* ส่วนหัว: โปรไฟล์ */}
       <div className="p-4 flex flex-col items-center justify-center bg-[#444444] py-8">
         <Avatar className="h-24 w-24 mb-3 border-4 border-gray-600">
