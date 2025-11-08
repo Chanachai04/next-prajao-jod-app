@@ -8,6 +8,7 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import DateForm from "@/components/form/DateForm";
 import TimeForm from "@/components/form/TimeForm";
 import SelectForm from "@/components/form/SelectForm";
+import Link from "next/link";
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState("hourly");
@@ -20,6 +21,11 @@ export default function Home() {
     sixMonths: "6 เดือน",
     oneYears: "1 ปี",
   };
+  const options = [
+    { key: "hourly", label: "รายชั่วโมง" },
+    { key: "daily", label: "รายวัน" },
+    { key: "monthly", label: "รายเดือน" },
+  ];
   return (
     <div className="min-h-screen ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
@@ -35,39 +41,18 @@ export default function Home() {
         </div>
         <div className="flex flex-col mt-10 sm:mt-10 justify-center w-full xl:w-2/3">
           <div className="flex flex-wrap gap-2 md:gap-4">
-            <Button
-              onClick={() => setSelectedOption("hourly")}
-              variant={selectedOption === "hourly" ? "default" : "link"}
-              className={
-                selectedOption === "hourly"
-                  ? "text-white text-sm md:text-lg"
-                  : "text-black text-sm md:text-lg"
-              }
-            >
-              รายชั่วโมง
-            </Button>
-            <Button
-              onClick={() => setSelectedOption("daily")}
-              variant={selectedOption === "daily" ? "default" : "link"}
-              className={
-                selectedOption === "daily"
-                  ? "text-white text-sm md:text-lg"
-                  : "text-black text-sm md:text-lg"
-              }
-            >
-              รายวัน
-            </Button>
-            <Button
-              onClick={() => setSelectedOption("monthly")}
-              variant={selectedOption === "monthly" ? "default" : "link"}
-              className={
-                selectedOption === "monthly"
-                  ? "text-white text-sm md:text-lg"
-                  : "text-black text-sm md:text-lg"
-              }
-            >
-              รายเดือน
-            </Button>
+            {options.map(({ key, label }) => (
+              <Button
+                key={key}
+                onClick={() => setSelectedOption(key)}
+                variant={selectedOption === key ? "default" : "link"}
+                className={`text-sm md:text-lg cursor-pointer ${
+                  selectedOption === key ? "text-white" : "text-black"
+                }`}
+              >
+                {label}
+              </Button>
+            ))}
           </div>
           <form action="" className="w-full  mt-4 space-y-4">
             {selectedOption === "hourly" ? (
@@ -163,12 +148,16 @@ export default function Home() {
               </>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Button className="mt-6 w-full text-lg py-6">
-                ค้นหาที่จอดรถ
-              </Button>
-              <Button className="mt-6 w-full text-lg py-6">
-                ค้นหาที่จอดรถใกล้ฉัน
-              </Button>
+              <Link href={"/booking"}>
+                <Button className="mt-6 w-full text-lg py-6 cursor-pointer">
+                  ค้นหาที่จอดรถ
+                </Button>
+              </Link>
+              <Link href={"/booking"}>
+                <Button className="mt-6 w-full text-lg py-6 cursor-pointer">
+                  ค้นหาที่จอดรถใกล้ฉัน
+                </Button>
+              </Link>
             </div>
           </form>
         </div>

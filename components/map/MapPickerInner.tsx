@@ -42,11 +42,12 @@ export default function MapPickerInner({
       <MapContainer
         center={[13.7563, 100.5018]}
         zoom={zoom}
+        minZoom={15}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution="&copy; OpenStreetMap contributors"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
         />
         {/* เมื่อคลิกบนแผนที่ จะอัปเดต position */}
         <ClickMarker setPosition={setPosition} />

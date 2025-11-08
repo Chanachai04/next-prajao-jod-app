@@ -29,7 +29,7 @@ export default function Navbar() {
                 เข้าสู่ระบบ
               </Button>
             </Link>
-            <Link href="/" className="hidden sm:block">
+            <Link href="/rent" className="hidden sm:block">
               <Button
                 variant={"outline"}
                 className="cursor-pointer text-sm  px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 md:text-lg"
