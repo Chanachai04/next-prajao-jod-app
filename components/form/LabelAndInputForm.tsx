@@ -39,7 +39,11 @@ export default function LabelAndInputForm({
           id={id}
           type={type}
           placeholder={placeholder}
-          className={`pl-10 pr-10 w-full text-sm md:text-lg h-10 ${className}`}
+          className={
+            leadingIcon
+              ? `pl-10 pr-10 w-full text-sm md:text-lg h-10 ${className}`
+              : `w-full text-sm md:text-lg h-10 ${className}`
+          }
         />
 
         {/* ด้านหลัง */}
