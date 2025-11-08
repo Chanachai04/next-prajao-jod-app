@@ -4,7 +4,7 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 
 export default function Rent() {
   return (
-    <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5 bg-gray-50 space-y-5">
+    <div className="min-h-screen container mx-auto  px-4  py-5  space-y-5">
       {/* ส่วนหัว */}
       <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
       <h1 className="text-xl">

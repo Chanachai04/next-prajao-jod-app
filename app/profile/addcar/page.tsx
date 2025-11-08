@@ -25,7 +25,10 @@ export default function AddCar() {
         {/* Form Section */}
         <div className="w-full lg:w-1/2 flex flex-col py-25">
           <div className="space-y-4">
-            <div className="text-xl text-gray-600">ข้อมูลรถ</div>
+            <div className="flex justify-between items-center">
+              <div className="text-xl text-gray-600">ข้อมูลรถ</div>
+              <div className="text-gray-600">เช่น1กข8462</div>
+            </div>
             <div className="flex">
               <Field>
                 <FieldLabel
@@ -36,7 +39,6 @@ export default function AddCar() {
                 </FieldLabel>
                 <Input id="email" placeholder="" required />
               </Field>
-              <div className="text-gray-600">เช่น1กข8462</div>
             </div>
             <Field>
               <FieldLabel

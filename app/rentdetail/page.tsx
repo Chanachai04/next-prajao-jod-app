@@ -34,7 +34,7 @@ export default function RentDetail() {
 
   return (
     <>
-      <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5">
+      <div className="min-h-screen container mx-auto px-4  py-5">
         {/* --ส่วนหัว */}
         <div className="space-y-3">
           <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
@@ -122,7 +122,7 @@ export default function RentDetail() {
           {/* หัวข้อ: วัน / เวลาเปิด / เวลาปิด */}
           <div className="grid grid-cols-12 items-center py-2 gap-2">
             <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
-              <Checkbox id="everyday" />
+              <Checkbox id="everyday" className="border border-black" />
               <Label htmlFor="everyday">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
             </div>
             <div className="col-span-6 sm:col-span-2"></div>
@@ -150,13 +150,13 @@ export default function RentDetail() {
               <div className="grid grid-cols-12 items-center py-3 gap-2 sm:gap-4">
                 {/* วัน */}
                 <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
-                  <Checkbox id={day} />
+                  <Checkbox id={day} className="border border-black" />
                   <Label htmlFor={day}>{day}</Label>
                 </div>
 
                 {/* เปิด 24 ชม. */}
                 <div className="col-span-6 sm:col-span-2 flex items-center gap-2">
-                  <Checkbox id={`${day}-24h`} />
+                  <Checkbox id={`${day}-24h`} className="border border-black" />
                   <Label htmlFor={`${day}-24h`}>เปิด 24 ชม.</Label>
                 </div>
 
@@ -331,56 +331,59 @@ export default function RentDetail() {
             {" "}
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="ประตูเปิดปิด" />
+              <Checkbox id="ประตูเปิดปิด" className="border border-black" />
               <Label htmlFor="ประตูเปิดปิด" className="text-base">
                 มีประตูเปิดปิด
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="ระบบรักษาความปลอดภัย" />
+              <Checkbox
+                id="ระบบรักษาความปลอดภัย"
+                className="border border-black"
+              />
               <Label htmlFor="ระบบรักษาความปลอดภัย" className="text-base">
                 มีระบบรักษาความปลอดภัย
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="หลังคา" />
+              <Checkbox id="หลังคา" className="border border-black" />
               <Label className="text-base" htmlFor="หลังคา">
                 มีหลังคา
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="เจ้าหน้าที่ดูแล" />
+              <Checkbox id="เจ้าหน้าที่ดูแล" className="border border-black" />
               <Label className="text-base" htmlFor="เจ้าหน้าที่ดูแล">
                 มีเจ้าหน้าที่ดูแล
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="จอดค้างคืน" />
+              <Checkbox id="จอดค้างคืน" className="border border-black" />
               <Label htmlFor="จอดค้างคืน" className="text-base">
                 จอดค้างคืน
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="บริการรับรถ" />
+              <Checkbox id="บริการรับรถ" className="border border-black" />
               <Label htmlFor="บริการรับรถ" className="text-base">
                 มีบริการรับรถ
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="กล้องวงจรปิด" />
+              <Checkbox id="กล้องวงจรปิด" className="border border-black" />
               <Label htmlFor="กล้องวงจรปิด" className="text-base">
                 กล้องวงจรปิด
               </Label>
             </div>
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="ห้องน้ำ" />
+              <Checkbox id="ห้องน้ำ" className="border border-black" />
               <Label htmlFor="ห้องน้ำ" className="text-base">
                 ห้องน้ำ
               </Label>
@@ -392,7 +395,7 @@ export default function RentDetail() {
             {" "}
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="ข้อตกลง" />
+              <Checkbox id="ข้อตกลง" className="border border-black" />
               <Label htmlFor="ข้อตกลง" className="text-base">
                 อ่านและยอมรับ{" "}
                 <Link href="/terms" className="text-blue-500">
@@ -405,7 +408,7 @@ export default function RentDetail() {
             {" "}
             <div className="flex items-center gap-2 whitespace-nowrap">
               {" "}
-              <Checkbox id="ข้อตกลง" />
+              <Checkbox id="ข้อตกลง" className="border border-black" />
               <Label htmlFor="ข้อตกลง" className="text-base">
                 รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
                 ตาม คู่มือการใช้งาน
@@ -413,9 +416,7 @@ export default function RentDetail() {
             </div>
           </div>
         </div>
-        <div className="py-5">
-          <Button className="rounded-none h-12">ส่งข้อมูล</Button>
-        </div>
+        <Button className="px-12 h-12 cursor-pointer">ส่งข้อมูล</Button>
       </div>
     </>
   );
