@@ -1,13 +1,6 @@
 import { supabase } from "./supabaseClient";
 import bcrypt from "bcryptjs";
 
-// ตรวจสอบการโหลด SECRET_KEY จาก .env
-const SECRET_KEY = process.env.NEXT_PUBLIC_SECRET_KEY;
-
-if (!SECRET_KEY) {
-  throw new Error("SECRET_KEY is not defined in the environment variables.");
-}
-
 interface RegisterData {
   email: string;
   password: string;
