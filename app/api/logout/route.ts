@@ -3,12 +3,9 @@ import { NextResponse } from "next/server";
 export async function POST() {
   const res = NextResponse.json({ message: "Logged out" });
 
-  res.cookies.set("token", "", {
-    path: "/",
-    maxAge: 0,
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-  });
+  // ลบ cookie ทั้งสอง
+  res.cookies.set("token", "", { path: "/", maxAge: 0 });
+  res.cookies.set("userId", "", { path: "/", maxAge: 0 });
 
   return res;
 }

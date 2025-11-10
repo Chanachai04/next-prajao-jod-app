@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import {
@@ -9,28 +10,40 @@ import {
   CalendarCheck,
   Wallet,
   LucideIcon,
+  LogOut,
 } from "lucide-react";
 
 interface MenuItem {
   name: string;
-  href: string;
+  href?: string; // href เป็น optional เพราะ logout ไม่มี link
   icon: LucideIcon;
+  action?: () => void; // ฟังก์ชันสำหรับ logout
 }
 
-const menuItems: MenuItem[] = [
-  { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
-  { name: "ประวัติการจอง", href: "/profile/history", icon: History },
-  { name: "ข้อมูลรถของคุณ", href: "/profile/cardetail", icon: Car },
-  { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
-  { name: "การเข้าจอง", href: "/profile/reservation", icon: CalendarCheck },
-  { name: "สรุปผลรายได้", href: "/profile/result", icon: Wallet },
-];
-
-interface SidebarProps {
+export default function Sidebar({
+  currentPathname,
+}: {
   currentPathname: string;
-}
+}) {
+  const router = useRouter();
 
-export default function Sidebar({ currentPathname }: SidebarProps) {
+  const handleLogout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    // แจ้ง component อื่นว่ามีการ logout (ถ้ามี)
+    window.dispatchEvent(new Event("loginStatusChanged"));
+    router.push("/login"); // redirect ไปหน้า login
+  };
+
+  const menuItems: MenuItem[] = [
+    { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
+    { name: "ประวัติการจอง", href: "/profile/history", icon: History },
+    { name: "ข้อมูลรถของคุณ", href: "/profile/cardetail", icon: Car },
+    { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
+    { name: "การเข้าจอง", href: "/profile/reservation", icon: CalendarCheck },
+    { name: "สรุปผลรายได้", href: "/profile/result", icon: Wallet },
+    { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
+  ];
+
   const profile = {
     name: "chanachai benmat",
     email: "nexus87th@gmail.com",
@@ -57,18 +70,28 @@ export default function Sidebar({ currentPathname }: SidebarProps) {
 
             return (
               <li key={item.name}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center space-x-3 p-4 text-base transition-colors duration-200",
-                    isActive
-                      ? "bg-blue-600 text-white font-bold"
-                      : "hover:bg-[#444444] text-gray-300"
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.name}</span>
-                </Link>
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center space-x-3 p-4 text-base transition-colors duration-200",
+                      isActive
+                        ? "bg-blue-600 text-white font-bold"
+                        : "hover:bg-[#444444] text-gray-300"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={item.action}
+                    className="flex items-center space-x-3 p-4 w-full text-left text-base hover:bg-[#444444] text-gray-300"
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </button>
+                )}
               </li>
             );
           })}

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -32,8 +32,8 @@ export default function Register() {
       const data = await res.json();
 
       if (res.ok) {
-        // ถ้า backend สร้าง token แล้ว สามารถ redirect ไปหน้า home ได้เลย
-        // หรือถ้าไม่สร้าง token ก็ไปหน้า login
+        // token ถูกตั้งใน httpOnly cookie แล้ว
+        window.dispatchEvent(new Event("loginStatusChanged"));
         router.push("/");
       } else {
         alert(data.message || "สมัครไม่สำเร็จ");
@@ -54,7 +54,7 @@ export default function Register() {
               หมายเลขโทรศัพท์
             </Label>
             <div className="relative mt-2">
-              <Mail className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
+              <Phone className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
               <Input
                 id="phone"
                 type="tel"

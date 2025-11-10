@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { jwtVerify } from "jose";
-
-const SECRET_KEY = process.env.SECRET_KEY as string;
 
 export async function GET() {
-  const token = (await cookies()).get("token")?.value;
-
-  if (!token) {
-    return NextResponse.json({ loggedIn: false }, { status: 401 });
-  }
-
   try {
-    const { payload } = await jwtVerify(
-      token,
-      new TextEncoder().encode(SECRET_KEY)
-    );
+    // ดึง cookies จาก request (ใน server component / API route)
+    const cookieStore = await cookies(); // Note: ใน Next.js 13+ cookies() เป็น synchronous, ไม่ต้อง await ก็ได้
+    // ดึงค่า token และ userId จาก cookie
+    const token = cookieStore.get("token")?.value;
+    const userId = cookieStore.get("userId")?.value;
 
-    // payload เป็น object ที่คุณ encode ตอนสร้าง token
-    return NextResponse.json({ loggedIn: true, user: payload });
+    // ถ้า token หรือ userId ไม่มี => ยังไม่ได้ login
+    if (!token || !userId) {
+      return NextResponse.json({ loggedIn: false }, { status: 401 });
+    }
+
+    // ถ้ามี token และ userId => login อยู่ ส่งกลับข้อมูล
+    return NextResponse.json({ loggedIn: true, token, userId });
   } catch (err) {
-    console.log("Token verify error:", err);
+    console.error(err);
     return NextResponse.json({ loggedIn: false }, { status: 401 });
   }
 }

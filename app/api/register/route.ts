@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   try {
     const { email, password, name, phone } = await req.json();
 
-    // ตรวจสอบว่า email มีคนใช้แล้วหรือไม่
+    // ตรวจสอบ email ซ้ำ
     const { data: existingUser } = await supabase
       .from("users")
       .select("id")
@@ -29,37 +29,40 @@ export async function POST(req: Request) {
     // insert user ลง database
     const { data: newUser, error } = await supabase
       .from("users")
-      .insert({
-        email,
-        password: hashedPassword,
-        name,
-        phone,
-      })
+      .insert({ email, password: hashedPassword, name, phone })
       .select()
       .single();
 
-    if (error || !newUser) {
+    if (!newUser || error) {
       return NextResponse.json(
         { message: "สร้างบัญชีไม่สำเร็จ" },
         { status: 500 }
       );
     }
 
-    // ถ้าต้องการสร้าง token ทันทีหลัง register
-    const token = await new SignJWT({
-      userId: newUser.id,
-      email: newUser.email,
-    })
-      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    // สร้าง JWT payload เก็บ userId
+    const jwtToken = await new SignJWT({ userId: newUser.id })
+      .setProtectedHeader({ alg: "HS256" })
       .setExpirationTime("7d")
       .sign(new TextEncoder().encode(SECRET_KEY));
 
     const res = NextResponse.json({ message: "Register success" });
+
+    //   cookie สำหรับ JWT
     res.cookies.set({
       name: "token",
-      value: token,
+      value: jwtToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    // cookie สำหรับ userId
+    res.cookies.set({
+      name: "userId",
+      value: newUser.id,
+      httpOnly: false,
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });

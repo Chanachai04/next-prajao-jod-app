@@ -7,17 +7,21 @@ const SECRET_KEY = process.env.SECRET_KEY as string;
 
 export async function POST(req: Request) {
   try {
+    // รับข้อมูลจาก body ของ request (JSON)
     const { email, password } = await req.json();
 
+    // หา user ในฐานข้อมูล Supabase ตาม email
     const { data: user, error } = await supabase
       .from("users")
       .select("*")
       .eq("email", email)
       .single();
 
-    if (error || !user)
+    // ถ้าไม่พบ user หรือเกิด error => ส่ง status 401
+    if (!user || error)
       return NextResponse.json({ message: "ไม่พบผู้ใช้" }, { status: 401 });
 
+    // ตรวจสอบรหัสผ่านโดยใช้ bcrypt
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid)
       return NextResponse.json(
@@ -25,24 +29,38 @@ export async function POST(req: Request) {
         { status: 401 }
       );
 
-    // สร้าง JWT token ด้วย jose
-    const token = await new SignJWT({ userId: user.id, email: user.email })
-      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-      .setExpirationTime("7d")
+    // สร้าง JWT token โดยเก็บ userId ใน payload
+    const jwtToken = await new SignJWT({ userId: user.id })
+      .setProtectedHeader({ alg: "HS256" })
+      .setExpirationTime("7d") // token หมดอายุ 7 วัน
       .sign(new TextEncoder().encode(SECRET_KEY));
 
+    // สร้าง response JSON แจ้ง login success
     const res = NextResponse.json({ message: "Login success" });
+
+    // ตั้งค่า httpOnly cookie สำหรับ JWT token
     res.cookies.set({
       name: "token",
-      value: token,
-      httpOnly: true,
+      value: jwtToken,
+      httpOnly: true, // client JS ไม่สามารถอ่าน token ได้
       secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 วัน
+    });
+
+    // ตั้งค่า cookie สำหรับ userId (client JS สามารถอ่านได้)
+    res.cookies.set({
+      name: "userId",
+      value: user.id,
+      httpOnly: false, // client JS สามารถอ่านได้
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
     });
 
+    // ส่ง response กลับ client
     return res;
   } catch (err) {
+    // กรณีเกิด error อื่นๆ
     console.error(err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
