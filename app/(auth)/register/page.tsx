@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerUser } from "@/lib/userService";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -14,21 +13,37 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
   const router = useRouter();
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (password.length < 6) {
       alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
       return;
     }
+
     try {
-      await registerUser({ email, password, phone });
-      alert("สมัครสำเร็จ!");
-      router.push("/login");
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, phone }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // ถ้า backend สร้าง token แล้ว สามารถ redirect ไปหน้า home ได้เลย
+        // หรือถ้าไม่สร้าง token ก็ไปหน้า login
+        router.push("/");
+      } else {
+        alert(data.message || "สมัครไม่สำเร็จ");
+      }
     } catch (err) {
-      console.log(err);
-      return;
+      console.error(err);
+      alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
     }
   };
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center ">
       <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px] ">

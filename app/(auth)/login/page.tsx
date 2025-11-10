@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginUser } from "@/lib/userService";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,14 +21,23 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await loginUser({ email, password });
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-      alert("เข้าสู่ระบบสำเร็จ");
-      // ให้ Navbar จะอัพเดทโดยอัตโนมัติ
-      window.dispatchEvent(new Event("loginStatusChanged"));
-      router.push("/");
+      const data = await res.json();
+
+      if (res.ok && data.message === "Login success") {
+        // token ถูกตั้งใน httpOnly cookie แล้ว
+        window.dispatchEvent(new Event("loginStatusChanged"));
+        router.push("/");
+      } else {
+        setError(data.message || "เข้าสู่ระบบไม่สำเร็จ");
+      }
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
     } finally {
       setLoading(false);

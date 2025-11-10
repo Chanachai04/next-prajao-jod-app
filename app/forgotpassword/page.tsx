@@ -31,6 +31,7 @@ export default function ResetPassword() {
       }
       if (error) {
         console.error(error);
+        return;
       } else {
         router.push("/forgotpassword/resetpassword/" + data.id);
         setEmail("");
