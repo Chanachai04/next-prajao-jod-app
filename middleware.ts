@@ -5,18 +5,34 @@ import { jwtVerify } from "jose";
 const SECRET_KEY = process.env.SECRET_KEY as string;
 
 // หน้า public ที่ไม่ต้องตรวจ token
-const publicRoutes = ["/login", "/register", "/forgotpassword", "/terms", "/"];
+const publicRoutes = [
+  "/login",
+  "/register",
+  "/forgotpassword/*",
+  "/terms",
+  "/",
+  "/booking",
+];
+
+// ฟังก์ชันเช็คว่า path เป็น public หรือไม่
+const isPublicRoute = (path: string) => {
+  return publicRoutes.some((route) => {
+    if (route.endsWith("/*")) {
+      return path.startsWith(route.slice(0, -2)); // ลบ /* แล้วใช้ startsWith
+    }
+    return path === route;
+  });
+};
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // ถ้าเป็นหน้า public ไม่ต้องตรวจ token
-  if (publicRoutes.includes(path)) {
+  if (isPublicRoute(path)) {
     return NextResponse.next();
   }
 
   const token = req.cookies.get("token")?.value;
-  console.log("Middleware token:", token);
 
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
@@ -31,6 +47,7 @@ export async function middleware(req: NextRequest) {
   }
 }
 
+// กำหนด matcher ให้ middleware ตรวจทุกหน้า ยกเว้น static, API, favicon, รูปภาพ
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg).*)",

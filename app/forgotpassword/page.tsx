@@ -33,7 +33,7 @@ export default function ResetPassword() {
         console.error(error);
         return;
       } else {
-        router.push("/forgotpassword/resetpassword/" + data.id);
+        router.push("/forgotpassword/reset/" + data.id);
         setEmail("");
       }
     } catch (err) {
