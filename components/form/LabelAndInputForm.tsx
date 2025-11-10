@@ -11,7 +11,7 @@ type SearchInputProps = {
   textLabelSize?: string;
   className?: string;
   onClick?: () => void;
-  onChange?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
 };
 
