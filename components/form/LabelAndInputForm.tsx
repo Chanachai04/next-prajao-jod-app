@@ -1,7 +1,7 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 
-type SearchInputProps = {
+type LabelAndInputProps = {
   title?: string;
   type?: string;
   placeholder?: string;
@@ -11,7 +11,7 @@ type SearchInputProps = {
   textLabelSize?: string;
   className?: string;
   onClick?: () => void;
-  onChange?: () => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value?: string;
 };
 
@@ -27,14 +27,13 @@ export default function LabelAndInputForm({
   onClick,
   onChange,
   value,
-}: SearchInputProps) {
+}: LabelAndInputProps) {
   return (
     <div>
       <Label htmlFor={id} className={`${textLabelSize} `}>
         {title}
       </Label>
       <div className="relative mt-2">
-        {/* ด้านหน้า */}
         {leadingIcon && (
           <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6">
             {leadingIcon}
@@ -56,7 +55,6 @@ export default function LabelAndInputForm({
           }
         />
 
-        {/* ด้านหลัง */}
         {trailingIcon && (
           <button
             type="button"

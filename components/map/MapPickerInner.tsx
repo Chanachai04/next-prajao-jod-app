@@ -43,6 +43,7 @@ export default function MapPickerInner({
         center={[13.7563, 100.5018]}
         zoom={zoom}
         minZoom={15}
+        zoomControl={false}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer

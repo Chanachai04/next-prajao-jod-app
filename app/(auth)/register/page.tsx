@@ -12,15 +12,34 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isShowPassword, setIsShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    if (password.length < 6) {
-      alert("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+    // ตรวจความถูกต้องก่อน submit
+    if (!phone) {
+      setError("กรุณากรอกหมายเลขโทรศัพท์");
       return;
     }
+    if (phone.length !== 10) {
+      setError("กรุณากรอกหมายเลขโทรศัพท์ 10 หลัก");
+      return;
+    }
+    if (!email) {
+      setError("กรุณากรอกอีเมล");
+      return;
+    }
+    if (password.length < 6) {
+      setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/register", {
@@ -32,18 +51,18 @@ export default function Register() {
       const data = await res.json();
 
       if (res.ok) {
-        // token ถูกตั้งใน httpOnly cookie แล้ว
         window.dispatchEvent(new Event("loginStatusChanged"));
         router.push("/");
       } else {
-        alert(data.message || "สมัครไม่สำเร็จ");
+        setError(data.message || "สมัครไม่สำเร็จ");
       }
     } catch (err) {
       console.error(err);
-      alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
+    } finally {
+      setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center ">
       <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px] ">
@@ -61,8 +80,12 @@ export default function Register() {
                 placeholder="กรอกหมายเลขโทรศัพท์ของคุณ"
                 className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
+                onChange={(e) => {
+                  // รับเฉพาะตัวเลข
+                  const onlyNumbers = e.target.value.replace(/\D/g, "");
+                  setPhone(onlyNumbers);
+                }}
+                maxLength={10}
               />
             </div>
           </div>
@@ -79,7 +102,6 @@ export default function Register() {
                 className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
           </div>
@@ -96,7 +118,6 @@ export default function Register() {
                 className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
               <button
                 type="button"
@@ -125,9 +146,12 @@ export default function Register() {
               .
             </Label>
           </div>
-
-          <Button className="my-4 w-full text-lg py-5 cursor-pointer">
-            สมัครสมาชิก
+          {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
+          <Button
+            className="my-2 w-full text-lg py-5 cursor-pointer"
+            disabled={loading}
+          >
+            {loading ? "กำลังสมัครสมาชิก..." : "สมัครสมาชิก"}
           </Button>
         </form>
       </div>

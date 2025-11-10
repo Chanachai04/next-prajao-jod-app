@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { MapPin } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -17,9 +16,15 @@ import MapPicker from "@/components/map/MapPicker";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import SelectForm from "@/components/form/SelectForm";
 import Link from "next/link";
+import ProvinceSearch from "@/components/form/ProvinceSearch";
+import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
 export default function RentDetail() {
   const [images, setImages] = useState<File[]>([]);
+  const [location, setLocation] = useState("");
+  const [provinceId, setProvinceId] = useState<number | null>(null);
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [subDistrictId, setSubDistrictId] = useState<number | null>(null);
   const type = {
     ที่จอดรถในบ้าน: "ที่จอดรถในบ้าน",
     ที่จอดรถในคอนโด: "ที่จอดรถในคอนโด",
@@ -253,14 +258,26 @@ export default function RentDetail() {
             พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
             และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
           </p>
-          <LabelAndInput
-            title=""
-            id="Landmark"
-            type="text"
-            placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
-            leadingIcon={<MapPin className="w-6 h-6" />}
-            trailingIcon={""}
-            className="w-full "
+          <ProvinceSearch
+            onChange={(pId, dId, sId) => {
+              setProvinceId(pId);
+              setDistrictId(dId);
+              setSubDistrictId(sId);
+
+              // set location เป็นชื่อ
+              if (sId) {
+                const sub = subDistricts.find((s) => s.id === sId);
+                setLocation(sub?.name_th || "");
+              } else if (dId) {
+                const district = districts.find((d) => d.id === dId);
+                setLocation(district?.name_th || "");
+              } else if (pId) {
+                const province = provinces.find((p) => p.id === pId);
+                setLocation(province?.name_th || "");
+              } else {
+                setLocation("");
+              }
+            }}
           />
           <div className="h-[400px] w-full relative pt-3">
             <MapPicker

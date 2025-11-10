@@ -102,7 +102,7 @@ export default function Navbar() {
                 <Link href="/login">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
                   >
                     เข้าสู่ระบบ
                   </Button>
@@ -110,13 +110,16 @@ export default function Navbar() {
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
                   >
                     ปล่อยเช่าที่จอดรถ
                   </Button>
                 </Link>
                 <Link href="/rent" className="sm:hidden">
-                  <Button variant="outline" className="px-2 py-1 h-8 text-sm">
+                  <Button
+                    variant="outline"
+                    className="px-2 py-1 h-8 text-sm cursor-pointer"
+                  >
                     เช่าที่จอด
                   </Button>
                 </Link>

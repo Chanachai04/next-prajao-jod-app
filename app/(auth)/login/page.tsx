@@ -18,6 +18,26 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      setError("กรุณากรอกอีเมล");
+      return;
+    } else if (!emailRegex.test(email)) {
+      setError("รูปแบบอีเมลไม่ถูกต้อง");
+      return;
+    }
+
+    // Validate password
+    if (!password) {
+      setError("กรุณากรอกรหัสผ่าน");
+      return;
+    } else if (password.length < 6) {
+      setError("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -30,7 +50,6 @@ export default function Login() {
       const data = await res.json();
 
       if (res.ok && data.message === "Login success") {
-        // token ถูกตั้งใน httpOnly cookie แล้ว
         window.dispatchEvent(new Event("loginStatusChanged"));
         router.push("/");
       } else {

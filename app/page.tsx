@@ -10,6 +10,8 @@ import TimeForm from "@/components/form/TimeForm";
 import SelectForm from "@/components/form/SelectForm";
 import Link from "next/link";
 import useGeolocation from "@/hook/useGeolocation";
+import ProvinceSearch from "@/components/form/ProvinceSearch";
+import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
 export default function Home() {
   const [selectedOption, setSelectedOption] = useState("hourly");
@@ -17,6 +19,10 @@ export default function Home() {
   const [dateOut, setDateOut] = useState<Date>();
   const [timeIn, setTimeIn] = useState<string>("00:00");
   const [timeOut, setTimeOut] = useState<string>("01:00");
+  const [location, setLocation] = useState("");
+  const [provinceId, setProvinceId] = useState<number | null>(null);
+  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [subDistrictId, setSubDistrictId] = useState<number | null>(null);
   const timeOption = {
     threeMonths: "3 เดือน",
     sixMonths: "6 เดือน",
@@ -61,13 +67,26 @@ export default function Home() {
           <form action="" className="w-full  mt-4 space-y-4">
             {selectedOption === "hourly" ? (
               <>
-                <LabelAndInput
-                  title="สถานที่"
-                  id="location"
-                  type="text"
-                  placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
-                  leadingIcon={<MapPin className="w-6 h-6" />}
-                  trailingIcon={<X className="w-6 h-6" />}
+                <ProvinceSearch
+                  onChange={(pId, dId, sId) => {
+                    setProvinceId(pId);
+                    setDistrictId(dId);
+                    setSubDistrictId(sId);
+
+                    // set location เป็นชื่อ
+                    if (sId) {
+                      const sub = subDistricts.find((s) => s.id === sId);
+                      setLocation(sub?.name_th || "");
+                    } else if (dId) {
+                      const district = districts.find((d) => d.id === dId);
+                      setLocation(district?.name_th || "");
+                    } else if (pId) {
+                      const province = provinces.find((p) => p.id === pId);
+                      setLocation(province?.name_th || "");
+                    } else {
+                      setLocation("");
+                    }
+                  }}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   <DateForm
@@ -98,13 +117,26 @@ export default function Home() {
               </>
             ) : selectedOption === "daily" ? (
               <>
-                <LabelAndInput
-                  title="สถานที่"
-                  id="location"
-                  type="text"
-                  placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
-                  leadingIcon={<MapPin className="w-6 h-6" />}
-                  trailingIcon={<X className="w-6 h-6" />}
+                <ProvinceSearch
+                  onChange={(pId, dId, sId) => {
+                    setProvinceId(pId);
+                    setDistrictId(dId);
+                    setSubDistrictId(sId);
+
+                    // set location เป็นชื่อ
+                    if (sId) {
+                      const sub = subDistricts.find((s) => s.id === sId);
+                      setLocation(sub?.name_th || "");
+                    } else if (dId) {
+                      const district = districts.find((d) => d.id === dId);
+                      setLocation(district?.name_th || "");
+                    } else if (pId) {
+                      const province = provinces.find((p) => p.id === pId);
+                      setLocation(province?.name_th || "");
+                    } else {
+                      setLocation("");
+                    }
+                  }}
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -126,13 +158,26 @@ export default function Home() {
               </>
             ) : (
               <>
-                <LabelAndInput
-                  title="สถานที่"
-                  id="location"
-                  type="text"
-                  placeholder="ชื่อสถานที่หรือบริเวณใกล้เคียง"
-                  leadingIcon={<MapPin className="w-6 h-6" />}
-                  trailingIcon={<X className="w-6 h-6" />}
+                <ProvinceSearch
+                  onChange={(pId, dId, sId) => {
+                    setProvinceId(pId);
+                    setDistrictId(dId);
+                    setSubDistrictId(sId);
+
+                    // set location เป็นชื่อ
+                    if (sId) {
+                      const sub = subDistricts.find((s) => s.id === sId);
+                      setLocation(sub?.name_th || "");
+                    } else if (dId) {
+                      const district = districts.find((d) => d.id === dId);
+                      setLocation(district?.name_th || "");
+                    } else if (pId) {
+                      const province = provinces.find((p) => p.id === pId);
+                      setLocation(province?.name_th || "");
+                    } else {
+                      setLocation("");
+                    }
+                  }}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <DateForm
