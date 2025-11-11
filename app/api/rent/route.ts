@@ -34,7 +34,7 @@ export async function GET() {
     // ดึง email และ phone จากตาราง users ด้วย userId
     const { data, error } = await supabase
       .from("users")
-      .select("email, phone")
+      .select("email, phone, is_checked")
       .eq("id", userId)
       .single();
 
@@ -45,7 +45,11 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ email: data.email, phone: data.phone });
+    return NextResponse.json({
+      email: data.email,
+      phone: data.phone,
+      isChecked: data.is_checked ?? false,
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
@@ -102,6 +106,7 @@ export async function POST(req: Request) {
         citizen_id: citizenId,
         line_id: lineId,
         phone,
+        is_checked: true,
       })
       .eq("id", userId);
 
