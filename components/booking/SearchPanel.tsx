@@ -1,3 +1,6 @@
+"use client";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Minimize2 } from "lucide-react";
 import DateForm from "../form/DateForm";
 import SelectForm from "../form/SelectForm";
@@ -11,6 +14,8 @@ import { districts, provinces, subDistricts } from "@/lib/thaiData";
 interface SearchPanelProps {
   dateIn: Date | undefined;
   setDateIn: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  dateOut: Date | undefined;
+  setDateOut: React.Dispatch<React.SetStateAction<Date | undefined>>;
   timeIn: string;
   setTimeIn: React.Dispatch<React.SetStateAction<string>>;
   timeOut: string;
@@ -27,6 +32,8 @@ interface SearchPanelProps {
 export default function SearchPanel({
   dateIn,
   setDateIn,
+  dateOut,
+  setDateOut,
   timeIn,
   setTimeIn,
   timeOut,
@@ -35,15 +42,34 @@ export default function SearchPanel({
   setSelectedOption,
   timeOptions,
   onCardClick,
-  searchText, // consumed via ProvinceSearch -> setSearchText
+  searchText,
   setSearchText,
   onSearch,
 }: SearchPanelProps) {
+  const searchParams = useSearchParams();
   const isHourly = selectedOption === "hourly";
+
   const [, setLocation] = useState("");
   const [, setProvinceId] = useState<number | null>(null);
   const [, setDistrictId] = useState<number | null>(null);
   const [, setSubDistrictId] = useState<number | null>(null);
+  // 🧠 โหลดค่าจาก URL ตอนหน้าเปิด
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    const location = searchParams.get("location");
+    const dateInParam = searchParams.get("dateIn");
+    const dateOutParam = searchParams.get("dateOut");
+    const timeInParam = searchParams.get("timeIn");
+    const timeOutParam = searchParams.get("timeOut");
+
+    if (mode) setSelectedOption(mode);
+    if (location) setSearchText(location);
+    if (dateInParam) setDateIn(new Date(dateInParam));
+    if (dateOutParam) setDateOut(new Date(dateOutParam));
+    if (timeInParam) setTimeIn(timeInParam);
+    if (timeOutParam) setTimeOut(timeOutParam);
+  }, [searchParams]);
+
   return (
     <div className="w-[420px] bg-[#EBEBEB] p-4">
       <form
@@ -53,13 +79,14 @@ export default function SearchPanel({
         }}
       >
         <h1 className="text-4xl my-2">{searchText || "สถานที่"}</h1>
+
+        {/* Province Search */}
         <ProvinceSearch
           initialQuery={searchText}
           onChange={(pId, dId, sId) => {
             setProvinceId(pId);
             setDistrictId(dId);
             setSubDistrictId(sId);
-            // set location เป็นชื่อ และ sync ไปยัง searchText
             if (sId) {
               const sub = subDistricts.find((s) => s.id === sId);
               const name = sub?.name_th || "";
@@ -82,6 +109,7 @@ export default function SearchPanel({
           }}
         />
 
+        {/* Form Section */}
         {isHourly ? (
           <>
             <div className="grid grid-cols-2 gap-2 my-4">
@@ -100,8 +128,8 @@ export default function SearchPanel({
             <div className="grid grid-cols-2 gap-2 my-4">
               <DateForm
                 id="dateOut"
-                date={dateIn}
-                setDate={setDateIn}
+                date={dateOut}
+                setDate={setDateOut}
                 className="bg-white"
               />
               <TimeForm
@@ -159,6 +187,7 @@ export default function SearchPanel({
           </Button>
         </div>
 
+        {/* Parking List */}
         <div className="mt-2 flex-1 overflow-y-auto pr-2 max-h-[600px]">
           <ParkingCard onClick={onCardClick} />
           <ParkingCard onClick={onCardClick} />

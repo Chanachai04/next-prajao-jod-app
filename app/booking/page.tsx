@@ -24,6 +24,7 @@ export default function Booking() {
   const searchParams = useSearchParams();
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [dateIn, setDateIn] = useState<Date>();
+  const [dateOut, setDateOut] = useState<Date>();
   const [selectedOption, setSelectedOption] = useState("hourly");
   const [timeIn, setTimeIn] = useState("00:00");
   const [timeOut, setTimeOut] = useState("01:00");
@@ -205,6 +206,8 @@ export default function Booking() {
           <SearchPanel
             dateIn={dateIn}
             setDateIn={setDateIn}
+            dateOut={dateOut}
+            setDateOut={setDateOut}
             timeIn={timeIn}
             setTimeIn={setTimeIn}
             timeOut={timeOut}
