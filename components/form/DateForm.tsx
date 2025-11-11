@@ -51,11 +51,8 @@ export default function DateForm({
             value={value}
           >
             <CalendarIcon className="text-gray-500 w-6! h-6!" />
-            {date ? (
-              format(date, "dd/MM/yyyy")
-            ) : (
-              <span className="text-lg">{placeholder}</span>
-            )}
+
+            {format(date as Date, "dd/MM/yyyy")}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0">

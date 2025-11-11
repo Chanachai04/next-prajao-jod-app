@@ -12,12 +12,16 @@ type MapPickerProps = {
   height?: string;
   zoom: number;
   onMapReady?: () => void;
+  center?: [number, number];
+  markerAt?: [number, number] | null;
 };
 
 export default function MapPicker({
   height = "400px",
   zoom,
   onMapReady,
+  center,
+  markerAt,
 }: MapPickerProps) {
   useEffect(() => {
     const timer = setTimeout(() => onMapReady?.(), 100);
@@ -26,7 +30,12 @@ export default function MapPicker({
 
   return (
     <div style={{ height }}>
-      <MapPickerInner zoom={zoom} height={height} />
+      <MapPickerInner
+        zoom={zoom}
+        height={height}
+        center={center}
+        markerAt={markerAt}
+      />
     </div>
   );
 }

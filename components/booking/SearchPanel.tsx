@@ -1,10 +1,12 @@
-import { MapPin, Minimize2 } from "lucide-react";
+import { Minimize2 } from "lucide-react";
 import DateForm from "../form/DateForm";
-import LabelAndInputForm from "../form/LabelAndInputForm";
 import SelectForm from "../form/SelectForm";
 import TimeForm from "../form/TimeForm";
 import { Button } from "../ui/button";
 import ParkingCard from "./ParkingCard";
+import ProvinceSearch from "../form/ProvinceSearch";
+import { useState } from "react";
+import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
 interface SearchPanelProps {
   dateIn: Date | undefined;
@@ -17,6 +19,9 @@ interface SearchPanelProps {
   setSelectedOption: React.Dispatch<React.SetStateAction<string>>;
   timeOptions: Record<string, string>;
   onCardClick: () => void;
+  searchText: string;
+  setSearchText: React.Dispatch<React.SetStateAction<string>>;
+  onSearch: () => void;
 }
 
 export default function SearchPanel({
@@ -30,36 +35,54 @@ export default function SearchPanel({
   setSelectedOption,
   timeOptions,
   onCardClick,
+  searchText, // consumed via ProvinceSearch -> setSearchText
+  setSearchText,
+  onSearch,
 }: SearchPanelProps) {
   const isHourly = selectedOption === "hourly";
-
+  const [, setLocation] = useState("");
+  const [, setProvinceId] = useState<number | null>(null);
+  const [, setDistrictId] = useState<number | null>(null);
+  const [, setSubDistrictId] = useState<number | null>(null);
   return (
     <div className="w-[420px] bg-[#EBEBEB] p-4">
-      <form>
-        <h1 className="text-4xl my-2">กรุงเทพมหานคร</h1>
-        <LabelAndInputForm
-          title="ค้นหาที่จอดรถในบริเวณ"
-          placeholder="ค้นหา..."
-          leadingIcon={<MapPin />}
-          textLabelSize="text-xl"
-          className="bg-white"
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSearch();
+        }}
+      >
+        <h1 className="text-4xl my-2">{searchText || "สถานที่"}</h1>
+        <ProvinceSearch
+          initialQuery={searchText}
+          onChange={(pId, dId, sId) => {
+            setProvinceId(pId);
+            setDistrictId(dId);
+            setSubDistrictId(sId);
+            // set location เป็นชื่อ และ sync ไปยัง searchText
+            if (sId) {
+              const sub = subDistricts.find((s) => s.id === sId);
+              const name = sub?.name_th || "";
+              setLocation(name);
+              setSearchText(name);
+            } else if (dId) {
+              const district = districts.find((d) => d.id === dId);
+              const name = district?.name_th || "";
+              setLocation(name);
+              setSearchText(name);
+            } else if (pId) {
+              const province = provinces.find((p) => p.id === pId);
+              const name = province?.name_th || "";
+              setLocation(name);
+              setSearchText(name);
+            } else {
+              setLocation("");
+              setSearchText("");
+            }
+          }}
         />
 
         {isHourly ? (
-          <div className="grid grid-cols-2 gap-2 my-4">
-            <DateForm
-              id="dateIn"
-              date={dateIn}
-              setDate={setDateIn}
-              className="bg-white"
-            />
-            <SelectForm
-              itemList={timeOptions}
-              className="bg-white"
-              leadingIcon={<Minimize2 />}
-            />
-          </div>
-        ) : (
           <>
             <div className="grid grid-cols-2 gap-2 my-4">
               <DateForm
@@ -88,6 +111,22 @@ export default function SearchPanel({
               />
             </div>
           </>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-2 my-4">
+              <DateForm
+                id="dateIn"
+                date={dateIn}
+                setDate={setDateIn}
+                className="bg-white"
+              />
+              <SelectForm
+                itemList={timeOptions}
+                className="bg-white"
+                leadingIcon={<Minimize2 />}
+              />
+            </div>
+          </>
         )}
 
         <div className="flex justify-between">
@@ -111,7 +150,11 @@ export default function SearchPanel({
               รายเดือน
             </Button>
           </div>
-          <Button type="button" className="text-lg cursor-pointer">
+          <Button
+            type="submit"
+            onClick={onSearch}
+            className="text-lg cursor-pointer"
+          >
             ค้นหา
           </Button>
         </div>

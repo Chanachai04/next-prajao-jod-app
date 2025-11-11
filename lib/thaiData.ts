@@ -6,13 +6,5 @@ import subDistrictsJson from "./thai-data/sub_districts.json";
 export const provinces = provincesJson; // จังหวัด
 export const districts = districtsJson; // อำเภอ/เขต
 export const subDistricts = subDistrictsJson; // ตำบล/แขวง
-
-// หาอำเภอตามจังหวัด
-export function getDistrictsByProvince(provinceId: number) {
-  return districts.filter((d) => d.province_id === provinceId);
-}
-
-// หาตำบลตามอำเภอ
-export function getSubDistrictsByDistrict(districtId: number) {
-  return subDistricts.filter((s) => s.district_id === districtId);
-}
+// ความสัมพันธ์ province_id / district_id ถูกลบออกจากข้อมูลต้นทาง
+// หากต้องการใช้งานความสัมพันธ์ กรุณาเตรียม mapping แยกต่างหาก

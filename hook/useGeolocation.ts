@@ -5,17 +5,25 @@ export default function useGeolocation() {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          // เก็บใน localStorage
-          localStorage.setItem("user_location", JSON.stringify(coords));
-          console.log("Saved location:", coords);
+          const { latitude, longitude } = position.coords;
+
+          // เก็บ latitude และ longitude เป็น cookie
+          const roundedLat = Math.round(latitude * 1e6) / 1e6;
+          const roundedLon = Math.round(longitude * 1e6) / 1e6;
+          const cookieValue = JSON.stringify({
+            lat: roundedLat,
+            lon: roundedLon,
+          });
+          document.cookie = `user_location=${encodeURIComponent(
+            cookieValue
+          )}; path=/; Secure; SameSite=Strict; expires=Fri, 31 Dec 9999 23:59:59 GMT`;
+
+          console.log("Saved location cookie:", cookieValue);
         },
         (error) => {
           console.error("Geolocation error:", error);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
   }, []);

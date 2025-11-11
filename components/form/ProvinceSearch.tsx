@@ -11,8 +11,6 @@ interface Option {
   name_th: string;
   name_en: string;
   type: "province" | "district" | "subDistrict";
-  province_id?: number;
-  district_id?: number;
 }
 
 interface ProvinceSearchProps {
@@ -21,10 +19,14 @@ interface ProvinceSearchProps {
     districtId: number | null,
     subDistrictId: number | null
   ) => void;
+  initialQuery?: string;
 }
 
-export default function ProvinceSearch({ onChange }: ProvinceSearchProps) {
-  const [query, setQuery] = useState("");
+export default function ProvinceSearch({
+  onChange,
+  initialQuery,
+}: ProvinceSearchProps) {
+  const [query, setQuery] = useState(initialQuery ?? "");
   const [dropdown, setDropdown] = useState(false);
   const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(
     null
@@ -64,15 +66,15 @@ export default function ProvinceSearch({ onChange }: ProvinceSearchProps) {
       setSelectedDistrictId(null);
       setSelectedSubDistrictId(null);
     } else if (option.type === "district") {
-      setSelectedProvinceId(option.province_id || null);
       setSelectedDistrictId(option.id);
       setSelectedSubDistrictId(null);
+      // ไม่มีความสัมพันธ์ province_id ในข้อมูลอีกต่อไป
+      setSelectedProvinceId(null);
     } else if (option.type === "subDistrict") {
-      const sub = subDistricts.find((s) => s.id === option.id);
-      const district = districts.find((d) => d.id === sub?.district_id);
-      setSelectedDistrictId(district?.id || null);
-      setSelectedProvinceId(district?.province_id || null);
       setSelectedSubDistrictId(option.id);
+      // ไม่มีความสัมพันธ์ district_id / province_id ในข้อมูลอีกต่อไป
+      setSelectedDistrictId(null);
+      setSelectedProvinceId(null);
     }
   };
 
@@ -81,6 +83,15 @@ export default function ProvinceSearch({ onChange }: ProvinceSearchProps) {
     if (onChange)
       onChange(selectedProvinceId, selectedDistrictId, selectedSubDistrictId);
   }, [selectedProvinceId, selectedDistrictId, selectedSubDistrictId]);
+
+  // sync initialQuery from parent
+  useEffect(() => {
+    if (typeof initialQuery === "string") {
+      setTimeout(() => {
+        setQuery(initialQuery);
+      }, 0);
+    }
+  }, [initialQuery]);
 
   // click นอก dropdown ปิด dropdown
   useEffect(() => {

@@ -1,22 +1,22 @@
 "use client";
 import { Button } from "@/components/ui/button";
 
-import { MapPin, MapPlus, Minimize2, MousePointerClick, X } from "lucide-react";
+import { MapPlus, Minimize2, MousePointerClick } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import LabelAndInput from "@/components/form/LabelAndInputForm";
 import DateForm from "@/components/form/DateForm";
 import TimeForm from "@/components/form/TimeForm";
 import SelectForm from "@/components/form/SelectForm";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useGeolocation from "@/hook/useGeolocation";
 import ProvinceSearch from "@/components/form/ProvinceSearch";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
 export default function Home() {
+  const router = useRouter();
   const [selectedOption, setSelectedOption] = useState("hourly");
-  const [dateIn, setDateIn] = useState<Date>();
-  const [dateOut, setDateOut] = useState<Date>();
+  const [dateIn, setDateIn] = useState<Date>(new Date());
+  const [dateOut, setDateOut] = useState<Date>(new Date());
   const [timeIn, setTimeIn] = useState<string>("00:00");
   const [timeOut, setTimeOut] = useState<string>("01:00");
   const [location, setLocation] = useState("");
@@ -35,6 +35,67 @@ export default function Home() {
   ];
 
   useGeolocation();
+
+  const buildAndGoToBooking = async (nearMe = false) => {
+    const params = new URLSearchParams();
+    params.set("mode", selectedOption);
+    if (location) params.set("location", location);
+    if (provinceId) params.set("provinceId", String(provinceId));
+    if (districtId) params.set("districtId", String(districtId));
+    if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
+    if (nearMe) params.set("nearMe", "1");
+
+    // Dates/times
+    if (dateIn) params.set("dateIn", dateIn.toISOString());
+    if (dateOut) params.set("dateOut", dateOut.toISOString());
+    if (timeIn) params.set("timeIn", timeIn);
+    if (timeOut) params.set("timeOut", timeOut);
+
+    // If near me: get precise location and pass lat/lon
+    if (nearMe && "geolocation" in navigator) {
+      try {
+        const pos = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            });
+          }
+        );
+        params.set("lat", String(pos.coords.latitude));
+        params.set("lon", String(pos.coords.longitude));
+      } catch {
+        // ignore, fallback without lat/lon
+      }
+      router.push(`/booking?${params.toString()}`);
+      return;
+    }
+
+    // If has text location: geocode first so booking centers instantly
+    const q = location.trim();
+    if (!nearMe && q) {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          q + " Thailand"
+        )}&countrycodes=th&limit=1&addressdetails=1`;
+        const res = await fetch(url, {
+          headers: { "Accept-Language": "th,en;q=0.8" },
+        });
+        if (res.ok) {
+          const data: Array<{ lat: string; lon: string }> = await res.json();
+          if (data && data.length > 0) {
+            params.set("lat", data[0].lat);
+            params.set("lon", data[0].lon);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    router.push(`/booking?${params.toString()}`);
+  };
 
   return (
     <div className="min-h-screen ">
@@ -197,16 +258,20 @@ export default function Home() {
               </>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Link href={"/booking"}>
-                <Button className="mt-6 w-full text-lg py-6 cursor-pointer">
-                  ค้นหาที่จอดรถ
-                </Button>
-              </Link>
-              <Link href={"/booking"}>
-                <Button className="mt-6 w-full text-lg py-6 cursor-pointer">
-                  ค้นหาที่จอดรถใกล้ฉัน
-                </Button>
-              </Link>
+              <Button
+                type="button"
+                onClick={() => buildAndGoToBooking(false)}
+                className="mt-6 w-full text-lg py-6 cursor-pointer"
+              >
+                ค้นหาที่จอดรถ
+              </Button>
+              <Button
+                type="button"
+                onClick={() => buildAndGoToBooking(true)}
+                className="mt-6 w-full text-lg py-6 cursor-pointer"
+              >
+                ค้นหาที่จอดรถใกล้ฉัน
+              </Button>
             </div>
           </form>
         </div>
