@@ -21,7 +21,9 @@ export default function Rent() {
           credentials: "include",
           cache: "no-store",
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          return;
+        }
         const data = await res.json();
         setEmail(data.email ?? "");
         setPhone(data.phone ?? "");
@@ -52,7 +54,7 @@ export default function Rent() {
         alert(data?.message ?? "บันทึกข้อมูลไม่สำเร็จ");
         return;
       }
-      router.push("/rentdetail");
+      router.replace("/rentdetail");
     } catch (e) {
       console.error(e);
       alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
