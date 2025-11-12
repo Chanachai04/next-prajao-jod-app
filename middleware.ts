@@ -8,7 +8,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
 
 // หน้าที่เข้าได้โดยไม่ต้อง login
-const publicRoutes = ["/", "/booking"];
+const publicRoutes = ["/", "/booking", "/terms"];
 
 // หน้าที่ต้อง login ก่อนถึงจะเข้าได้
 const protectedRoutes = ["/rent", "/rentdetail", "/profile"];
@@ -55,6 +55,11 @@ export async function middleware(req: NextRequest) {
     );
     const userId = req.cookies.get("userId")?.value;
 
+    // login แล้วแต่พยายามเข้าหน้า auth → redirect ไปหน้าแรก
+    if (isAuthRoute(path)) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+
     // ถ้าเป็นหน้า /rent ให้ตรวจสอบ is_checked
     if (path === "/rent" && userId) {
       try {
@@ -75,6 +80,7 @@ export async function middleware(req: NextRequest) {
       }
     }
 
+    // token ถูกต้อง → ให้ผ่านปกติ
     return NextResponse.next();
   } catch (err) {
     console.log("Token verify error:", err);
@@ -85,6 +91,7 @@ export async function middleware(req: NextRequest) {
       : NextResponse.next();
 
     res.cookies.delete("token");
+    res.cookies.delete("userId");
     return res;
   }
 }
