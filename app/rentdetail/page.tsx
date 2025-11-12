@@ -40,6 +40,7 @@ export default function RentDetail() {
     price_per_month: "",
     deposit: "",
   });
+  const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const parkingTypes = useMemo(
     () => [
       "ที่จอดรถในบ้าน",
@@ -47,6 +48,19 @@ export default function RentDetail() {
       "ที่จอดรถในห้าง",
       "ที่จอดรถสำนักงาน",
       "อื่นๆ",
+    ],
+    []
+  );
+  const facilityOptions = useMemo(
+    () => [
+      "มีประตูเปิดปิด",
+      "มีระบบรักษาความปลอดภัย",
+      "มีหลังคา",
+      "มีเจ้าหน้าที่ดูแล",
+      "จอดค้างคืน",
+      "มีบริการรับรถ",
+      "กล้องวงจรปิด",
+      "ห้องน้ำ",
     ],
     []
   );
@@ -63,6 +77,16 @@ export default function RentDetail() {
       const value = event.target.value;
       setFormValues((prev) => ({ ...prev, [field]: value }));
     };
+
+  const toggleFacility = (facility: string, checked: boolean) => {
+    setSelectedFacilities((prev) => {
+      if (checked) {
+        if (prev.includes(facility)) return prev;
+        return [...prev, facility];
+      }
+      return prev.filter((item) => item !== facility);
+    });
+  };
 
   const handleProvinceSearchChange = (
     pId: number | null,
@@ -183,6 +207,7 @@ export default function RentDetail() {
       province: formValues.province.trim(),
       landmark: formValues.landmark.trim(),
       price: pricePayload,
+      facilities: selectedFacilities,
     };
 
     setIsSubmitting(true);
@@ -214,6 +239,7 @@ export default function RentDetail() {
         price_per_month: "",
         deposit: "",
       });
+      setSelectedFacilities([]);
     } catch (error) {
       console.error(error);
       setSubmitStatus({
@@ -556,67 +582,25 @@ export default function RentDetail() {
         <div className="py-5">
           <h1 className="pb-3 text-2xl">สิ่งอำนวยความสะดวก</h1>
 
-          <div className="grid grid-cols-4 gap-y-3 py-3">
-            {" "}
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="ประตูเปิดปิด" className="border border-black" />
-              <Label htmlFor="ประตูเปิดปิด" className="text-base">
-                มีประตูเปิดปิด
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox
-                id="ระบบรักษาความปลอดภัย"
-                className="border border-black"
-              />
-              <Label htmlFor="ระบบรักษาความปลอดภัย" className="text-base">
-                มีระบบรักษาความปลอดภัย
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="หลังคา" className="border border-black" />
-              <Label className="text-base" htmlFor="หลังคา">
-                มีหลังคา
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="เจ้าหน้าที่ดูแล" className="border border-black" />
-              <Label className="text-base" htmlFor="เจ้าหน้าที่ดูแล">
-                มีเจ้าหน้าที่ดูแล
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="จอดค้างคืน" className="border border-black" />
-              <Label htmlFor="จอดค้างคืน" className="text-base">
-                จอดค้างคืน
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="บริการรับรถ" className="border border-black" />
-              <Label htmlFor="บริการรับรถ" className="text-base">
-                มีบริการรับรถ
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="กล้องวงจรปิด" className="border border-black" />
-              <Label htmlFor="กล้องวงจรปิด" className="text-base">
-                กล้องวงจรปิด
-              </Label>
-            </div>
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox id="ห้องน้ำ" className="border border-black" />
-              <Label htmlFor="ห้องน้ำ" className="text-base">
-                ห้องน้ำ
-              </Label>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-3 py-3">
+            {facilityOptions.map((facility) => {
+              const id = `facility-${facility}`;
+              return (
+                <div className="flex items-center gap-2" key={facility}>
+                  <Checkbox
+                    id={id}
+                    className="border border-black"
+                    checked={selectedFacilities.includes(facility)}
+                    onCheckedChange={(checked) =>
+                      toggleFacility(facility, checked === true)
+                    }
+                  />
+                  <Label htmlFor={id} className="text-base">
+                    {facility}
+                  </Label>
+                </div>
+              );
+            })}
           </div>
 
           {/* --term */}

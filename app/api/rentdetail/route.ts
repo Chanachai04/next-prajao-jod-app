@@ -17,6 +17,7 @@ type RentDetailPayload = {
     price_per_month?: number | null;
     deposit?: number | null;
   };
+  facilities?: string[];
 };
 
 export async function POST(req: Request) {
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
       province,
       landmark,
       price,
+      facilities,
     } = body;
 
     if (
@@ -111,6 +113,26 @@ export async function POST(req: Request) {
         console.error("Insert price error:", priceError);
         return NextResponse.json(
           { message: "บันทึกข้อมูลราคาไม่สำเร็จ" },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (Array.isArray(facilities) && facilities.length > 0) {
+      const uniqueFacilities = Array.from(new Set(facilities));
+      const facilityRows = uniqueFacilities.map((facilityName) => ({
+        rent_id: data.id,
+        name: facilityName,
+      }));
+
+      const { error: facilitiesError } = await supabase
+        .from("rent_facilities")
+        .insert(facilityRows);
+
+      if (facilitiesError) {
+        console.error("Insert facilities error:", facilitiesError);
+        return NextResponse.json(
+          { message: "บันทึกข้อมูลสิ่งอำนวยความสะดวกไม่สำเร็จ" },
           { status: 500 }
         );
       }
