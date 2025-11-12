@@ -1,30 +1,107 @@
 "use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Image from "next/image";
 
 export default function Detail() {
+  const router = useRouter();
   const pathname = usePathname();
-  const [image, setImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [citizenId, setCitizenId] = useState<string>("");
+  const [lineId, setLineId] = useState<string>("");
+  const [image, setImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const res = await fetch("/api/profile", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!res.ok) return;
+        const data = await res.json();
+
+        setEmail(data.email ?? "");
+        setPhone(data.phone ?? "");
+        setFirstName(data.firstName ?? "");
+        setLastName(data.lastName ?? "");
+        setCitizenId(data.citizenId ?? "");
+        setLineId(data.lineId ?? "");
+        setImage(data.imageUrl ?? null);
+      } catch (e) {
+        console.error("❌ fetchContact error:", e);
+      }
+    };
+
+    fetchContact();
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setImageFile(file);
       const imageUrl = URL.createObjectURL(file);
       setImage(imageUrl);
     } else {
       setImage(null);
+      setImageFile(null);
     }
   };
 
   const handleContainerClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleSave = async () => {
+    if (!firstName || !lastName || !email) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("email", email);
+      formData.append("citizenId", citizenId);
+      formData.append("lineId", lineId);
+      formData.append("phone", phone);
+      if (imageFile) formData.append("image", imageFile);
+
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data?.message ?? "บันทึกข้อมูลไม่สำเร็จ");
+        return;
+      }
+
+      alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
+      router.replace("/");
+    } catch (e) {
+      console.error("❌ handleSave error:", e);
+      alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,101 +123,95 @@ export default function Detail() {
               title="อีเมล *"
               id="email"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border-gray-300 w-full"
             />
-
             <LabelAndInput
               title="ชื่อ *"
               id="name"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="border-gray-300 w-full"
             />
-
             <LabelAndInput
               title="นามสกุล *"
               id="surname"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="border-gray-300 w-full"
             />
-
             <LabelAndInput
               title="เลขประจำตัวประชาชน"
               id="id"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={citizenId}
+              onChange={(e) => setCitizenId(e.target.value)}
+              className="border-gray-300 w-full"
             />
-
             <LabelAndInput
               title="Line ID"
               id="lineid"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={lineId}
+              onChange={(e) => setLineId(e.target.value)}
+              className="border-gray-300 w-full"
             />
-
             <LabelAndInput
               title="เบอร์โทรศัพท์"
               id="phonenumber"
               type="text"
-              placeholder=""
-              leadingIcon={""}
-              trailingIcon={""}
-              className="resize-none border-gray-300 w-full"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="border-gray-300 w-full"
             />
           </div>
 
           <hr className="my-6" />
 
           <div className="flex justify-start">
-            <Button className="w-full sm:w-auto">บันทึกข้อมูล</Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={handleSave}
+              disabled={loading}
+            >
+              {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            </Button>
           </div>
         </div>
-        <div className="w-full lg:w-1/3 p-6 flex flex-col mt-20">
+
+        {/* Image Section */}
+        <div className="w-full lg:w-1/3 p-6 flex flex-col mt-20 items-center">
           <h2 className="text-2xl font-semibold mb-4 text-gray-700">รูปภาพ</h2>
-
-          {/* อัปโหลดรูปภาพ */}
-          <div className="image-container-vertical border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 aspect-square">
-            <div
-              className="image-container-vertical border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 aspect-square cursor-pointer hover:bg-gray-200 transition"
-              onClick={handleContainerClick}
-            >
-              {image ? (
-                <Image
-                  src={image}
-                  alt="Uploaded"
-                  className="object-cover w-full h-full"
-                  width={150}
-                  height={150}
-                />
-              ) : (
-                <span className="text-gray-400 text-sm">
-                  ยังไม่ได้เลือกรูปภาพ
-                </span>
-              )}
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="mt-4 hidden"
-              onChange={handleImageChange}
-            />
+          <div
+            className="border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 
+                w-40 h-40 cursor-pointer hover:bg-gray-200 transition"
+            onClick={handleContainerClick}
+          >
+            {image ? (
+              <Image
+                src={image}
+                alt="Uploaded"
+                className="object-cover w-full h-full"
+                width={160}
+                height={160}
+              />
+            ) : (
+              <span className="text-gray-400 text-sm text-center">
+                ยังไม่ได้เลือกรูปภาพ
+              </span>
+            )}
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
+          />
         </div>
       </div>
     </div>

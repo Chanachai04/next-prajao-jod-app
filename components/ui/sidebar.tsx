@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,9 +18,9 @@ import {
 
 interface MenuItem {
   name: string;
-  href?: string; // href เป็น optional เพราะ logout ไม่มี link
+  href?: string;
   icon: LucideIcon;
-  action?: () => void; // ฟังก์ชันสำหรับ logout
+  action?: () => void;
 }
 
 export default function Sidebar({
@@ -26,12 +29,15 @@ export default function Sidebar({
   currentPathname: string;
 }) {
   const router = useRouter();
+  const [email, setEmail] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await fetch("/api/logout", { method: "POST" });
-    // แจ้ง component อื่นว่ามีการ logout (ถ้ามี)
     window.dispatchEvent(new Event("loginStatusChanged"));
-    router.push("/login"); // redirect ไปหน้า login
+    router.push("/login");
   };
 
   const menuItems: MenuItem[] = [
@@ -44,10 +50,32 @@ export default function Sidebar({
     { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
   ];
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/profile", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setEmail(data.email ?? "");
+        setFirstName(data.firstName ?? "");
+        setLastName(data.lastName ?? "");
+        setImageUrl(data.imageUrl ?? null);
+      } catch (err) {
+        console.error("❌ fetchProfile error:", err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const profile = {
-    name: "chanachai benmat",
-    email: "nexus87th@gmail.com",
-    avatarUrl: "",
+    name: `${firstName} ${lastName}`,
+    email: email,
+    avatarUrl: imageUrl || "", // ถ้าไม่มี image ใช้ fallback
   };
 
   return (
@@ -55,8 +83,14 @@ export default function Sidebar({
       {/* ส่วนหัว: โปรไฟล์ */}
       <div className="p-4 flex flex-col items-center justify-center bg-[#444444] py-8">
         <Avatar className="h-24 w-24 mb-3 border-4 border-gray-600">
-          <AvatarImage src={profile.avatarUrl} alt={profile.name} />
-          <AvatarFallback className="bg-gray-500 text-3xl">CB</AvatarFallback>
+          {imageUrl ? (
+            <AvatarImage src={imageUrl} alt={`${firstName} ${lastName}`} />
+          ) : (
+            <AvatarFallback className="bg-gray-500 text-3xl">
+              {firstName?.[0] || "U"}
+              {lastName?.[0] || "N"}
+            </AvatarFallback>
+          )}
         </Avatar>
         <p className="font-semibold text-lg">{profile.name}</p>
         <p className="text-sm text-gray-400">{profile.email}</p>
@@ -67,7 +101,6 @@ export default function Sidebar({
         <ul className="space-y-0">
           {menuItems.map((item) => {
             const isActive = currentPathname === item.href;
-
             return (
               <li key={item.name}>
                 {item.href ? (
