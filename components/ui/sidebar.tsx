@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,22 +23,120 @@ interface MenuItem {
   action?: () => void;
 }
 
+type ProfileState = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  imageUrl: string | null;
+};
+
+const DEFAULT_PROFILE: ProfileState = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  imageUrl: null,
+};
+
+const PROFILE_STORAGE_KEY = "profile.sidebar.snapshot";
+
+function readProfileSnapshot(): ProfileState {
+  if (typeof window === "undefined") return DEFAULT_PROFILE;
+
+  try {
+    const stored = window.sessionStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!stored) return DEFAULT_PROFILE;
+
+    const parsed = JSON.parse(stored) as Partial<ProfileState>;
+    return {
+      email: parsed.email ?? "",
+      firstName: parsed.firstName ?? "",
+      lastName: parsed.lastName ?? "",
+      imageUrl: parsed.imageUrl ?? null,
+    };
+  } catch {
+    return DEFAULT_PROFILE;
+  }
+}
+
 export default function Sidebar({
   currentPathname,
 }: {
   currentPathname: string;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileState>(() =>
+    readProfileSnapshot()
+  );
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await fetch("/api/logout", { method: "POST" });
     window.dispatchEvent(new Event("loginStatusChanged"));
+    window.sessionStorage.removeItem(PROFILE_STORAGE_KEY);
     router.push("/login");
-  };
+  }, [router]);
+
+  const syncProfile = useCallback((next: ProfileState) => {
+    setProfile(next);
+
+    if (typeof window === "undefined") return;
+
+    try {
+      window.sessionStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // ignore sessionStorage errors
+    }
+  }, []);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+      syncProfile({
+        email: data.email ?? "",
+        firstName: data.firstName ?? "",
+        lastName: data.lastName ?? "",
+        imageUrl: data.imageUrl ?? null,
+      });
+    } catch (err) {
+      console.error("❌ fetchProfile error:", err);
+    }
+  }, [syncProfile]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const scheduleFetch = () => {
+      Promise.resolve().then(() => {
+        if (isMounted) {
+          fetchProfile();
+        }
+      });
+    };
+
+    scheduleFetch();
+
+    const handleLoginStatusChanged = () => {
+      if (typeof window === "undefined") return;
+      window.sessionStorage.removeItem(PROFILE_STORAGE_KEY);
+      scheduleFetch();
+    };
+
+    window.addEventListener("loginStatusChanged", handleLoginStatusChanged);
+    return () => {
+      isMounted = false;
+      window.removeEventListener(
+        "loginStatusChanged",
+        handleLoginStatusChanged
+      );
+    };
+  }, [fetchProfile]);
 
   const menuItems: MenuItem[] = [
     { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
@@ -50,49 +148,26 @@ export default function Sidebar({
     { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
   ];
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch("/api/profile", {
-          method: "GET",
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!res.ok) return;
-        const data = await res.json();
-        setEmail(data.email ?? "");
-        setFirstName(data.firstName ?? "");
-        setLastName(data.lastName ?? "");
-        setImageUrl(data.imageUrl ?? null);
-      } catch (err) {
-        console.error("❌ fetchProfile error:", err);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  const profile = {
-    name: `${firstName} ${lastName}`,
-    email: email,
-    avatarUrl: imageUrl || "", // ถ้าไม่มี image ใช้ fallback
-  };
-
   return (
     <div className="w-[300px] bg-[#333333] text-white h-full flex flex-col shadow-xl rounded overflow-hidden m-2">
       {/* ส่วนหัว: โปรไฟล์ */}
       <div className="p-4 flex flex-col items-center justify-center bg-[#444444] py-8">
         <Avatar className="h-24 w-24 mb-3 border-4 border-gray-600">
-          {imageUrl ? (
-            <AvatarImage src={imageUrl} alt={`${firstName} ${lastName}`} />
+          {profile.imageUrl ? (
+            <AvatarImage
+              src={profile.imageUrl}
+              alt={`${profile.firstName} ${profile.lastName}`}
+            />
           ) : (
             <AvatarFallback className="bg-gray-500 text-3xl">
-              {firstName?.[0] || "U"}
-              {lastName?.[0] || "N"}
+              {profile.firstName?.[0] || "U"}
+              {profile.lastName?.[0] || "N"}
             </AvatarFallback>
           )}
         </Avatar>
-        <p className="font-semibold text-lg">{profile.name}</p>
+        <p className="font-semibold text-lg">
+          {`${profile.firstName} ${profile.lastName}`.trim()}
+        </p>
         <p className="text-sm text-gray-400">{profile.email}</p>
       </div>
 
