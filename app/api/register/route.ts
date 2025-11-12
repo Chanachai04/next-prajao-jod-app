@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      // maxAge: 60 * 60 * 24 * 7,
     });
 
     // cookie สำหรับ userId
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       value: newUser.id,
       httpOnly: false,
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      // maxAge: 60 * 60 * 24 * 7,
     });
 
     return res;

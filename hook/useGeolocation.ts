@@ -7,16 +7,17 @@ export default function useGeolocation() {
         (position) => {
           const { latitude, longitude } = position.coords;
 
-          // เก็บ latitude และ longitude เป็น cookie
           const roundedLat = Math.round(latitude * 1e6) / 1e6;
           const roundedLon = Math.round(longitude * 1e6) / 1e6;
           const cookieValue = JSON.stringify({
             lat: roundedLat,
             lon: roundedLon,
           });
+
+          // ✅ ไม่มี expires = session cookie
           document.cookie = `user_location=${encodeURIComponent(
             cookieValue
-          )}; path=/; Secure; SameSite=Strict; expires=Fri, 31 Dec 9999 23:59:59 GMT`;
+          )}; path=/; Secure; SameSite=Strict`;
 
           console.log("Saved location cookie:", cookieValue);
         },

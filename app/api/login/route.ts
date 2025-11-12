@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       httpOnly: true, // client JS ไม่สามารถอ่าน token ได้
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 วัน
+      // maxAge: 60 * 60 * 24 * 7, // 7 วัน
     });
 
     // ตั้งค่า cookie สำหรับ userId (client JS สามารถอ่านได้)
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       value: user.id,
       httpOnly: false, // client JS สามารถอ่านได้
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      // maxAge: 60 * 60 * 24 * 7,
     });
 
     // ส่ง response กลับ client
