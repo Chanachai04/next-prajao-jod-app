@@ -15,6 +15,7 @@ type MapPickerProps = {
   center?: [number, number];
   markerAt?: [number, number] | null;
   onPositionChange?: (lat: number, lng: number) => void;
+  interactive?: boolean;
 };
 
 export default function MapPicker({
@@ -24,6 +25,7 @@ export default function MapPicker({
   center,
   markerAt,
   onPositionChange,
+  interactive = true,
 }: MapPickerProps) {
   useEffect(() => {
     const timer = setTimeout(() => onMapReady?.(), 100);
@@ -38,6 +40,7 @@ export default function MapPicker({
         center={center}
         markerAt={markerAt}
         onPositionChange={onPositionChange}
+        interactive={interactive}
       />
     </div>
   );

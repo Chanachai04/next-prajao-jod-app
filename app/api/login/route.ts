@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     res.cookies.set({
       name: "token",
       value: jwtToken,
-      httpOnly: true, // client JS ไม่สามารถอ่าน token ได้
+      httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
       // maxAge: 60 * 60 * 24 * 7, // 7 วัน
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     res.cookies.set({
       name: "userId",
       value: user.id,
-      httpOnly: false, // client JS สามารถอ่านได้
+      httpOnly: false,
       path: "/",
       // maxAge: 60 * 60 * 24 * 7,
     });

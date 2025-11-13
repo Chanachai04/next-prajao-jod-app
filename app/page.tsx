@@ -37,13 +37,43 @@ export default function Home() {
 
   useGeolocation();
 
+  const getUserLocationFromCookie = () => {
+    if (typeof document === "undefined") return null;
+    const cookieEntry = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith("user_location="));
+    if (!cookieEntry) return null;
+    const value = cookieEntry.split("=")[1];
+    if (!value) return null;
+    try {
+      const parsed = JSON.parse(decodeURIComponent(value));
+      if (
+        typeof parsed?.lat === "number" &&
+        typeof parsed?.lon === "number" &&
+        Number.isFinite(parsed.lat) &&
+        Number.isFinite(parsed.lon)
+      ) {
+        return parsed as { lat: number; lon: number };
+      }
+    } catch {
+      // ignore parse errors
+    }
+    return null;
+  };
+
   const buildAndGoToBooking = async (nearMe = false) => {
     const params = new URLSearchParams();
     params.set("mode", selectedOption);
-    if (location) params.set("location", location);
-    if (provinceId) params.set("provinceId", String(provinceId));
-    if (districtId) params.set("districtId", String(districtId));
-    if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
+    const trimmedLocation = location.trim();
+    if (!nearMe && trimmedLocation) {
+      params.set("location", trimmedLocation);
+      params.set("search", trimmedLocation);
+    }
+    if (!nearMe) {
+      if (provinceId) params.set("provinceId", String(provinceId));
+      if (districtId) params.set("districtId", String(districtId));
+      if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
+    }
     if (nearMe) params.set("nearMe", "1");
 
     // Dates/times
@@ -53,46 +83,33 @@ export default function Home() {
     if (timeOut) params.set("timeOut", timeOut);
 
     // If near me: get precise location and pass lat/lon
-    if (nearMe && "geolocation" in navigator) {
-      try {
-        const pos = await new Promise<GeolocationPosition>(
-          (resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 0,
-            });
-          }
-        );
-        params.set("lat", String(pos.coords.latitude));
-        params.set("lon", String(pos.coords.longitude));
-      } catch {
-        // ignore, fallback without lat/lon
+    if (nearMe) {
+      const cookieLocation = getUserLocationFromCookie();
+      if (cookieLocation) {
+        params.set("lat", String(cookieLocation.lat));
+        params.set("lon", String(cookieLocation.lon));
+        router.push(`/booking?${params.toString()}`);
+        return;
+      }
+      if ("geolocation" in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+              });
+            }
+          );
+          params.set("lat", String(pos.coords.latitude));
+          params.set("lon", String(pos.coords.longitude));
+        } catch {
+          // ignore, fallback without lat/lon
+        }
       }
       router.push(`/booking?${params.toString()}`);
       return;
-    }
-
-    // If has text location: geocode first so booking centers instantly
-    const q = location.trim();
-    if (!nearMe && q) {
-      try {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          q + " Thailand"
-        )}&countrycodes=th&limit=1&addressdetails=1`;
-        const res = await fetch(url, {
-          headers: { "Accept-Language": "th,en;q=0.8" },
-        });
-        if (res.ok) {
-          const data: Array<{ lat: string; lon: string }> = await res.json();
-          if (data && data.length > 0) {
-            params.set("lat", data[0].lat);
-            params.set("lon", data[0].lon);
-          }
-        }
-      } catch {
-        // ignore
-      }
     }
 
     router.push(`/booking?${params.toString()}`);

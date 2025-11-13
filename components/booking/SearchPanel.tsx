@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Minimize2 } from "lucide-react";
 import DateForm from "../form/DateForm";
@@ -8,8 +8,15 @@ import TimeForm from "../form/TimeForm";
 import { Button } from "../ui/button";
 import ParkingCard from "./ParkingCard";
 import ProvinceSearch from "../form/ProvinceSearch";
-import { useState } from "react";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
+import { RentSpot } from "@/types/booking";
+
+interface LocationChangePayload {
+  provinceName: string | null;
+  districtName: string | null;
+  subdistrictName: string | null;
+  displayText: string;
+}
 
 interface SearchPanelProps {
   dateIn: Date | undefined;
@@ -20,13 +27,19 @@ interface SearchPanelProps {
   setTimeIn: React.Dispatch<React.SetStateAction<string>>;
   timeOut: string;
   setTimeOut: React.Dispatch<React.SetStateAction<string>>;
-  selectedOption: string;
-  setSelectedOption: React.Dispatch<React.SetStateAction<string>>;
+  selectedOption: "hourly" | "monthly";
+  setSelectedOption: React.Dispatch<React.SetStateAction<"hourly" | "monthly">>;
   timeOptions: Record<string, string>;
-  onCardClick: () => void;
   searchText: string;
   setSearchText: React.Dispatch<React.SetStateAction<string>>;
   onSearch: () => void;
+  spots: RentSpot[];
+  onSelectSpot: (spot: RentSpot) => void;
+  activeSpotId: string | null;
+  isLoading: boolean;
+  errorMessage?: string | null;
+  emptyMessage?: string | null;
+  onLocationChange: (payload: LocationChangePayload) => void;
 }
 
 export default function SearchPanel({
@@ -41,19 +54,20 @@ export default function SearchPanel({
   selectedOption,
   setSelectedOption,
   timeOptions,
-  onCardClick,
   searchText,
   setSearchText,
   onSearch,
+  spots,
+  onSelectSpot,
+  activeSpotId,
+  isLoading,
+  errorMessage,
+  emptyMessage,
+  onLocationChange,
 }: SearchPanelProps) {
   const searchParams = useSearchParams();
   const isHourly = selectedOption === "hourly";
 
-  const [, setLocation] = useState("");
-  const [, setProvinceId] = useState<number | null>(null);
-  const [, setDistrictId] = useState<number | null>(null);
-  const [, setSubDistrictId] = useState<number | null>(null);
-  // 🧠 โหลดค่าจาก URL ตอนหน้าเปิด
   useEffect(() => {
     const mode = searchParams.get("mode");
     const location = searchParams.get("location");
@@ -62,16 +76,58 @@ export default function SearchPanel({
     const timeInParam = searchParams.get("timeIn");
     const timeOutParam = searchParams.get("timeOut");
 
-    if (mode) setSelectedOption(mode);
+    if (mode === "monthly") setSelectedOption("monthly");
+    else if (mode === "daily" || mode === "hourly") setSelectedOption("hourly");
     if (location) setSearchText(location);
     if (dateInParam) setDateIn(new Date(dateInParam));
     if (dateOutParam) setDateOut(new Date(dateOutParam));
     if (timeInParam) setTimeIn(timeInParam);
     if (timeOutParam) setTimeOut(timeOutParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  const filteredSpots = useMemo(() => {
+    if (!spots.length) return [];
+    const byMode =
+      selectedOption === "hourly"
+        ? spots.filter((spot) => {
+            const price = spot.price;
+            if (!price) return false;
+            return (
+              price.price_per_hour !== null ||
+              price.price_per_day !== null ||
+              price.price_per_hour === 0 ||
+              price.price_per_day === 0
+            );
+          })
+        : spots.filter((spot) => {
+            const price = spot.price;
+            if (!price) return false;
+            return (
+              price.price_per_month !== null || price.price_per_month === 0
+            );
+          });
+    return byMode.length > 0 ? byMode : spots;
+  }, [spots, selectedOption]);
+
+  const renderStatus = () => {
+    if (isLoading) {
+      return <p className="text-sm text-gray-500 mt-4">กำลังโหลดข้อมูล...</p>;
+    }
+    if (errorMessage) {
+      return <p className="text-sm text-red-500 mt-4">{errorMessage}</p>;
+    }
+    if (!filteredSpots.length) {
+      if (!emptyMessage) {
+        return null;
+      }
+      return <p className="text-sm text-gray-500 mt-4">{emptyMessage}</p>;
+    }
+    return null;
+  };
+
   return (
-    <div className="w-[420px] bg-[#EBEBEB] p-4">
+    <div className="w-lg bg-[#EBEBEB] p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -84,28 +140,33 @@ export default function SearchPanel({
         <ProvinceSearch
           initialQuery={searchText}
           onChange={(pId, dId, sId) => {
-            setProvinceId(pId);
-            setDistrictId(dId);
-            setSubDistrictId(sId);
-            if (sId) {
-              const sub = subDistricts.find((s) => s.id === sId);
-              const name = sub?.name_th || "";
-              setLocation(name);
-              setSearchText(name);
-            } else if (dId) {
-              const district = districts.find((d) => d.id === dId);
-              const name = district?.name_th || "";
-              setLocation(name);
-              setSearchText(name);
-            } else if (pId) {
-              const province = provinces.find((p) => p.id === pId);
-              const name = province?.name_th || "";
-              setLocation(name);
-              setSearchText(name);
+            let displayText = "";
+            const matchedSubdistrict = sId
+              ? subDistricts.find((s) => s.id === sId)
+              : undefined;
+            const matchedDistrict = dId
+              ? districts.find((d) => d.id === dId)
+              : undefined;
+            const matchedProvince = pId
+              ? provinces.find((p) => p.id === pId)
+              : undefined;
+
+            if (matchedSubdistrict) {
+              displayText = matchedSubdistrict.name_th;
+            } else if (matchedDistrict) {
+              displayText = matchedDistrict.name_th;
+            } else if (matchedProvince) {
+              displayText = matchedProvince.name_th;
             } else {
-              setLocation("");
-              setSearchText("");
+              displayText = "";
             }
+            setSearchText(displayText);
+            onLocationChange({
+              provinceName: matchedProvince?.name_th ?? null,
+              districtName: matchedDistrict?.name_th ?? null,
+              subdistrictName: matchedSubdistrict?.name_th ?? null,
+              displayText,
+            });
           }}
         />
 
@@ -170,7 +231,7 @@ export default function SearchPanel({
             </Button>
             <Button
               type="button"
-              onClick={() => setSelectedOption("daily")}
+              onClick={() => setSelectedOption("monthly")}
               className={`text-lg rounded-full cursor-pointer ${
                 !isHourly ? "" : "bg-white text-black"
               }`}
@@ -189,8 +250,15 @@ export default function SearchPanel({
 
         {/* Parking List */}
         <div className="mt-2 flex-1 overflow-y-auto pr-2 max-h-[600px]">
-          <ParkingCard onClick={onCardClick} />
-          <ParkingCard onClick={onCardClick} />
+          {filteredSpots.map((spot) => (
+            <ParkingCard
+              key={spot.id}
+              spot={spot}
+              isActive={spot.id === activeSpotId}
+              onClick={() => onSelectSpot(spot)}
+            />
+          ))}
+          {renderStatus()}
         </div>
       </form>
     </div>

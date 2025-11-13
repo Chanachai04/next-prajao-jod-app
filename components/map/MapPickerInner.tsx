@@ -44,18 +44,26 @@ export default function MapPickerInner({
   center,
   markerAt,
   onPositionChange,
+  interactive = true,
 }: {
   height: string;
   zoom: number;
   center?: [number, number];
   markerAt?: [number, number] | null;
   onPositionChange?: (lat: number, lng: number) => void;
+  interactive?: boolean;
 }) {
   const [position, setPosition] = useState<[number, number] | null>(null);
 
   useEffect(() => {
-    if (markerAt && (markerAt[0] || markerAt[0] === 0) && (markerAt[1] || markerAt[1] === 0)) {
+    if (
+      markerAt &&
+      (markerAt[0] || markerAt[0] === 0) &&
+      (markerAt[1] || markerAt[1] === 0)
+    ) {
       setPosition(markerAt);
+    } else {
+      setPosition(null);
     }
   }, [markerAt?.[0], markerAt?.[1]]);
 
@@ -86,11 +94,17 @@ export default function MapPickerInner({
         />
         <RecenterOnChange targetCenter={center} />
         {/* เมื่อคลิกบนแผนที่ จะอัปเดต position */}
-        <ClickMarker setPosition={setPosition} onPositionChange={onPositionChange} />
-        {/* ถ้ามี position จะแสดง Marker */}
-        {position && <Marker position={position} />}
-        {/* ถ้ามี markerAt จากการค้นหา แสดง Marker ตำแหน่งค้นหา */}
-        {markerAt && <Marker position={markerAt} />}
+        {interactive && (
+          <ClickMarker
+            setPosition={setPosition}
+            onPositionChange={onPositionChange}
+          />
+        )}
+        {/* Marker แสดงตำแหน่งที่เลือกหรือที่ได้รับมา */}
+        {(() => {
+          const markerPosition = position ?? markerAt ?? null;
+          return markerPosition ? <Marker position={markerPosition} /> : null;
+        })()}
       </MapContainer>
     </div>
   );
