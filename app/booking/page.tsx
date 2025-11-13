@@ -54,8 +54,15 @@ export default function Booking() {
   const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const [selectedSpot, setSelectedSpot] = useState<RentSpot | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [searchKeyword, setSearchKeyword] = useState<string | null>(null);
   const [nearbyCoords, setNearbyCoords] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
+  const [appliedProvince, setAppliedProvince] = useState<string | null>(null);
+  const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<
+    string | null
+  >(null);
+  const [appliedCoords, setAppliedCoords] = useState<{
     lat: number;
     lon: number;
   } | null>(null);
@@ -158,8 +165,10 @@ export default function Booking() {
 
     firstFetchRef.current = Boolean(trimmedInitialSearch);
     setSelectedProvince(computedProvince);
-    setSearchKeyword(computedSearch);
     setNearbyCoords(computedCoords);
+    setAppliedProvince(computedProvince);
+    setAppliedSearchKeyword(computedSearch);
+    setAppliedCoords(computedCoords);
     setIsInitialised(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -234,11 +243,11 @@ export default function Booking() {
       displayEmptyMessage?: boolean;
     }) => {
       const provinceName =
-        override?.province !== undefined ? override.province : selectedProvince;
+        override?.province !== undefined ? override.province : appliedProvince;
       const searchValue =
-        override?.search !== undefined ? override.search : searchKeyword;
+        override?.search !== undefined ? override.search : appliedSearchKeyword;
       const coordsValue =
-        override?.coords !== undefined ? override.coords : nearbyCoords;
+        override?.coords !== undefined ? override.coords : appliedCoords;
       const displayEmpty =
         override?.displayEmptyMessage !== undefined
           ? override.displayEmptyMessage
@@ -312,18 +321,17 @@ export default function Booking() {
         setIsLoadingSpots(false);
       }
     },
-    [selectedProvince, searchKeyword, nearbyCoords]
+    [appliedProvince, appliedSearchKeyword, appliedCoords]
   );
 
   useEffect(() => {
-    if (!isInitialised) return;
+    if (!isInitialised || !firstFetchRef.current) return;
     void fetchParkingSpots({
-      displayEmptyMessage: !firstFetchRef.current,
+      displayEmptyMessage: false,
     });
-    if (firstFetchRef.current) {
-      firstFetchRef.current = false;
-    }
-  }, [fetchParkingSpots, isInitialised]);
+    firstFetchRef.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialised]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -359,13 +367,6 @@ export default function Booking() {
 
   const handleLocationChange = (payload: LocationChangePayload) => {
     setSelectedProvince(payload.provinceName);
-    const key =
-      payload.subdistrictName ??
-      payload.districtName ??
-      payload.provinceName ??
-      payload.displayText;
-    const trimmed = key?.trim();
-    setSearchKeyword(trimmed ? trimmed : null);
     setNearbyCoords(null);
     setMarkerAt(null);
   };
@@ -373,14 +374,18 @@ export default function Booking() {
   const handleSearch = async () => {
     const trimmed = searchText.trim();
     const normalizedSearch = trimmed ? trimmed : null;
-    setSearchKeyword(normalizedSearch);
     if (normalizedSearch) {
       setNearbyCoords(null);
     }
+    const coordsToApply = normalizedSearch ? null : nearbyCoords;
+    setAppliedProvince(selectedProvince);
+    setAppliedSearchKeyword(normalizedSearch);
+    setAppliedCoords(coordsToApply);
     await geocodeAndCenter();
     await fetchParkingSpots({
+      province: selectedProvince,
       search: normalizedSearch,
-      coords: normalizedSearch ? null : nearbyCoords,
+      coords: coordsToApply,
       displayEmptyMessage: true,
     });
   };
