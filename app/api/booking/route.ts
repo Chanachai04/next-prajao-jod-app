@@ -227,7 +227,16 @@ export async function GET(req: Request) {
   if (searchParam) {
     const keyword = searchParam.toLowerCase();
     data = data.filter((item) => {
-      const fields = [item.subdistrict, item.district, item.province];
+      // include name, address and landmark so free-text typed searches
+      // (when user doesn't pick a suggestion) can still find results
+      const fields = [
+        item.subdistrict,
+        item.district,
+        item.province,
+        item.name,
+        item.address,
+        item.landmark,
+      ];
       return fields.some((field) =>
         (field ?? "").toLowerCase().includes(keyword)
       );
