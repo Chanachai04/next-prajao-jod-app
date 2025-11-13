@@ -443,35 +443,38 @@ export default function RentDetail() {
             onChange={handleFieldChange("address")}
           />
 
-          <LabelAndInput
-            title="จังหวัด *"
-            id="province"
-            type="text"
-            placeholder=""
-            className="w-full"
-            value={formValues.province}
-            onChange={handleFieldChange("province")}
-          />
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <LabelAndInput
+              title="จังหวัด *"
+              id="province"
+              type="text"
+              placeholder=""
+              className="w-full"
+              value={formValues.province}
+              onChange={handleFieldChange("province")}
+            />
 
-          {/* แขวง / เขต */}
-          <LabelAndInput
-            title="แขวง / ตำบล *"
-            id="subdistrict"
-            type="text"
-            placeholder=""
-            className="w-full"
-            value={formValues.subdistrict}
-            onChange={handleFieldChange("subdistrict")}
-          />
-          <LabelAndInput
-            title="เขต / อำเภอ *"
-            id="county"
-            type="text"
-            placeholder=""
-            className="w-full"
-            value={formValues.district}
-            onChange={handleFieldChange("district")}
-          />
+            {/* แขวง / เขต */}
+            <LabelAndInput
+              title="แขวง / ตำบล *"
+              id="subdistrict"
+              type="text"
+              placeholder=""
+              className="w-full"
+              value={formValues.subdistrict}
+              onChange={handleFieldChange("subdistrict")}
+            />
+
+            <LabelAndInput
+              title="เขต / อำเภอ *"
+              id="county"
+              type="text"
+              placeholder=""
+              className="w-full"
+              value={formValues.district}
+              onChange={handleFieldChange("district")}
+            />
+          </div>
 
           {/* จุดสังเกต */}
           <div className="md:col-span-2">
@@ -662,7 +665,7 @@ export default function RentDetail() {
         {/* --ราคา */}
         <div className="py-5">
           <h1 className="pb-3 text-2xl">ราคา</h1>
-          <div className="flex flex-col md:flex-row gap-10 pt-3">
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
             <LabelAndInput
               title="ราคาต่อชั่วโมง"
               id="priceperhour"
@@ -762,17 +765,7 @@ export default function RentDetail() {
             </div>
           </div>
         </div>
-        {submitStatus && (
-          <p
-            className={`mt-4 text-sm ${
-              submitStatus.type === "success"
-                ? "text-green-600"
-                : "text-red-600"
-            }`}
-          >
-            {submitStatus.message}
-          </p>
-        )}
+
         <Button
           className="px-12 h-12 cursor-pointer mt-6"
           type="submit"
