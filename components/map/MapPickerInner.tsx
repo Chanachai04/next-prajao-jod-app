@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -23,12 +23,16 @@ L.Icon.Default.mergeOptions({
 // Component ที่จับ click บนแผนที่
 function ClickMarker({
   setPosition,
+  onPositionChange,
 }: {
   setPosition: (pos: [number, number]) => void;
+  onPositionChange?: (lat: number, lng: number) => void;
 }) {
   useMapEvents({
     click(e) {
-      setPosition([e.latlng.lat, e.latlng.lng]);
+      const latlng: [number, number] = [e.latlng.lat, e.latlng.lng];
+      setPosition(latlng);
+      onPositionChange?.(latlng[0], latlng[1]);
     },
   });
   return null;
@@ -39,13 +43,21 @@ export default function MapPickerInner({
   zoom,
   center,
   markerAt,
+  onPositionChange,
 }: {
   height: string;
   zoom: number;
   center?: [number, number];
   markerAt?: [number, number] | null;
+  onPositionChange?: (lat: number, lng: number) => void;
 }) {
   const [position, setPosition] = useState<[number, number] | null>(null);
+
+  useEffect(() => {
+    if (markerAt && (markerAt[0] || markerAt[0] === 0) && (markerAt[1] || markerAt[1] === 0)) {
+      setPosition(markerAt);
+    }
+  }, [markerAt?.[0], markerAt?.[1]]);
 
   function RecenterOnChange({
     targetCenter,
@@ -74,7 +86,7 @@ export default function MapPickerInner({
         />
         <RecenterOnChange targetCenter={center} />
         {/* เมื่อคลิกบนแผนที่ จะอัปเดต position */}
-        <ClickMarker setPosition={setPosition} />
+        <ClickMarker setPosition={setPosition} onPositionChange={onPositionChange} />
         {/* ถ้ามี position จะแสดง Marker */}
         {position && <Marker position={position} />}
         {/* ถ้ามี markerAt จากการค้นหา แสดง Marker ตำแหน่งค้นหา */}

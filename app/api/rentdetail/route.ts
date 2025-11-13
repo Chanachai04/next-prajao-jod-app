@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { Buffer } from "node:buffer";
 import { supabase } from "@/lib/supabaseClient";
+
+export const runtime = "nodejs";
 
 type RentDetailPayload = {
   name?: string;
@@ -11,6 +15,8 @@ type RentDetailPayload = {
   district?: string;
   province?: string;
   landmark?: string;
+  latitude?: number;
+  longitude?: number;
   price?: {
     price_per_hour?: number | null;
     price_per_day?: number | null;
@@ -18,11 +24,27 @@ type RentDetailPayload = {
     deposit?: number | null;
   };
   facilities?: string[];
+  schedule?: Array<{
+    day: string;
+    open_time: string;
+    close_time: string;
+  }>;
 };
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as RentDetailPayload;
+    const formData = await req.formData();
+    const payloadRaw = formData.get("payload");
+    const images = formData.getAll("images") as File[];
+
+    if (typeof payloadRaw !== "string") {
+      return NextResponse.json(
+        { message: "ข้อมูลไม่ถูกต้อง" },
+        { status: 400 }
+      );
+    }
+
+    const body = JSON.parse(payloadRaw) as RentDetailPayload;
 
     const {
       name,
@@ -34,8 +56,11 @@ export async function POST(req: Request) {
       district,
       province,
       landmark,
+      latitude,
+      longitude,
       price,
       facilities,
+      schedule,
     } = body;
 
     if (
@@ -46,7 +71,11 @@ export async function POST(req: Request) {
       !subdistrict ||
       !district ||
       !province ||
-      !landmark
+      !landmark ||
+      typeof latitude !== "number" ||
+      typeof longitude !== "number" ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
     ) {
       return NextResponse.json(
         { message: "ข้อมูลไม่ครบถ้วน" },
@@ -66,6 +95,8 @@ export async function POST(req: Request) {
         district,
         province,
         landmark,
+        latitude,
+        longitude,
       })
       .select("id")
       .single();
@@ -135,6 +166,87 @@ export async function POST(req: Request) {
           { message: "บันทึกข้อมูลสิ่งอำนวยความสะดวกไม่สำเร็จ" },
           { status: 500 }
         );
+      }
+    }
+
+    if (Array.isArray(schedule) && schedule.length > 0) {
+      const toPgTime = (t: string) => (t?.length === 5 ? `${t}:00` : t);
+      const rows = schedule.map((item) => ({
+        rent_id: data.id,
+        // If column is text[] in DB, wrap as single-element array
+        available_days: [item.day],
+        open_time: toPgTime(item.open_time),
+        close_time: toPgTime(item.close_time),
+      }));
+      const { error: scheduleError } = await supabase
+        .from("rent_schedule")
+        .insert(rows);
+      if (scheduleError) {
+        console.error("Insert schedule error:", scheduleError);
+        return NextResponse.json(
+          { message: "บันทึกเวลาเปิดปิดไม่สำเร็จ" },
+          { status: 500 }
+        );
+      }
+    }
+
+    if (images.length > 0) {
+      const uploadedUrls: string[] = [];
+      for (const file of images) {
+        if (!file || !file.size) continue;
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const fileExt =
+          file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const filePath = `${data.id}/${randomUUID()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("parking_bk")
+          .upload(filePath, buffer, {
+            contentType: file.type || "image/jpeg",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error("Upload image error:", uploadError);
+          return NextResponse.json(
+            { message: "อัปโหลดรูปภาพไม่สำเร็จ" },
+            { status: 500 }
+          );
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from("parking_bk")
+          .getPublicUrl(filePath);
+
+        if (!publicUrlData?.publicUrl) {
+          console.error("Get public URL failed for", filePath);
+          return NextResponse.json(
+            { message: "สร้างลิงก์รูปภาพไม่สำเร็จ" },
+            { status: 500 }
+          );
+        }
+
+        uploadedUrls.push(publicUrlData.publicUrl);
+      }
+
+      if (uploadedUrls.length > 0) {
+        const imageRows = uploadedUrls.map((url) => ({
+          rent_id: data.id,
+          image_url: url,
+        }));
+
+        const { error: imageError } = await supabase
+          .from("rent_images")
+          .insert(imageRows);
+
+        if (imageError) {
+          console.error("Insert images error:", imageError);
+          return NextResponse.json(
+            { message: "บันทึกรูปภาพไม่สำเร็จ" },
+            { status: 500 }
+          );
+        }
       }
     }
 

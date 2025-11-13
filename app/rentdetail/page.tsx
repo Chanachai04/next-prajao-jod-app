@@ -39,6 +39,8 @@ export default function RentDetail() {
     price_per_day: "",
     price_per_month: "",
     deposit: "",
+    latitude: "",
+    longitude: "",
   });
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const parkingTypes = useMemo(
@@ -50,6 +52,31 @@ export default function RentDetail() {
       "อื่นๆ",
     ],
     []
+  );
+  const dayLabels = useMemo(
+    () => [
+      "วันจันทร์",
+      "วันอังคาร",
+      "วันพุธ",
+      "วันพฤหัสบดี",
+      "วันศุกร์",
+      "วันเสาร์",
+      "วันอาทิตย์",
+    ],
+    []
+  );
+  const timeOptions = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`),
+    []
+  );
+  const [schedules, setSchedules] = useState(
+    dayLabels.map((day) => ({
+      day,
+      selected: false,
+      open_time: "06:00",
+      close_time: "20:00",
+    }))
   );
   const facilityOptions = useMemo(
     () => [
@@ -64,6 +91,14 @@ export default function RentDetail() {
     ],
     []
   );
+  const markerPosition = useMemo<[number, number] | null>(() => {
+    const lat = Number(formValues.latitude);
+    const lng = Number(formValues.longitude);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      return [lat, lng];
+    }
+    return null;
+  }, [formValues.latitude, formValues.longitude]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -86,6 +121,24 @@ export default function RentDetail() {
       }
       return prev.filter((item) => item !== facility);
     });
+  };
+
+  const toggleSelectAllDays = (checked: boolean) => {
+    setSchedules((prev) => prev.map((s) => ({ ...s, selected: checked })));
+  };
+  const toggleDay = (index: number, checked: boolean) => {
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, selected: checked } : s))
+    );
+  };
+  const changeTime = (
+    index: number,
+    field: "open_time" | "close_time",
+    value: string
+  ) => {
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+    );
   };
 
   const handleProvinceSearchChange = (
@@ -164,6 +217,24 @@ export default function RentDetail() {
       return;
     }
 
+    if (!formValues.latitude || !formValues.longitude) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณาเลือกตำแหน่งบนแผนที่",
+      });
+      return;
+    }
+
+    const latitude = Number(formValues.latitude);
+    const longitude = Number(formValues.longitude);
+    if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      setSubmitStatus({
+        type: "error",
+        message: "ละติจูด/ลองจิจูดไม่ถูกต้อง",
+      });
+      return;
+    }
+
     let pricePayload: {
       price_per_hour: number | null;
       price_per_day: number | null;
@@ -206,16 +277,28 @@ export default function RentDetail() {
       district: formValues.district.trim(),
       province: formValues.province.trim(),
       landmark: formValues.landmark.trim(),
+      latitude,
+      longitude,
       price: pricePayload,
       facilities: selectedFacilities,
+      schedule: schedules
+        .filter((s) => s.selected)
+        .map((s) => ({
+          day: s.day,
+          open_time: s.open_time,
+          close_time: s.close_time,
+        })),
     };
 
     setIsSubmitting(true);
     try {
+      const formData = new FormData();
+      formData.append("payload", JSON.stringify(payload));
+      images.forEach((file) => formData.append("images", file, file.name));
+
       const response = await fetch("/api/rentdetail", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -238,8 +321,19 @@ export default function RentDetail() {
         price_per_day: "",
         price_per_month: "",
         deposit: "",
+        latitude: "",
+        longitude: "",
       });
       setSelectedFacilities([]);
+      setSchedules(
+        dayLabels.map((day) => ({
+          day,
+          selected: false,
+          open_time: "06:00",
+          close_time: "20:00",
+        }))
+      );
+      setImages([]);
     } catch (error) {
       console.error(error);
       setSubmitStatus({
@@ -385,7 +479,14 @@ export default function RentDetail() {
           {/* หัวข้อ: วัน / เวลาเปิด / เวลาปิด */}
           <div className="grid grid-cols-12 items-center py-2 gap-2">
             <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
-              <Checkbox id="everyday" className="border border-black" />
+              <Checkbox
+                id="everyday"
+                className="border border-black"
+                checked={schedules.every((s) => s.selected)}
+                onCheckedChange={(checked) =>
+                  toggleSelectAllDays(checked === true)
+                }
+              />
               <Label htmlFor="everyday">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
             </div>
             <div className="col-span-6 sm:col-span-2"></div>
@@ -400,45 +501,50 @@ export default function RentDetail() {
 
         {/* --รายการวันจันทร์ - อาทิตย์ */}
         <div className="space-y-1">
-          {[
-            "วันจันทร์",
-            "วันอังคาร",
-            "วันพุธ",
-            "วันพฤหัสบดี",
-            "วันศุกร์",
-            "วันเสาร์",
-            "วันอาทิตย์",
-          ].map((day, index) => (
-            <div key={index}>
+          {schedules.map((row, index) => (
+            <div key={row.day}>
               <div className="grid grid-cols-12 items-center py-3 gap-2 sm:gap-4">
                 {/* วัน */}
                 <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
-                  <Checkbox id={day} className="border border-black" />
-                  <Label htmlFor={day}>{day}</Label>
+                  <Checkbox
+                    id={row.day}
+                    className="border border-black"
+                    checked={row.selected}
+                    onCheckedChange={(checked) =>
+                      toggleDay(index, checked === true)
+                    }
+                  />
+                  <Label htmlFor={row.day}>{row.day}</Label>
                 </div>
 
                 {/* เปิด 24 ชม. */}
                 <div className="col-span-6 sm:col-span-2 flex items-center gap-2">
-                  <Checkbox id={`${day}-24h`} className="border border-black" />
-                  <Label htmlFor={`${day}-24h`}>เปิด 24 ชม.</Label>
+                  <Checkbox
+                    id={`${row.day}-24h`}
+                    className="border border-black"
+                  />
+                  <Label htmlFor={`${row.day}-24h`}>เปิด 24 ชม.</Label>
                 </div>
 
                 {/* เวลาเปิด */}
                 <div className="col-span-6 sm:col-span-4 flex justify-start mt-2 sm:mt-0">
-                  <Select>
+                  <Select
+                    value={row.open_time}
+                    onValueChange={(value) =>
+                      changeTime(index, "open_time", value)
+                    }
+                    disabled={!row.selected}
+                  >
                     <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="06:00" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {Array.from({ length: 24 }, (_, i) => {
-                          const time = `${String(i).padStart(2, "0")}:00`;
-                          return (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          );
-                        })}
+                        {timeOptions.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -446,20 +552,23 @@ export default function RentDetail() {
 
                 {/* เวลาปิด */}
                 <div className="col-span-6 sm:col-span-3 flex justify-start mt-2 sm:mt-0">
-                  <Select>
+                  <Select
+                    value={row.close_time}
+                    onValueChange={(value) =>
+                      changeTime(index, "close_time", value)
+                    }
+                    disabled={!row.selected}
+                  >
                     <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="20:00" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {Array.from({ length: 24 }, (_, i) => {
-                          const time = `${String(i).padStart(2, "0")}:00`;
-                          return (
-                            <SelectItem key={time} value={time}>
-                              {time}
-                            </SelectItem>
-                          );
-                        })}
+                        {timeOptions.map((time) => (
+                          <SelectItem key={time} value={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -522,7 +631,29 @@ export default function RentDetail() {
               height="400px"
               zoom={13}
               onMapReady={() => console.log("Map loaded")}
+              markerAt={markerPosition}
+              onPositionChange={(lat, lng) =>
+                setFormValues((prev) => ({
+                  ...prev,
+                  latitude: lat.toFixed(6),
+                  longitude: lng.toFixed(6),
+                }))
+              }
             />
+          </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
+            <div className="rounded-md border p-3">
+              <p className="font-medium text-muted-foreground">ละติจูด</p>
+              <p className="mt-1 text-base">
+                {formValues.latitude ? formValues.latitude : "-"}
+              </p>
+            </div>
+            <div className="rounded-md border p-3">
+              <p className="font-medium text-muted-foreground">ลองจิจูด</p>
+              <p className="mt-1 text-base">
+                {formValues.longitude ? formValues.longitude : "-"}
+              </p>
+            </div>
           </div>
         </div>
         <hr className="border-gray-300" />
