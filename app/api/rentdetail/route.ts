@@ -17,6 +17,7 @@ type RentDetailPayload = {
   landmark?: string;
   latitude?: number;
   longitude?: number;
+  owner_id?: string;
   price?: {
     price_per_hour?: number | null;
     price_per_day?: number | null;
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
       landmark,
       latitude,
       longitude,
+      owner_id,
       price,
       facilities,
       schedule,
@@ -75,7 +77,8 @@ export async function POST(req: Request) {
       typeof latitude !== "number" ||
       typeof longitude !== "number" ||
       !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude)
+      !Number.isFinite(longitude) ||
+      !owner_id
     ) {
       return NextResponse.json(
         { message: "ข้อมูลไม่ครบถ้วน" },
@@ -97,6 +100,7 @@ export async function POST(req: Request) {
         landmark,
         latitude,
         longitude,
+        owner_id,
       })
       .select("id")
       .single();
@@ -131,14 +135,22 @@ export async function POST(req: Request) {
       pricePerMonth !== null ||
       deposit !== null;
 
+    let priceId: string | null = null;
+    let facilityIds: string[] | undefined;
+    let scheduleIds: string[] | undefined;
+    let imageIds: string[] | undefined;
     if (hasPrice) {
-      const { error: priceError } = await supabase.from("price").insert({
-        rent_id: data.id,
-        price_per_hour: pricePerHour,
-        price_per_day: pricePerDay,
-        price_per_month: pricePerMonth,
-        deposit,
-      });
+      const { data: priceRows, error: priceError } = await supabase
+        .from("price")
+        .insert({
+          rent_id: data.id,
+          price_per_hour: pricePerHour,
+          price_per_day: pricePerDay,
+          price_per_month: pricePerMonth,
+          deposit,
+        })
+        .select("id")
+        .single();
 
       if (priceError) {
         console.error("Insert price error:", priceError);
@@ -147,6 +159,7 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
+      priceId = priceRows?.id ?? null;
     }
 
     if (Array.isArray(facilities) && facilities.length > 0) {
@@ -156,9 +169,10 @@ export async function POST(req: Request) {
         name: facilityName,
       }));
 
-      const { error: facilitiesError } = await supabase
+      const { data: facilityData, error: facilitiesError } = await supabase
         .from("rent_facilities")
-        .insert(facilityRows);
+        .insert(facilityRows)
+        .select("id");
 
       if (facilitiesError) {
         console.error("Insert facilities error:", facilitiesError);
@@ -167,6 +181,8 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
+      facilityIds =
+        facilityData?.map((facility) => facility.id).filter(Boolean) ?? [];
     }
 
     if (Array.isArray(schedule) && schedule.length > 0) {
@@ -178,9 +194,10 @@ export async function POST(req: Request) {
         open_time: toPgTime(item.open_time),
         close_time: toPgTime(item.close_time),
       }));
-      const { error: scheduleError } = await supabase
+      const { data: scheduleData, error: scheduleError } = await supabase
         .from("rent_schedule")
-        .insert(rows);
+        .insert(rows)
+        .select("id");
       if (scheduleError) {
         console.error("Insert schedule error:", scheduleError);
         return NextResponse.json(
@@ -188,10 +205,13 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
+      scheduleIds =
+        scheduleData?.map((item) => item.id).filter(Boolean) ?? [];
     }
 
     if (images.length > 0) {
       const uploadedUrls: string[] = [];
+      const uploadedImageIds: string[] = [];
       for (const file of images) {
         if (!file || !file.size) continue;
         const arrayBuffer = await file.arrayBuffer();
@@ -236,9 +256,10 @@ export async function POST(req: Request) {
           image_url: url,
         }));
 
-        const { error: imageError } = await supabase
+        const { data: imageData, error: imageError } = await supabase
           .from("rent_images")
-          .insert(imageRows);
+          .insert(imageRows)
+          .select("id");
 
         if (imageError) {
           console.error("Insert images error:", imageError);
@@ -247,6 +268,84 @@ export async function POST(req: Request) {
             { status: 500 }
           );
         }
+        uploadedImageIds.push(
+          ...(imageData?.map((item) => item.id).filter(Boolean) ?? [])
+        );
+
+        imageIds = uploadedImageIds;
+      }
+    }
+
+    // Update references on rent_detail.
+    // Some DB columns may expect a single uuid while others expect an array.
+    // We'll perform per-field updates and try array first, then fall back to single uuid.
+    if (priceId) {
+      const { error: priceUpdateErr } = await supabase
+        .from("rent_detail")
+        .update({ price_id: priceId })
+        .eq("id", data.id);
+      if (priceUpdateErr) {
+        console.error("Update rent_detail price_id error:", priceUpdateErr);
+        return NextResponse.json(
+          { message: "อัปเดตข้อมูลอ้างอิงราคาไม่สำเร็จ" },
+          { status: 500 }
+        );
+      }
+    }
+
+    const tryUpdateArrayThenSingle = async (
+      column: string,
+      ids?: string[] | null
+    ) => {
+      if (!ids) return null;
+      if (ids.length === 0) return null;
+      // Try writing the full array first
+      const payloadArray: Record<string, unknown> = {};
+      payloadArray[column] = ids;
+      let res = await supabase.from("rent_detail").update(payloadArray).eq("id", data.id);
+      if (!res.error) return null;
+      // If writing array failed, try single uuid (first element)
+      const payloadSingle: Record<string, unknown> = {};
+      payloadSingle[column] = ids[0];
+      res = await supabase.from("rent_detail").update(payloadSingle).eq("id", data.id);
+      if (!res.error) return null;
+      // return last error
+      return res.error;
+    };
+
+    // facilities
+    if (facilityIds && facilityIds.length > 0) {
+      const err = await tryUpdateArrayThenSingle("facilities_id", facilityIds);
+      if (err) {
+        console.error("Update rent_detail facilities_id error:", err);
+        return NextResponse.json(
+          { message: "อัปเดตข้อมูลสิ่งอำนวยความสะดวกไม่สำเร็จ" },
+          { status: 500 }
+        );
+      }
+    }
+
+    // schedule
+    if (scheduleIds && scheduleIds.length > 0) {
+      const err = await tryUpdateArrayThenSingle("schedule_id", scheduleIds);
+      if (err) {
+        console.error("Update rent_detail schedule_id error:", err);
+        return NextResponse.json(
+          { message: "อัปเดตข้อมูลเวลาไม่สำเร็จ" },
+          { status: 500 }
+        );
+      }
+    }
+
+    // images
+    if (imageIds && imageIds.length > 0) {
+      const err = await tryUpdateArrayThenSingle("image_id", imageIds);
+      if (err) {
+        console.error("Update rent_detail image_id error:", err);
+        return NextResponse.json(
+          { message: "อัปเดตรูปภาพไม่สำเร็จ" },
+          { status: 500 }
+        );
       }
     }
 

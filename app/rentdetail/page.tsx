@@ -41,7 +41,20 @@ export default function RentDetail() {
     deposit: "",
     latitude: "",
     longitude: "",
+    owner_id: "",
   });
+
+  // Read owner id from cookie if available and set into formValues
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const cookieValue = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("userId="))
+      ?.split("=")[1];
+    if (cookieValue) {
+      setFormValues((prev) => ({ ...prev, owner_id: cookieValue }));
+    }
+  }, []);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
   const parkingTypes = useMemo(
     () => [
@@ -279,6 +292,7 @@ export default function RentDetail() {
       landmark: formValues.landmark.trim(),
       latitude,
       longitude,
+      owner_id: formValues.owner_id,
       price: pricePayload,
       facilities: selectedFacilities,
       schedule: schedules
@@ -323,6 +337,7 @@ export default function RentDetail() {
         deposit: "",
         latitude: "",
         longitude: "",
+        owner_id: formValues.owner_id,
       });
       setSelectedFacilities([]);
       setSchedules(
@@ -641,20 +656,7 @@ export default function RentDetail() {
               }
             />
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
-            <div className="rounded-md border p-3">
-              <p className="font-medium text-muted-foreground">ละติจูด</p>
-              <p className="mt-1 text-base">
-                {formValues.latitude ? formValues.latitude : "-"}
-              </p>
-            </div>
-            <div className="rounded-md border p-3">
-              <p className="font-medium text-muted-foreground">ลองจิจูด</p>
-              <p className="mt-1 text-base">
-                {formValues.longitude ? formValues.longitude : "-"}
-              </p>
-            </div>
-          </div>
+          {/* latitude/longitude display removed per user request */}
         </div>
         <hr className="border-gray-300" />
         {/* --ราคา */}
