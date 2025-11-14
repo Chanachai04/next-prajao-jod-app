@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { RentSpot } from "@/types/booking";
+import Link from "next/link";
 
 interface ParkingCardProps {
   spot: RentSpot;
@@ -104,7 +105,9 @@ export default function ParkingCard({
                 }`
               : "ไม่ระบุราคา"}
           </p>
-          <Button className="ml-2">จองทันที</Button>
+          <Link href={`/order/${spot.id}`}>
+            <Button className="ml-2">จองทันที</Button>
+          </Link>
         </div>
       </CardHeader>
     </Card>

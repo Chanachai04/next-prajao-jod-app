@@ -1,0 +1,428 @@
+"use client";
+
+import Loading from "../loading";
+import DateForm from "@/components/form/DateForm";
+import SelectForm from "@/components/form/SelectForm";
+import TimeForm from "@/components/form/TimeForm";
+import { Button } from "@/components/ui/button";
+import { Facility, Price, RentDetail, Schedule } from "@/types/order";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clock,
+  MapPin,
+  Minimize2,
+  Share2,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { ReactNode, useEffect, useState } from "react";
+
+export default function Page() {
+  const { id } = useParams();
+  const [rentDetail, setRentDetail] = useState<RentDetail | null>(null);
+  const [price, setPrice] = useState<Price | null>(null);
+  const [facilities, setFacilities] = useState<Facility[] | null>(null);
+  const [schedule, setSchedule] = useState<Schedule[] | null>(null);
+  const [images, setImages] = useState<{ image_url: string }[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [showAll, setShowAll] = useState(false);
+  const [dateIn, setDateIn] = useState<Date>(new Date());
+  const [dateOut, setDateOut] = useState<Date>(new Date());
+  const [timeIn, setTimeIn] = useState<string>("00:00");
+  const [timeOut, setTimeOut] = useState<string>("01:00");
+
+  const [isShow, setIsShow] = useState<"day" | "month" | "hour" | "">("");
+  const isLoading = !rentDetail || !price || !facilities || !schedule;
+  const [displayPrice, setDisplayPrice] = useState<number | null>(null);
+  const [priceSuffix, setPriceSuffix] = useState<string>("");
+
+  const FALLBACK_IMAGE = "/image.jpg";
+
+  const daysInfo: Record<string, { index: number }> = {
+    วันอาทิตย์: { index: 0 },
+    วันจันทร์: { index: 1 },
+    วันอังคาร: { index: 2 },
+    วันพุธ: { index: 3 },
+    วันพฤหัสบดี: { index: 4 },
+    วันศุกร์: { index: 5 },
+    วันเสาร์: { index: 6 },
+  };
+
+  const timeOption = {
+    threeMonths: "3 เดือน",
+    sixMonths: "6 เดือน",
+    oneYears: "1 ปี",
+  };
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const res = await fetch(`/api/order?id=${id}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+      const data = await res.json();
+
+      setRentDetail(data.rentDetail);
+      setPrice(data.price);
+      setFacilities(data.facilities);
+      setSchedule(data.schedules);
+      setImages(data.images ?? []);
+    };
+    fetchOrder();
+  }, [id]);
+
+  // ตั้งค่า default ราคาตอนโหลดข้อมูลเสร็จ
+  useEffect(() => {
+    if (price?.price_per_day) {
+      const timer = setTimeout(() => {
+        setIsShow("day");
+        setDisplayPrice(price.price_per_day);
+        setPriceSuffix("/ วัน");
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [price]);
+
+  const imageUrls =
+    images.length > 0 ? images.map((img) => img.image_url) : [FALLBACK_IMAGE];
+
+  const onNavigate = (dir: "prev" | "next") =>
+    setCurrentIndex((prev) =>
+      dir === "prev"
+        ? prev === 0
+          ? images.length - 1
+          : prev - 1
+        : prev === images.length - 1
+        ? 0
+        : prev + 1
+    );
+
+  const onSelectImage = (index: number) => setCurrentIndex(index);
+
+  const formatTime = (open?: string, close?: string) => {
+    if (!open || !close) return "";
+    if (open === "00:00:00" && close === "00:00:00") return "เปิด 24 ชม.";
+    return `${open.slice(0, 5)} - ${close.slice(0, 5)}`;
+  };
+
+  const formatDays = (days: string[]) => {
+    if (!days || days.length === 0) return "";
+    const validDays = days.filter((d) => d in daysInfo);
+    const indices = validDays
+      .map((d) => daysInfo[d].index)
+      .sort((a, b) => a - b);
+
+    if (indices.length === 7) return "วันจันทร์ - วันอาทิตย์";
+    if (indices.length === 1) return validDays[0];
+
+    const firstDay = validDays.find((d) => daysInfo[d].index === indices[0]);
+    const lastDay = validDays.find(
+      (d) => daysInfo[d].index === indices[indices.length - 1]
+    );
+    return `${firstDay} - ${lastDay}`;
+  };
+
+  const groupedSchedules = () => {
+    if (!schedule) return [];
+    const groups: Record<string, string[]> = {};
+
+    schedule.forEach((s) => {
+      const key = `${s.open_time}-${s.close_time}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(...s.available_days);
+    });
+
+    return Object.entries(groups).map(([time, days]) => {
+      const [open, close] = time.split("-");
+      return { open, close, days };
+    });
+  };
+
+  const renderScheduleGroup = (group: {
+    open: string;
+    close: string;
+    days: string[];
+    button?: ReactNode;
+  }) => (
+    <div key={`${group.open}-${group.close}`} className="flex items-center">
+      <Clock size={16} className="mr-2" />
+      <span>
+        เปิด {formatDays(group.days)}: {formatTime(group.open, group.close)}
+      </span>
+      {group.button && (
+        <span className={`${showAll ? "mt-1" : "ml-2"}`}>{group.button}</span>
+      )}
+    </div>
+  );
+
+  const allGroups = groupedSchedules();
+  if (isLoading) return <Loading />;
+  return (
+    <div className="container mx-auto min-h-screen">
+      {/* Breadcrumb */}
+      <div className="flex items-center  my-4">
+        <p>
+          <Link href="/" className="text-blue-500 hover:underline">
+            หน้าหลัก
+          </Link>{" "}
+          &gt; {rentDetail?.province} &gt; {rentDetail?.name}
+        </p>
+      </div>
+
+      <div className="flex">
+        {/* Main Image */}
+        <div className="relative w-2/4">
+          <Image
+            src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
+            alt={rentDetail?.name ?? "รูปที่จอดรถ"}
+            width={800}
+            height={250}
+            className="w-full h-[400px] object-cover cursor-pointer rounded-2xl"
+          />
+
+          {imageUrls.length > 1 && (
+            <>
+              <button
+                onClick={() => onNavigate("prev")}
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => onNavigate("next")}
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Price Box */}
+        <div className="bg-white h-full w-1/3 ml-10 p-4 rounded-2xl border border-gray-300 shadow-sm">
+          {/* Dynamic Price */}
+          <p className="text-2xl font-bold mb-4">
+            {displayPrice !== null ? `฿ ${displayPrice} ${priceSuffix}` : "-"}
+          </p>
+
+          {/* Tabs */}
+          <div className="flex gap-2 mb-4">
+            {price?.price_per_day && (
+              <Button
+                variant={isShow === "day" ? "default" : "outline"}
+                onClick={() => {
+                  setIsShow("day");
+                  setDisplayPrice(price.price_per_day);
+                  setPriceSuffix("/ วัน");
+                }}
+                className="flex-1 cursor-pointer"
+              >
+                รายวัน
+              </Button>
+            )}
+
+            {price?.price_per_month && (
+              <Button
+                variant={isShow === "month" ? "default" : "outline"}
+                onClick={() => {
+                  setIsShow("month");
+                  setDisplayPrice(price.price_per_month);
+                  setPriceSuffix("/ เดือน");
+                }}
+                className="flex-1 cursor-pointer"
+              >
+                รายเดือน
+              </Button>
+            )}
+
+            {price?.price_per_hour && (
+              <Button
+                variant={isShow === "hour" ? "default" : "outline"}
+                onClick={() => {
+                  setIsShow("hour");
+                  setDisplayPrice(price.price_per_hour);
+                  setPriceSuffix("/ ชั่วโมง");
+                }}
+                className="flex-1 cursor-pointer"
+              >
+                รายชั่วโมง
+              </Button>
+            )}
+          </div>
+
+          {/* Form Content */}
+          {isShow === "day" && (
+            <div className="grid grid-cols-2 gap-4">
+              <DateForm
+                id="dateIn"
+                title="วันที่เข้าจอด"
+                date={dateIn}
+                setDate={setDateIn}
+                placeholder="เลือกวันที่เข้าจอด"
+                className="cursor-pointer"
+              />
+              <DateForm
+                id="dateOut"
+                title="วันที่นำรถออก"
+                date={dateOut}
+                setDate={setDateOut}
+                placeholder="เลือกวันที่นำรถออก"
+                className="cursor-pointer"
+              />
+            </div>
+          )}
+
+          {isShow === "month" && (
+            <div className="grid grid-cols-2 gap-4">
+              <DateForm
+                id="dateIn"
+                title="วันที่เข้าจอด"
+                date={dateIn}
+                setDate={setDateIn}
+                placeholder="เลือกวันที่เข้าจอด"
+                className="cursor-pointer"
+              />
+              <SelectForm
+                title="จำนวนวัน"
+                placeholder="เลือกจำนวนวัน"
+                itemList={timeOption}
+                leadingIcon={<Minimize2 />}
+              />
+            </div>
+          )}
+
+          {isShow === "hour" && (
+            <>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <DateForm
+                  id="dateIn"
+                  title="วันที่เข้าจอด"
+                  date={dateIn}
+                  setDate={setDateIn}
+                  placeholder="เลือกวันที่เข้าจอด"
+                  className="cursor-pointer"
+                />
+                <TimeForm
+                  title="เวลาเข้าจอด"
+                  time={timeIn}
+                  setTime={setTimeIn}
+                  className="cursor-pointer"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <DateForm
+                  id="dateOut"
+                  title="วันที่นำรถออก"
+                  date={dateOut}
+                  setDate={setDateOut}
+                  placeholder="เลือกวันที่นำรถออก"
+                  className="cursor-pointer"
+                />
+                <TimeForm
+                  title="เวลานำรถออก"
+                  time={timeOut}
+                  setTime={setTimeOut}
+                  className="cursor-pointer"
+                />
+              </div>
+            </>
+          )}
+          <div className="flex justify-between items-center text-lg my-2 font-semibold">
+            <p>ราคารวม</p>
+            <p>{displayPrice !== null ? `฿ ${displayPrice} ` : "-"}</p>
+          </div>
+          <div>
+            <Link href={"/payment"}>
+              <Button className="w-full cursor-pointer">จองที่จอดนี้</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="h-[130px] w-2/4 flex justify-center items-center space-x-2 overflow-x-auto px-4">
+        {imageUrls.map((img, idx) => (
+          <Image
+            key={`${img}-${idx}`}
+            src={img}
+            width={80}
+            height={100}
+            alt=""
+            className={`h-16 w-20 object-cover border-2 rounded cursor-pointer ${
+              idx === currentIndex
+                ? "border-blue-500 scale-105"
+                : "border-transparent"
+            }`}
+            onClick={() => onSelectImage(idx)}
+          />
+        ))}
+      </div>
+
+      <div>
+        <h1 className="text-2xl mb-2 font-semibold">{rentDetail?.name}</h1>
+        <div className="flex items-center">
+          <MapPin size={18} className="mr-2" />
+          <span>
+            {rentDetail?.district}, {rentDetail?.subdistrict},{" "}
+            {rentDetail?.province}
+          </span>
+        </div>
+
+        {/* Schedule */}
+        <div
+          className={`mb-8 ${showAll ? "flex flex-col" : "flex items-center"}`}
+        >
+          {allGroups.length > 0 &&
+            allGroups
+              .map((g, index) => {
+                const showButton = index === 0 && allGroups.length > 1;
+
+                return renderScheduleGroup({
+                  ...g,
+                  button: showButton ? (
+                    <button
+                      onClick={() => setShowAll(!showAll)}
+                      className="text-blue-500 underline ml-2"
+                    >
+                      {showAll ? "ย่อ" : "เพิ่มเติม"}
+                    </button>
+                  ) : undefined,
+                });
+              })
+              .filter((_, i) => showAll || i === 0)}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <h1 className="text-lg font-semibold">เกี่ยวกับลานจอด</h1>
+        <p className="my-2">{rentDetail?.description}</p>
+      </div>
+
+      <div className="mb-8">
+        <h1 className="text-lg font-semibold">จุดสังเกตุ</h1>
+        <p className="my-2">{rentDetail?.landmark}</p>
+      </div>
+
+      <div className="mb-8">
+        <h1 className="text-lg font-semibold">สิ่งอำนวยความสะดวก</h1>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {facilities && facilities.length > 0 ? (
+            facilities.map((f) => (
+              <span key={f.id} className=" bg-gray-100 rounded-full">
+                {f.name}
+              </span>
+            ))
+          ) : (
+            <p>ไม่มีข้อมูลสิ่งอำนวยความสะดวก</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

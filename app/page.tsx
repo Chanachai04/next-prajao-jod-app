@@ -19,7 +19,6 @@ export default function Home() {
   const [dateOut, setDateOut] = useState<Date>(new Date());
   const [timeIn, setTimeIn] = useState<string>("00:00");
   const [timeOut, setTimeOut] = useState<string>("01:00");
-  const [monthDuration, setMonthDuration] = useState<string>("");
   const [location, setLocation] = useState("");
   const [provinceId, setProvinceId] = useState<number | null>(null);
   const [districtId, setDistrictId] = useState<number | null>(null);

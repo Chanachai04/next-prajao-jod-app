@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { ArrowLeft, ArrowRight, MapPin, X } from "lucide-react";
 import { RentSpot } from "@/types/booking";
+import Link from "next/link";
 
 type PriceKey = "hourly" | "daily" | "monthly";
 
@@ -189,12 +190,14 @@ export default function DetailPanel({
                   : "-"}
               </p>
             </div>
-            <Button
-              type="button"
-              className="w-full md:w-1/2 mt-10 cursor-pointer hover:scale-105 transition-transform"
-            >
-              จองทันที
-            </Button>
+            <Link href={`/order/${spot.id}`}>
+              <Button
+                type="button"
+                className="w-full md:w-1/2 mt-10 cursor-pointer hover:scale-105 transition-transform"
+              >
+                จองทันที
+              </Button>
+            </Link>
           </div>
 
           <div>
