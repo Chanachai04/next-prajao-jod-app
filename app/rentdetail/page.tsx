@@ -17,6 +17,7 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import ProvinceSearch from "@/components/form/ProvinceSearch";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
+import AlertModal from "@/components/ui/modal";
 
 export default function RentDetail() {
   const [images, setImages] = useState<File[]>([]);
@@ -25,6 +26,12 @@ export default function RentDetail() {
     message: string;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+  const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
+  const [modalDescription, setModalDescription] = useState<string | undefined>(
+    undefined
+  );
   const [formValues, setFormValues] = useState({
     name: "",
     type: "",
@@ -356,6 +363,10 @@ export default function RentDetail() {
       }
 
       setSubmitStatus({ type: "success", message: "บันทึกข้อมูลสำเร็จ" });
+      setModalType("success");
+      setModalTitle("บันทึกข้อมูลสำเร็จ");
+      setModalDescription("ข้อมูลถูกบันทึกเรียบร้อยแล้ว");
+      setModalOpen(true);
       setFormValues({
         name: "",
         type: "",
@@ -389,11 +400,13 @@ export default function RentDetail() {
       setImages([]);
     } catch (error) {
       console.error(error);
-      setSubmitStatus({
-        type: "error",
-        message:
-          error instanceof Error ? error.message : "บันทึกข้อมูลไม่สำเร็จ",
-      });
+      const message =
+        error instanceof Error ? error.message : "บันทึกข้อมูลไม่สำเร็จ";
+      setSubmitStatus({ type: "error", message });
+      setModalType("error");
+      setModalTitle("เกิดข้อผิดพลาด");
+      setModalDescription(message);
+      setModalOpen(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -678,6 +691,18 @@ export default function RentDetail() {
           </div>
         )}
 
+        {submitStatus && (
+          <p
+            className={`mt-4 text-sm ${
+              submitStatus.type === "success"
+                ? "text-green-600"
+                : "text-red-600"
+            }`}
+          >
+            {submitStatus.message}
+          </p>
+        )}
+
         {/* --map */}
         <div className="py-5">
           <Label className="text-lg">ตำแหน่งที่จอดรถ *</Label>
@@ -825,6 +850,13 @@ export default function RentDetail() {
         >
           {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
         </Button>
+        <AlertModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          type={modalType}
+          title={modalTitle}
+          description={modalDescription}
+        />
       </form>
     </>
   );

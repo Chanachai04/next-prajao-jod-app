@@ -6,6 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Image from "next/image";
+import { toast } from "sonner";
+import AlertModal from "@/components/ui/modal";
 
 export default function Detail() {
   const router = useRouter();
@@ -21,6 +23,19 @@ export default function Detail() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [serverImageUrl, setServerImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "error">("success");
+  const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
+  const [modalDescription, setModalDescription] = useState<string | undefined>(
+    undefined
+  );
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    if (modalType === "success") {
+      router.replace("/");
+    }
+  };
 
   useEffect(() => {
     const fetchContact = async () => {
@@ -92,15 +107,23 @@ export default function Detail() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data?.message ?? "บันทึกข้อมูลไม่สำเร็จ");
+        const msg = data?.message ?? "บันทึกข้อมูลไม่สำเร็จ";
+        setModalType("error");
+        setModalTitle("เกิดข้อผิดพลาด");
+        setModalDescription(msg);
+        setModalOpen(true);
         return;
       }
-
-      alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว");
-      router.replace("/");
+      setModalType("success");
+      setModalTitle("บันทึกข้อมูลเรียบร้อยแล้ว");
+      setModalDescription("ข้อมูลโปรไฟล์ของคุณถูกบันทึกเรียบร้อยแล้ว");
+      setModalOpen(true);
     } catch (e) {
       console.error("❌ handleSave error:", e);
-      alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setModalType("error");
+      setModalTitle("เกิดข้อผิดพลาด");
+      setModalDescription("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setModalOpen(true);
     } finally {
       setLoading(false);
     }
@@ -216,6 +239,13 @@ export default function Detail() {
             onChange={handleImageChange}
           />
         </div>
+        <AlertModal
+          open={modalOpen}
+          onClose={handleModalClose}
+          type={modalType}
+          title={modalTitle}
+          description={modalDescription}
+        />
       </div>
     </div>
   );
