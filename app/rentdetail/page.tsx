@@ -56,6 +56,8 @@ export default function RentDetail() {
     }
   }, []);
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeFee, setAgreeFee] = useState(false);
   const parkingTypes = useMemo(
     () => [
       "ที่จอดรถในบ้าน",
@@ -87,6 +89,7 @@ export default function RentDetail() {
     dayLabels.map((day) => ({
       day,
       selected: false,
+      allDay: false,
       open_time: "06:00",
       close_time: "20:00",
     }))
@@ -141,7 +144,11 @@ export default function RentDetail() {
   };
   const toggleDay = (index: number, checked: boolean) => {
     setSchedules((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, selected: checked } : s))
+      prev.map((s, i) =>
+        i === index
+          ? { ...s, selected: checked, allDay: checked ? s.allDay : false }
+          : s
+      )
     );
   };
   const changeTime = (
@@ -151,6 +158,22 @@ export default function RentDetail() {
   ) => {
     setSchedules((prev) =>
       prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+    );
+  };
+
+  const toggleAllDay = (index: number, checked: boolean) => {
+    setSchedules((prev) =>
+      prev.map((s, i) =>
+        i === index
+          ? {
+              ...s,
+              allDay: checked,
+              selected: checked ? true : s.selected,
+              open_time: checked ? "00:00" : s.open_time,
+              close_time: checked ? "00:00" : s.close_time,
+            }
+          : s
+      )
     );
   };
 
@@ -183,6 +206,18 @@ export default function RentDetail() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitStatus(null);
+
+    if (!agreeTerms) {
+      setSubmitStatus({ type: "error", message: "กรุณาอ่านและยอมรับข้อตกลง" });
+      return;
+    }
+    if (!agreeFee) {
+      setSubmitStatus({
+        type: "error",
+        message: "โปรดยอมรับการเก็บค่าธรรมเนียม",
+      });
+      return;
+    }
 
     if (!formValues.name.trim()) {
       setSubmitStatus({ type: "error", message: "กรุณากรอกชื่อที่จอดรถ" });
@@ -299,8 +334,8 @@ export default function RentDetail() {
         .filter((s) => s.selected)
         .map((s) => ({
           day: s.day,
-          open_time: s.open_time,
-          close_time: s.close_time,
+          open_time: s.allDay ? "00:00" : s.open_time,
+          close_time: s.allDay ? "00:00" : s.close_time,
         })),
     };
 
@@ -344,10 +379,13 @@ export default function RentDetail() {
         dayLabels.map((day) => ({
           day,
           selected: false,
+          allDay: false,
           open_time: "06:00",
           close_time: "20:00",
         }))
       );
+      setAgreeTerms(false);
+      setAgreeFee(false);
       setImages([]);
     } catch (error) {
       console.error(error);
@@ -540,6 +578,10 @@ export default function RentDetail() {
                   <Checkbox
                     id={`${row.day}-24h`}
                     className="border border-black"
+                    checked={row.allDay}
+                    onCheckedChange={(checked) =>
+                      toggleAllDay(index, checked === true)
+                    }
                   />
                   <Label htmlFor={`${row.day}-24h`}>เปิด 24 ชม.</Label>
                 </div>
@@ -551,7 +593,7 @@ export default function RentDetail() {
                     onValueChange={(value) =>
                       changeTime(index, "open_time", value)
                     }
-                    disabled={!row.selected}
+                    disabled={!row.selected || row.allDay}
                   >
                     <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="06:00" />
@@ -575,7 +617,7 @@ export default function RentDetail() {
                     onValueChange={(value) =>
                       changeTime(index, "close_time", value)
                     }
-                    disabled={!row.selected}
+                    disabled={!row.selected || row.allDay}
                   >
                     <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
                       <SelectValue placeholder="20:00" />
@@ -744,8 +786,13 @@ export default function RentDetail() {
             {" "}
             <div className="flex items-center gap-2">
               {" "}
-              <Checkbox id="ข้อตกลง" className="border border-black" />
-              <Label htmlFor="ข้อตกลง" className="text-base">
+              <Checkbox
+                id="agree_terms"
+                className="border border-black"
+                checked={agreeTerms}
+                onCheckedChange={(checked) => setAgreeTerms(checked === true)}
+              />
+              <Label htmlFor="agree_terms" className="text-base">
                 อ่านและยอมรับ{" "}
                 <Link href="/terms" className="text-blue-500">
                   ข้อตกลงและเงื่อนไขในการให้บริการ
@@ -757,8 +804,13 @@ export default function RentDetail() {
             {" "}
             <div className="flex items-center gap-2 whitespace-nowrap">
               {" "}
-              <Checkbox id="ข้อตกลง" className="border border-black" />
-              <Label htmlFor="ข้อตกลง" className="text-base">
+              <Checkbox
+                id="agree_fee"
+                className="border border-black"
+                checked={agreeFee}
+                onCheckedChange={(checked) => setAgreeFee(checked === true)}
+              />
+              <Label htmlFor="agree_fee" className="text-base">
                 รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
                 ตาม คู่มือการใช้งาน
               </Label>
@@ -769,9 +821,9 @@ export default function RentDetail() {
         <Button
           className="px-12 h-12 cursor-pointer mt-6"
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !agreeTerms || !agreeFee}
         >
-          {isSubmitting ? "กำลังส่งข้อมูล..." : "ส่งข้อมูล"}
+          {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
         </Button>
       </form>
     </>
