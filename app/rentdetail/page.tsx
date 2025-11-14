@@ -433,7 +433,7 @@ export default function RentDetail() {
                 setFormValues((prev) => ({ ...prev, type: value }))
               }
             >
-              <SelectTrigger className="mt-2 h-10 w-full text-left">
+              <SelectTrigger className="mt-2 min-h-10 w-full text-left text-lg">
                 <SelectValue placeholder="เลือกประเภท" />
               </SelectTrigger>
               <SelectContent>

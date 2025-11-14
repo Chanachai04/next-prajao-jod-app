@@ -19,6 +19,7 @@ export default function Detail() {
   const [lineId, setLineId] = useState<string>("");
   const [image, setImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [serverImageUrl, setServerImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -39,7 +40,8 @@ export default function Detail() {
         setLastName(data.lastName ?? "");
         setCitizenId(data.citizenId ?? "");
         setLineId(data.lineId ?? "");
-        setImage(data.imageUrl ?? null);
+        // keep server image URL separate from the local preview
+        setServerImageUrl(data.imageUrl ?? null);
       } catch (e) {
         console.error("❌ fetchContact error:", e);
       }
@@ -190,7 +192,8 @@ export default function Detail() {
                 w-40 h-40 cursor-pointer hover:bg-gray-200 transition"
             onClick={handleContainerClick}
           >
-            {image ? (
+            {/* show preview only for newly selected local file; don't render server image */}
+            {imageFile && image ? (
               <Image
                 src={image}
                 alt="Uploaded"
