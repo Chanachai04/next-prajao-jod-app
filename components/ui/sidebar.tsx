@@ -11,7 +11,6 @@ import {
   Car,
   ParkingCircle,
   CalendarCheck,
-  Wallet,
   LucideIcon,
   LogOut,
 } from "lucide-react";
@@ -144,7 +143,6 @@ export default function Sidebar({
     { name: "ข้อมูลรถของคุณ", href: "/profile/cardetail", icon: Car },
     { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
     { name: "การเข้าจอง", href: "/profile/reservation", icon: CalendarCheck },
-    { name: "สรุปผลรายได้", href: "/profile/result", icon: Wallet },
     { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
   ];
 
