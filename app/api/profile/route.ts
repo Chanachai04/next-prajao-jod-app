@@ -86,6 +86,41 @@ export async function POST(req: Request) {
     let imageUrl: string | null = null;
 
     if (image && image.name) {
+      // Best-effort: remove previous image file from storage if present
+      try {
+        const { data: existing, error: existingErr } = await supabase
+          .from("users")
+          .select("image_url")
+          .eq("id", userId)
+          .single();
+
+        if (existingErr) {
+          console.warn("Could not read existing user image_url:", existingErr);
+        } else if (existing?.image_url) {
+          try {
+            const parsed = new URL(existing.image_url);
+            const path = parsed.pathname || ""; // e.g. /storage/v1/object/public/user_bk/{filePath}
+            const marker = "/user_bk/";
+            const idx = path.indexOf(marker);
+            if (idx !== -1) {
+              const filePath = path.slice(idx + marker.length);
+              if (filePath) {
+                const { error: removeErr } = await supabase.storage
+                  .from("user_bk")
+                  .remove([decodeURIComponent(filePath)]);
+                if (removeErr) {
+                  console.warn("Could not remove previous user image file:", removeErr);
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Could not parse existing image URL", existing.image_url, e);
+          }
+        }
+      } catch (e) {
+        console.error("Unexpected error while cleaning previous image:", e);
+      }
+
       const fileName = `user_${userId}/${Date.now()}_${image.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("user_bk") // <-- ใช้ bucket จริงของคุณ
