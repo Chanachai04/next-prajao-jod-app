@@ -1,19 +1,81 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 interface HistoryItem {
-  image: string;
+  id: number;
   name: string;
-  type: string;
-  slot: string;
+  imageUrl: string | null;
+  parkingTime: number | null;
+  parkingType: string | null;
+  totalPrice: number;
+  createdAt: string;
 }
 
 export default function History() {
   const pathname = usePathname();
-  const data: HistoryItem[] = [];
+  const [data, setData] = useState<HistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // ฟังก์ชันดึงข้อมูลจาก API
+    const fetchHistory = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/history");
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            setError("กรุณาเข้าสู่ระบบ");
+            return;
+          }
+          throw new Error("Failed to fetch history data");
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          setData(result.data);
+        } else {
+          throw new Error("Invalid response format");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการโหลดข้อมูล"
+        );
+        console.error("Error fetching history:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHistory();
+  }, []);
+
+  // ฟังก์ชันแปลง parkingType เป็นภาษาไทย
+  const getParkingTypeText = (type: string | null, time: number | null) => {
+    if (!type || time === null) return "-";
+
+    const typeMap: { [key: string]: string } = {
+      hour: "ชั่วโมง",
+      day: "วัน",
+      month: "เดือน",
+    };
+
+    return `${time} ${typeMap[type] || type}`;
+  };
+
+  // ฟังก์ชันจัดรูปแบบราคา
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("th-TH", {
+      style: "currency",
+      currency: "THB",
+    }).format(price);
+  };
+
   return (
     <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5 bg-gray-50">
       <hr className="border-3 border-gray-600" />
@@ -29,9 +91,9 @@ export default function History() {
         </div>
 
         {/* ไอคอนลูกศร ติดกับ Sidebar */}
-        <div className="pt-10">
+        <div className="pt-10 flex-1">
           <div className="flex items-center">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="text-gray-700 text-xl font-semibold border-b">
@@ -51,31 +113,66 @@ export default function History() {
                 </thead>
 
                 <tbody>
-                  {data.length === 0 ? (
+                  {loading ? (
                     <tr>
                       <td
                         colSpan={4}
                         className="text-center text-gray-400 py-20 text-lg"
                       >
-                        ไม่มีข้อมูล
+                        กำลังโหลดข้อมูล...
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center text-red-500 py-20 text-lg"
+                      >
+                        เกิดข้อผิดพลาด: {error}
+                      </td>
+                    </tr>
+                  ) : data.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center text-gray-400 py-20 text-lg"
+                      >
+                        ไม่มีประวัติการจอง
                       </td>
                     </tr>
                   ) : (
-                    data.map((item, index) => (
+                    data.map((item) => (
                       <tr
-                        key={index}
+                        key={item.id}
                         className="border-b hover:bg-gray-50 text-lg"
                       >
                         <td className="py-6 px-6 text-center">
-                          <Image
-                            src={item.image}
-                            alt=""
-                            className="w-24 h-24 object-cover rounded-lg mx-auto"
-                          />
+                          {item.imageUrl ? (
+                            <Image
+                              src={item.imageUrl}
+                              alt={item.name}
+                              width={96}
+                              height={96}
+                              className="w-24 h-24 object-cover rounded-lg mx-auto"
+                            />
+                          ) : (
+                            <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                              <span className="text-gray-400 text-sm">
+                                ไม่มีรูป
+                              </span>
+                            </div>
+                          )}
                         </td>
                         <td className="py-6 px-6 text-center">{item.name}</td>
-                        <td className="py-6 px-6 text-center">{item.type}</td>
-                        <td className="py-6 px-6 text-center">{item.slot}</td>
+                        <td className="py-6 px-6 text-center">
+                          {getParkingTypeText(
+                            item.parkingType,
+                            item.parkingTime
+                          )}
+                        </td>
+                        <td className="py-6 px-6 text-center">
+                          {formatPrice(item.totalPrice)}
+                        </td>
                       </tr>
                     ))
                   )}
