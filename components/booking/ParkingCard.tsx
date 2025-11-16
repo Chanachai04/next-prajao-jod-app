@@ -109,7 +109,7 @@ export default function ParkingCard({
   return (
     <Card
       className={`mt-4 cursor-pointer transition-shadow ${
-        isActive ? "shadow-lg ring-2 ring-blue-500" : "hover:shadow-lg"
+        isActive ? "shadow-lg " : "hover:shadow-lg"
       }`}
       onClick={onClick}
     >
@@ -153,7 +153,9 @@ export default function ParkingCard({
               : "ไม่ระบุราคา"}
           </p>
           <Link href={orderUrl}>
-            <Button className="ml-2">จองทันที</Button>
+            <Button className="ml-2 cursor-pointer hover:scale-105 transition-transform">
+              จองทันที
+            </Button>
           </Link>
         </div>
       </CardHeader>

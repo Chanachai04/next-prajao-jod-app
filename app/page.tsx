@@ -22,7 +22,6 @@ export default function Home() {
   const [provinceId, setProvinceId] = useState<number | null>(null);
   const [districtId, setDistrictId] = useState<number | null>(null);
   const [subDistrictId, setSubDistrictId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [monthDurationKey, setMonthDurationKey] = useState("threeMonths");
@@ -40,7 +39,7 @@ export default function Home() {
 
   const handleSubmit = () => {
     if (!location.trim() && (!provinceId || !districtId || !subDistrictId)) {
-      setError("กรุณาเลือกจังหวัด อำเภอ และตำบล หรือพิมพ์ชื่อสถานที่");
+      setError("กรุณาเลือกจังหวัด เขต และแขวง หรือพิมพ์ชื่อสถานที่");
       return;
     }
     setError(null);
@@ -67,7 +66,6 @@ export default function Home() {
       if (timeIn) params.set("timeIn", timeIn);
       if (timeOut) params.set("timeOut", timeOut);
     }
-
     router.push(`/booking?${params.toString()}`);
   };
 

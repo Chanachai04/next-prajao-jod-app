@@ -56,7 +56,7 @@ export default function Footer() {
                 ปล่อยเช่าพื้นที่ของคุณ
               </p>
             </Link>
-            <Link href="/">
+            <Link href="/privacy">
               <p className="hover:underline text-sm md:text-base mb-1">
                 Privacy Policy
               </p>

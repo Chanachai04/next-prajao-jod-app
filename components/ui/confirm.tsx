@@ -44,7 +44,7 @@ export default function ConfirmModal({
               ยกเลิก
             </Button>
             <Button
-              className="w-1/2"
+              className="w-1/2 cursor-pointer"
               onClick={() => {
                 onConfirm();
                 onClose();

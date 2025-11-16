@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Minimize2 } from "lucide-react";
 import DateForm from "../form/DateForm";
@@ -42,6 +42,8 @@ interface SearchPanelProps {
   onLocationChange: (payload: LocationChangePayload) => void;
   monthDurationKey: string;
   onMonthDurationChange: (value: string) => void;
+  error?: string | null;
+  loading?: boolean;
 }
 
 export default function SearchPanel({
@@ -68,6 +70,8 @@ export default function SearchPanel({
   onLocationChange,
   monthDurationKey,
   onMonthDurationChange,
+  error,
+  loading,
 }: SearchPanelProps) {
   const searchParams = useSearchParams();
   const isHourly = selectedOption === "hourly";
@@ -114,7 +118,7 @@ export default function SearchPanel({
     return byMode.length > 0 ? byMode : spots;
   }, [spots, selectedOption]);
 
-  // ✅ คำนวณ mode ที่แท้จริงตาม UI และเงื่อนไข
+  // คำนวณ mode ที่แท้จริงตาม UI และเงื่อนไข
   const actualMode = useMemo(() => {
     if (selectedOption === "monthly") {
       return "monthly";
@@ -131,16 +135,28 @@ export default function SearchPanel({
 
   const renderStatus = () => {
     if (isLoading) {
-      return <p className="text-sm text-gray-500 mt-4">กำลังโหลดข้อมูล...</p>;
+      return (
+        <p className="text-xl text-center text-gray-500 mt-4 overflow-hidden">
+          กำลังโหลดข้อมูล...
+        </p>
+      );
     }
     if (errorMessage) {
-      return <p className="text-sm text-red-500 mt-4">{errorMessage}</p>;
+      return (
+        <p className="text-xl text-center text-red-500 mt-4 overflow-hidden">
+          {errorMessage}
+        </p>
+      );
     }
     if (!filteredSpots.length) {
       if (!emptyMessage) {
         return null;
       }
-      return <p className="text-sm text-gray-500 mt-4">{emptyMessage}</p>;
+      return (
+        <p className="text-xl text-center text-gray-500 mt-4 overflow-hidden ">
+          {emptyMessage}
+        </p>
+      );
     }
     return null;
   };
@@ -238,7 +254,7 @@ export default function SearchPanel({
             </div>
           </>
         )}
-
+        {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
         <div className="flex justify-between">
           <div>
             <Button
@@ -260,12 +276,14 @@ export default function SearchPanel({
               รายเดือน
             </Button>
           </div>
+
           <Button
             type="submit"
             onClick={onSearch}
             className="text-lg cursor-pointer"
+            disabled={loading}
           >
-            ค้นหา
+            {loading ? "กำลังค้นหา..." : "ค้นหา"}
           </Button>
         </div>
 

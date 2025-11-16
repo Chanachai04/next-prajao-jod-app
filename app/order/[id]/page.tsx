@@ -341,6 +341,19 @@ export default function Page() {
 
           {/* Tabs */}
           <div className="flex gap-2 mb-4">
+            {price?.price_per_hour && (
+              <Button
+                variant={isShow === "hour" ? "default" : "outline"}
+                onClick={() => {
+                  setIsShow("hour");
+                  setDisplayPrice(price.price_per_hour);
+                  setPriceSuffix("/ ชั่วโมง");
+                }}
+                className="flex-1 cursor-pointer"
+              >
+                รายชั่วโมง
+              </Button>
+            )}
             {price?.price_per_day && (
               <Button
                 variant={isShow === "day" ? "default" : "outline"}
@@ -366,20 +379,6 @@ export default function Page() {
                 className="flex-1 cursor-pointer"
               >
                 รายเดือน
-              </Button>
-            )}
-
-            {price?.price_per_hour && (
-              <Button
-                variant={isShow === "hour" ? "default" : "outline"}
-                onClick={() => {
-                  setIsShow("hour");
-                  setDisplayPrice(price.price_per_hour);
-                  setPriceSuffix("/ ชั่วโมง");
-                }}
-                className="flex-1 cursor-pointer"
-              >
-                รายชั่วโมง
               </Button>
             )}
           </div>
@@ -416,16 +415,14 @@ export default function Page() {
                 placeholder="เลือกวันที่เข้าจอด"
                 className="cursor-pointer"
               />
-              {/* --- v v v อัปเดต SelectForm v v v --- */}
               <SelectForm
                 title="จำนวนวัน"
                 placeholder="เลือกจำนวนวัน"
                 itemList={timeOption}
                 leadingIcon={<Minimize2 />}
-                value={selectedMonthKey} // <--- ใช้ Key (string)
-                onValueChange={setSelectedMonthKey} // <--- อัปเดต Key (string)
+                value={selectedMonthKey}
+                onValueChange={setSelectedMonthKey}
               />
-              {/* --- ^ ^ ^ ----------------------- ^ ^ ^ --- */}
             </div>
           )}
 
@@ -472,14 +469,16 @@ export default function Page() {
           </div>
           <div>
             <Link href={buildPaymentUrl}>
-              <Button className="w-full cursor-pointer">จองที่จอดนี้</Button>
+              <Button className="w-full cursor-pointer h-10">
+                จองที่จอดนี้
+              </Button>
             </Link>
           </div>
         </div>
       </div>
 
       {/* Thumbnails */}
-      <div className="h-[130px] w-2/4 flex justify-center items-center space-x-2 overflow-x-auto px-4">
+      <div className="h-[100px] w-2/4 flex justify-center items-center space-x-2 overflow-x-auto px-4">
         {imageUrls.map((img, idx) => (
           <Image
             key={`${img}-${idx}`}
@@ -487,7 +486,7 @@ export default function Page() {
             width={80}
             height={100}
             alt=""
-            className={`h-16 w-20 object-cover border-2 rounded cursor-pointer ${
+            className={`h-16 w-20 object-cover border-2 rounded-lg cursor-pointer  ${
               idx === currentIndex
                 ? "border-blue-500 scale-105"
                 : "border-transparent"

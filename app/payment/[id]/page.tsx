@@ -264,11 +264,11 @@ export default function Page() {
     } else if (mode === "monthly") {
       return (
         <div className="mt-4 space-y-2 text-sm">
-          <div>
+          <div className="flex justify-between">
             <p className="text-gray-600">วันที่เข้าจอด</p>
             <p className="font-medium">{formatDate(dateIn)}</p>
           </div>
-          <div>
+          <div className="flex justify-between">
             <p className="text-gray-600">ระยะเวลาจอด</p>
             <p className="font-medium">
               {payment.duration} {payment.unit}
@@ -279,15 +279,15 @@ export default function Page() {
     } else if (mode === "daily") {
       return (
         <div className="mt-4 space-y-2 text-sm">
-          <div>
+          <div className="flex justify-between">
             <p className="text-gray-600">วันที่เข้าจอด</p>
             <p className="font-medium">{formatDate(dateIn)}</p>
           </div>
-          <div>
+          <div className="flex justify-between">
             <p className="text-gray-600">วันที่นำรถออก</p>
             <p className="font-medium">{formatDate(dateOut)}</p>
           </div>
-          <div>
+          <div className="flex justify-between">
             <p className="text-gray-600">ระยะเวลาจอด</p>
             <p className="font-medium">
               {payment.duration} {payment.unit}
@@ -540,7 +540,7 @@ export default function Page() {
 
           <div className="flex justify-end mt-8">
             <Button
-              className="cursor-pointer px-12 py-6 text-lg"
+              className="cursor-pointer px-12 py-4 text-lg"
               onClick={() => {
                 if (
                   !firstName.trim() ||
