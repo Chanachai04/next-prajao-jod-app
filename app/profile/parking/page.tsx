@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 interface ParkingItem {
-  image_id: string;
+  image_url: string | null;
   name: string;
   type: string;
   total_slot: string;
@@ -115,22 +115,27 @@ export default function Parking() {
                         className="border-b hover:bg-gray-50 text-lg"
                       >
                         <td className="py-6 px-6 text-center">
-                          <Image
-                            src={
-                              item.image_id
-                                ? `/images/${item.image_id}`
-                                : "/placeholder.png"
-                            }
-                            alt={item.name}
-                            width={96}
-                            height={96}
-                            className="w-24 h-24 object-cover rounded-lg mx-auto"
-                          />
+                          {item.image_url ? (
+                            <Image
+                              src={item.image_url}
+                              alt={item.name}
+                              width={96}
+                              height={96}
+                              className="w-24 h-24 object-cover rounded-lg mx-auto"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                              <span className="text-gray-400 text-xs">
+                                ไม่มีรูป
+                              </span>
+                            </div>
+                          )}
                         </td>
                         <td className="py-6 px-6 text-center">{item.name}</td>
                         <td className="py-6 px-6 text-center">{item.type}</td>
                         <td className="py-6 px-6 text-center">
-                          {item.total_slot} ช่อง
+                          {item.total_slot}
                         </td>
                       </tr>
                     ))

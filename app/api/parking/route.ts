@@ -12,9 +12,11 @@ export async function GET() {
         { status: 401 }
       );
     }
+
+    // ดึงข้อมูลจาก rent_detail
     const { data, error } = await supabase
       .from('rent_detail')
-      .select('name, type, total_slot, image_id')
+      .select('id, name, type, total_slot, image_id')
       .eq('owner_id', userId);
 
     if (error) {
@@ -25,10 +27,35 @@ export async function GET() {
       );
     }
 
+    // ดึงรูปภาพสำหรับแต่ละรายการ
+    const formattedData = await Promise.all(
+      (data || []).map(async (item) => {
+        let imageUrl = null;
+
+        if (item.image_id) {
+          // ดึง image_url จาก rent_images โดยใช้ image_id
+          const { data: imageData } = await supabase
+            .from('rent_images')
+            .select('image_url')
+            .eq('id', item.image_id)
+            .single();
+
+          imageUrl = imageData?.image_url || null;
+        }
+
+        return {
+          name: item.name,
+          type: item.type,
+          total_slot: item.total_slot,
+          image_url: imageUrl
+        };
+      })
+    );
+
     return Response.json({
       success: true,
-      data: data || [],
-      count: data?.length || 0
+      data: formattedData || [],
+      count: formattedData?.length || 0
     });
 
   } catch (err) {
