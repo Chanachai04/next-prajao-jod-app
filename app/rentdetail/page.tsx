@@ -12,10 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import MapPicker from "@/components/map/MapPicker";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
-import ProvinceSearch from "@/components/form/ProvinceSearch";
 import AlertModal from "@/components/ui/modal";
 import useRentDetail from "@/hook/useRentDetail";
 
@@ -39,16 +37,13 @@ export default function RentDetail() {
     selectedFacilities,
     agreeTerms,
     agreeFee,
-    markerPosition,
     handleFieldChange,
     toggleFacility,
     toggleSelectAllDays,
     toggleDay,
     changeTime,
     toggleAllDay,
-    handleProvinceSearchChange,
     handleSubmit,
-    onPositionChange,
     setFormValues,
     setAgreeTerms,
     setAgreeFee,
@@ -342,33 +337,6 @@ export default function RentDetail() {
             {submitStatus.message}
           </p>
         )}
-
-        {/* --map */}
-        <div className="py-5">
-          <Label className="text-lg">ตำแหน่งที่จอดรถ *</Label>
-          <p className="py-3 text-sm">
-            พิมพ์เพื่อค้นหาตำแหน่งที่ใกล้เคียง
-            และเลื่อนพิกัดในแผนที่เพื่อความละเอียดอีกครั้ง
-          </p>
-          <ProvinceSearch onChange={handleProvinceSearchChange} />
-          <div className="h-[400px] w-full relative pt-3">
-            <MapPicker
-              height="400px"
-              zoom={13}
-              onMapReady={() => console.log("Map loaded")}
-              markerAt={markerPosition}
-              onPositionChange={(lat, lng) =>
-                setFormValues((prev) => ({
-                  ...prev,
-                  latitude: lat.toFixed(6),
-                  longitude: lng.toFixed(6),
-                }))
-              }
-            />
-          </div>
-          {/* latitude/longitude display removed per user request */}
-        </div>
-        <hr className="border-gray-300" />
         {/* --ราคา */}
         <div className="py-5">
           <h1 className="pb-3 text-2xl">ราคา</h1>

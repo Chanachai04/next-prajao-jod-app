@@ -15,8 +15,6 @@ type RentDetailPayload = {
   district?: string;
   province?: string;
   landmark?: string;
-  latitude?: number;
-  longitude?: number;
   owner_id?: string;
   price?: {
     price_per_hour?: number | null;
@@ -31,6 +29,7 @@ type RentDetailPayload = {
     close_time: string;
   }>;
 };
+
 
 export async function POST(req: Request) {
   try {
@@ -57,8 +56,6 @@ export async function POST(req: Request) {
       district,
       province,
       landmark,
-      latitude,
-      longitude,
       owner_id,
       price,
       facilities,
@@ -74,10 +71,6 @@ export async function POST(req: Request) {
       !district ||
       !province ||
       !landmark ||
-      typeof latitude !== "number" ||
-      typeof longitude !== "number" ||
-      !Number.isFinite(latitude) ||
-      !Number.isFinite(longitude) ||
       !owner_id
     ) {
       return NextResponse.json(
@@ -98,8 +91,6 @@ export async function POST(req: Request) {
         district,
         province,
         landmark,
-        latitude,
-        longitude,
         owner_id,
       })
       .select("id")

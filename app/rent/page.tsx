@@ -16,7 +16,7 @@ export default function Rent() {
   useEffect(() => {
     const fetchContact = async () => {
       try {
-        const res = await fetch("/api/rent", {
+        const res = await fetch("/api/parking", {
           method: "GET",
           credentials: "include",
           cache: "no-store",
