@@ -9,6 +9,7 @@ type LabelAndInputProps = {
   leadingIcon?: React.ReactNode;
   trailingIcon?: React.ReactNode;
   textLabelSize?: string;
+  labelClassName?: string;
   className?: string;
   onClick?: () => void;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,12 +26,13 @@ export default function LabelAndInputForm({
   textLabelSize = "text-lg",
   className,
   onClick,
+  labelClassName,
   onChange,
   value,
 }: LabelAndInputProps) {
   return (
     <div>
-      <Label htmlFor={id} className={`${textLabelSize} `}>
+      <Label htmlFor={id} className={`${textLabelSize} ${labelClassName}`}>
         {title}
       </Label>
       <div className="relative mt-2">

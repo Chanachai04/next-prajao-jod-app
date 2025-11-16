@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Image from "next/image";
-import { toast } from "sonner";
 import AlertModal from "@/components/ui/modal";
 
 export default function Detail() {
@@ -150,7 +149,8 @@ export default function Detail() {
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
             <LabelAndInput
               title="ชื่อ *"
@@ -158,7 +158,8 @@ export default function Detail() {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
             <LabelAndInput
               title="นามสกุล *"
@@ -166,7 +167,8 @@ export default function Detail() {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
             <LabelAndInput
               title="เลขประจำตัวประชาชน"
@@ -174,7 +176,8 @@ export default function Detail() {
               type="text"
               value={citizenId}
               onChange={(e) => setCitizenId(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
             <LabelAndInput
               title="Line ID"
@@ -182,7 +185,8 @@ export default function Detail() {
               type="text"
               value={lineId}
               onChange={(e) => setLineId(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
             <LabelAndInput
               title="เบอร์โทรศัพท์"
@@ -190,7 +194,8 @@ export default function Detail() {
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="border-gray-300 w-full"
+              className="border-gray-300 w-full text-gray-700"
+              labelClassName="text-grey-500"
             />
           </div>
 

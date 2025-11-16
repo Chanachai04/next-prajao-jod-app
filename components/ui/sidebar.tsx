@@ -144,9 +144,7 @@ export default function Sidebar({
   const menuItems: MenuItem[] = [
     { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
     { name: "ประวัติการจอง", href: "/profile/history", icon: History },
-    { name: "ข้อมูลรถของคุณ", href: "/profile/cardetail", icon: Car },
     { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
-    { name: "การเข้าจอง", href: "/profile/reservation", icon: CalendarCheck },
     { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
   ];
 
