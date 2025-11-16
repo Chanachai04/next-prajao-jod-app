@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
-import { createClient } from "@supabase/supabase-js";
 
-const SECRET_KEY = process.env.SECRET_KEY as string;
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+import { supabase } from "./lib/supabaseClient";
 
 // หน้าที่ต้อง login ก่อนถึงจะเข้าได้
 const protectedRoutes = ["/rent", "/rentdetail", "/profile", "/payment"];
 
 // หน้าที่ login แล้วห้ามเข้า
-const authRoutes = [
-  "/login",
-  "/register",
-  "/forgotpassword",
-  "/reset",
-  "/terms",
-];
+const authRoutes = ["/login", "/register", "/forgotpassword", "/reset"];
 
 const isProtectedRoute = (path: string) =>
   protectedRoutes.some(
@@ -60,7 +50,6 @@ export async function middleware(req: NextRequest) {
     // ตรวจสอบ is_checked สำหรับ /rent
     if (path === "/rent" && userId) {
       try {
-        const supabase = createClient(supabaseUrl, supabaseKey);
         const { data, error } = await supabase
           .from("users")
           .select("is_checked")

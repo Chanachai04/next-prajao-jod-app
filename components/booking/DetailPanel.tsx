@@ -16,7 +16,6 @@ interface DetailPanelProps {
   onNavigate: (direction: "prev" | "next") => void;
   onSelectImage: (index: number) => void;
   onSelectOption: (option: PriceKey) => void;
-  // --- v v v เพิ่ม Prop นี้เพื่อรับค่า v v v ---
   monthDurationKey?: string;
 }
 
@@ -51,7 +50,6 @@ export default function DetailPanel({
   onNavigate,
   onSelectImage,
   onSelectOption,
-  // --- v v v รับ Prop นี้เข้ามา v v v ---
   monthDurationKey,
 }: DetailPanelProps) {
   const searchParams = useSearchParams();
@@ -102,7 +100,6 @@ export default function DetailPanel({
       ? spot.facilities.map((item) => item.name).join(", ")
       : "-";
 
-  // --- v v v แก้ไข useMemo นี้ ให้ส่งค่าได้ถูกต้อง v v v ---
   // สร้าง URL พร้อม params
   const orderUrl = useMemo(() => {
     const params = new URLSearchParams();
@@ -140,13 +137,7 @@ export default function DetailPanel({
     return `/order/${spot.id}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-  }, [
-    spot.id,
-    searchParams,
-    selectedOptionDetail, // <--- เพิ่ม Dependency
-    monthDurationKey, // <--- เพิ่ม Dependency
-  ]);
-  // --- ^ ^ ^ ----------------------------------------- ^ ^ ^ ---
+  }, [spot.id, searchParams, selectedOptionDetail, monthDurationKey]);
 
   return (
     <div className="w-lg bg-white">
@@ -184,7 +175,7 @@ export default function DetailPanel({
       </div>
 
       {/* Thumbnails */}
-      <div className="bg-[#F9F3F3] h-[130px] flex justify-center items-center space-x-2 overflow-x-auto px-4">
+      <div className="bg-[#F9F3F3] h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-4">
         {imageUrls.map((img, index) => (
           <Image
             key={`${img}-${index}`}
@@ -192,7 +183,7 @@ export default function DetailPanel({
             alt={`thumbnail-${index}`}
             width={80}
             height={100}
-            className={`h-16 w-20 object-cover cursor-pointer border-2 transition-all ${
+            className={`h-16 w-20 object-cover cursor-pointer border-2 transition-all rounded-lg ${
               index === currentIndex
                 ? "border-blue-500 scale-105"
                 : "border-transparent hover:border-gray-300"

@@ -12,9 +12,6 @@ export default function Navbar() {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let channel: any = null;
-
     const fetchData = async () => {
       try {
         const res = await fetch("/api/me", {
@@ -42,27 +39,6 @@ export default function Navbar() {
           if (userData?.image_url) {
             setImage(userData.image_url + `?t=${Date.now()}`);
           }
-
-          // ======== Subscribe Realtime ========
-          channel = supabase
-            .channel("user-image-updates")
-            .on(
-              "postgres_changes",
-              {
-                event: "UPDATE",
-                schema: "public",
-                table: "users",
-                filter: `id=eq.${data.userId}`,
-              },
-              (payload) => {
-                const newUrl = payload.new.image_url;
-
-                // กัน cache → บังคับโหลดใหม่ทันที
-                setImage(newUrl + `?t=${Date.now()}`);
-              }
-            )
-            .subscribe();
-          // ====================================
         }
       } catch (err) {
         console.error(err);
@@ -79,7 +55,6 @@ export default function Navbar() {
 
     return () => {
       window.removeEventListener("loginStatusChanged", handler);
-      if (channel) supabase.removeChannel(channel);
     };
   }, []);
 
@@ -105,14 +80,17 @@ export default function Navbar() {
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
                   >
                     ปล่อยเช่าที่จอดรถ
                   </Button>
                 </Link>
 
                 <Link href="/rent" className="sm:hidden">
-                  <Button variant="outline" className="px-2 py-1 h-8 text-sm">
+                  <Button
+                    variant="outline"
+                    className="px-2 py-1 h-8 text-sm cursor-pointer"
+                  >
                     เช่าที่จอด
                   </Button>
                 </Link>
