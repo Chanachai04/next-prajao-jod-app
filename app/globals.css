@@ -126,12 +126,12 @@
 .no-picker-icon[type="time"] {
   appearance: none;
   -webkit-appearance: none;
-  padding-right: 2rem; /* เพิ่มพื้นที่คลิกด้านขวา */
+  padding-right: 2rem;
 }
 
 .no-picker-icon[type="date"]::-webkit-calendar-picker-indicator,
 .no-picker-icon[type="time"]::-webkit-calendar-picker-indicator {
-  opacity: 0; /* ซ่อนไอคอน */
+  opacity: 0;
 }
 
 input::-webkit-outer-spin-button,
@@ -147,5 +147,6 @@ input[type=number] {
 .text-grey-500 {
   color: #50555c;
 }
+
 
 

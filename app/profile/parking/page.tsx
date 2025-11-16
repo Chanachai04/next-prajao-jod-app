@@ -61,10 +61,10 @@ export default function Parking() {
         {/* ไอคอนลูกศร ติดกับ Sidebar */}
         <div className="pt-10 pr-50 overflow-y-auto max-h-[80vh] w-full lg:w-2/3">
           <div className="overflow-x-auto flex justify-center">
-            {" "}
+            {""}
             {/* จัดตารางให้กลาง */}
             <table className="w-full max-w-[1200px] mx-auto border-collapse">
-              {" "}
+              {""}
               {/* ใช้ max-w เพื่อกำหนดความกว้างของตาราง */}
               <thead>
                 <tr className="text-gray-700 text-xl font-semibold border-b">
