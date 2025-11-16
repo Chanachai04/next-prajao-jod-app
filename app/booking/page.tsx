@@ -54,18 +54,10 @@ export default function Booking() {
   const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const [selectedSpot, setSelectedSpot] = useState<RentSpot | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [nearbyCoords, setNearbyCoords] = useState<{
-    lat: number;
-    lon: number;
-  } | null>(null);
   const [appliedProvince, setAppliedProvince] = useState<string | null>(null);
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<
     string | null
   >(null);
-  const [appliedCoords, setAppliedCoords] = useState<{
-    lat: number;
-    lon: number;
-  } | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const firstFetchRef = useRef(true);
 
@@ -75,9 +67,6 @@ export default function Booking() {
     const mode = searchParams.get("mode") || undefined;
     const location = searchParams.get("location") || "";
     const searchTermParam = searchParams.get("search") || "";
-    const nearMe = searchParams.get("nearMe") === "1";
-    const latParam = searchParams.get("lat");
-    const lonParam = searchParams.get("lon");
     const dateInStr = searchParams.get("dateIn");
     const dateOutStr = searchParams.get("dateOut");
     const timeInStr = searchParams.get("timeIn");
@@ -120,7 +109,7 @@ export default function Booking() {
     const initialSearch = searchTermParam || location;
     const trimmedInitialSearch = initialSearch.trim();
     let computedSearch: string | null = null;
-    if (trimmedInitialSearch && !nearMe) {
+    if (trimmedInitialSearch) {
       computedSearch = trimmedInitialSearch;
       setSearchText(trimmedInitialSearch);
     }
@@ -132,43 +121,14 @@ export default function Booking() {
       }
     }
 
-    let computedCoords: { lat: number; lon: number } | null = null;
-    if (latParam && lonParam) {
-      const latNum = Number(latParam);
-      const lonNum = Number(lonParam);
-      if (Number.isFinite(latNum) && Number.isFinite(lonNum)) {
-        const ll: LatLng = [latNum, lonNum];
-        setMapCenter(ll);
-        setMarkerAt(ll);
-        computedCoords = { lat: latNum, lon: lonNum };
-      }
-      if (nearMe) setSearchText("สถานที่ใกล้ฉัน");
-      else if (location) setSearchText(location);
-    } else if (nearMe) {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const ll: LatLng = [pos.coords.latitude, pos.coords.longitude];
-            setMapCenter(ll);
-            setMarkerAt(ll);
-            setSearchText("สถานที่ใกล้ฉัน");
-          },
-          () => {
-            // ignore failure
-          }
-        );
-      }
-    } else if (location) {
-      setSearchText(location);
+    if (location) {
       void geocodeAndCenterRef(location);
     }
 
     firstFetchRef.current = Boolean(trimmedInitialSearch);
     setSelectedProvince(computedProvince);
-    setNearbyCoords(computedCoords);
     setAppliedProvince(computedProvince);
     setAppliedSearchKeyword(computedSearch);
-    setAppliedCoords(computedCoords);
     setIsInitialised(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -182,14 +142,12 @@ export default function Booking() {
       )}&countrycodes=th&limit=1&addressdetails=1`;
       const res = await fetch(url, {
         headers: {
-          // Rely on browser Referer; set Accept-Language to Thai for better matches
           "Accept-Language": "th,en;q=0.8",
         },
       });
       if (!res.ok) return;
       const data: Array<{ lat: string; lon: string }> = await res.json();
       if (!data || data.length === 0) {
-        // not found: do nothing, keep current map
         return;
       }
       const { lat, lon } = data[0];
@@ -201,11 +159,10 @@ export default function Booking() {
         setMarkerAt(ll);
       }
     } catch {
-      // ignore errors, no UI change on failure
+      // ignore errors
     }
   }, [searchText]);
 
-  // overload for initial call with provided text
   const geocodeAndCenterWith = async (text: string) => {
     const q = text.trim();
     if (!q) return;
@@ -239,29 +196,22 @@ export default function Booking() {
     async (override?: {
       province?: string | null;
       search?: string | null;
-      coords?: { lat: number; lon: number } | null;
       displayEmptyMessage?: boolean;
     }) => {
       const provinceName =
         override?.province !== undefined ? override.province : appliedProvince;
       const searchValue =
         override?.search !== undefined ? override.search : appliedSearchKeyword;
-      const coordsValue =
-        override?.coords !== undefined ? override.coords : appliedCoords;
       const displayEmpty =
         override?.displayEmptyMessage !== undefined
           ? override.displayEmptyMessage
           : true;
       const trimmedSearch =
         typeof searchValue === "string" ? searchValue.trim() : "";
-      const hasCoords =
-        !!coordsValue &&
-        Number.isFinite(coordsValue.lat) &&
-        Number.isFinite(coordsValue.lon);
       const hasProvince = Boolean(provinceName);
       const hasSearch = Boolean(trimmedSearch);
 
-      if (!hasCoords && !hasProvince && !hasSearch) {
+      if (!hasProvince && !hasSearch) {
         setSpots([]);
         setEmptyMessage(displayEmpty ? EMPTY_MESSAGE : null);
         setSelectedSpot(null);
@@ -280,10 +230,6 @@ export default function Booking() {
         }
         if (trimmedSearch) {
           params.set("search", trimmedSearch);
-        }
-        if (hasCoords && coordsValue) {
-          params.set("lat", String(coordsValue.lat));
-          params.set("lon", String(coordsValue.lon));
         }
         const queryString = params.toString();
         const res = await fetch(
@@ -321,7 +267,7 @@ export default function Booking() {
         setIsLoadingSpots(false);
       }
     },
-    [appliedProvince, appliedSearchKeyword, appliedCoords]
+    [appliedProvince, appliedSearchKeyword]
   );
 
   useEffect(() => {
@@ -353,39 +299,24 @@ export default function Booking() {
     setIsShowing(true);
     setCurrentIndex(0);
     setSelectedOptionDetail("hourly");
-    if (
-      spot.latitude !== null &&
-      spot.longitude !== null &&
-      Number.isFinite(spot.latitude) &&
-      Number.isFinite(spot.longitude)
-    ) {
-      const ll: LatLng = [spot.latitude, spot.longitude];
-      setMapCenter(ll);
-      setMarkerAt(ll);
-    }
+    // ไม่เปลี่ยนตำแหน่งแผนที่และ marker - แสดงแค่ mark ที่ค้นหามาเดิม
   };
 
   const handleLocationChange = (payload: LocationChangePayload) => {
     setSelectedProvince(payload.provinceName);
-    setNearbyCoords(null);
     setMarkerAt(null);
   };
 
   const handleSearch = async () => {
     const trimmed = searchText.trim();
     const normalizedSearch = trimmed ? trimmed : null;
-    if (normalizedSearch) {
-      setNearbyCoords(null);
-    }
-    const coordsToApply = normalizedSearch ? null : nearbyCoords;
+
     setAppliedProvince(selectedProvince);
     setAppliedSearchKeyword(normalizedSearch);
-    setAppliedCoords(coordsToApply);
     await geocodeAndCenter();
     await fetchParkingSpots({
       province: selectedProvince,
       search: normalizedSearch,
-      coords: coordsToApply,
       displayEmptyMessage: true,
     });
   };

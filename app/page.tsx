@@ -8,7 +8,6 @@ import DateForm from "@/components/form/DateForm";
 import TimeForm from "@/components/form/TimeForm";
 import SelectForm from "@/components/form/SelectForm";
 import { useRouter } from "next/navigation";
-import useGeolocation from "@/hook/useGeolocation";
 import ProvinceSearch from "@/components/form/ProvinceSearch";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
@@ -34,82 +33,23 @@ export default function Home() {
     { key: "monthly", label: "รายเดือน" },
   ];
 
-  useGeolocation();
-
-  const getUserLocationFromCookie = () => {
-    if (typeof document === "undefined") return null;
-    const cookieEntry = document.cookie
-      .split("; ")
-      .find((item) => item.startsWith("user_location="));
-    if (!cookieEntry) return null;
-    const value = cookieEntry.split("=")[1];
-    if (!value) return null;
-    try {
-      const parsed = JSON.parse(decodeURIComponent(value));
-      if (
-        typeof parsed?.lat === "number" &&
-        typeof parsed?.lon === "number" &&
-        Number.isFinite(parsed.lat) &&
-        Number.isFinite(parsed.lon)
-      ) {
-        return parsed as { lat: number; lon: number };
-      }
-    } catch {
-      // ignore parse errors
-    }
-    return null;
-  };
-
-  const buildAndGoToBooking = async (nearMe = false) => {
+  const buildAndGoToBooking = () => {
     const params = new URLSearchParams();
     params.set("mode", selectedOption);
     const trimmedLocation = location.trim();
-    if (!nearMe && trimmedLocation) {
+    if (trimmedLocation) {
       params.set("location", trimmedLocation);
       params.set("search", trimmedLocation);
     }
-    if (!nearMe) {
-      if (provinceId) params.set("provinceId", String(provinceId));
-      if (districtId) params.set("districtId", String(districtId));
-      if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
-    }
-    if (nearMe) params.set("nearMe", "1");
+    if (provinceId) params.set("provinceId", String(provinceId));
+    if (districtId) params.set("districtId", String(districtId));
+    if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
 
     // Dates/times
     if (dateIn) params.set("dateIn", dateIn.toISOString());
     if (dateOut) params.set("dateOut", dateOut.toISOString());
     if (timeIn) params.set("timeIn", timeIn);
     if (timeOut) params.set("timeOut", timeOut);
-
-    // If near me: get precise location and pass lat/lon
-    if (nearMe) {
-      const cookieLocation = getUserLocationFromCookie();
-      if (cookieLocation) {
-        params.set("lat", String(cookieLocation.lat));
-        params.set("lon", String(cookieLocation.lon));
-        router.push(`/booking?${params.toString()}`);
-        return;
-      }
-      if ("geolocation" in navigator) {
-        try {
-          const pos = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0,
-              });
-            }
-          );
-          params.set("lat", String(pos.coords.latitude));
-          params.set("lon", String(pos.coords.longitude));
-        } catch {
-          // ignore, fallback without lat/lon
-        }
-      }
-      router.push(`/booking?${params.toString()}`);
-      return;
-    }
 
     router.push(`/booking?${params.toString()}`);
   };
@@ -274,22 +214,13 @@ export default function Home() {
                 </div>
               </>
             )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Button
-                type="button"
-                onClick={() => buildAndGoToBooking(false)}
-                className="mt-6 w-full text-lg py-6 cursor-pointer"
-              >
-                ค้นหาที่จอดรถ
-              </Button>
-              <Button
-                type="button"
-                onClick={() => buildAndGoToBooking(true)}
-                className="mt-6 w-full text-lg py-6 cursor-pointer"
-              >
-                ค้นหาที่จอดรถใกล้ฉัน
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={buildAndGoToBooking}
+              className="mt-6 w-full text-lg py-6 cursor-pointer"
+            >
+              ค้นหาที่จอดรถ
+            </Button>
           </form>
         </div>
       </div>

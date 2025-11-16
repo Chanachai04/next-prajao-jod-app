@@ -131,7 +131,7 @@ export default function ProvinceSearch({
             setDropdown(true);
           }}
           onFocus={() => setDropdown(true)}
-          className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
+          className="pl-10 pr-10 w-full text-sm md:text-lg h-10 bg-white"
         />
         {query && (
           <button

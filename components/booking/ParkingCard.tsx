@@ -5,6 +5,8 @@ import { Button } from "../ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { RentSpot } from "@/types/booking";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 interface ParkingCardProps {
   spot: RentSpot;
@@ -37,6 +39,7 @@ export default function ParkingCard({
   onClick,
   isActive = false,
 }: ParkingCardProps) {
+  const searchParams = useSearchParams();
   const coverImage = spot.images[0]?.image_url ?? FALLBACK_IMAGE;
   const availablePriceTags = PRICE_LABELS.filter(({ key }) => {
     const value = spot.price ? spot.price[key] : null;
@@ -58,6 +61,27 @@ export default function ParkingCard({
         spot.price?.price_per_hour !== undefined
       ? "ชั่วโมง"
       : null;
+
+  // สร้าง URL พร้อม params
+  const orderUrl = useMemo(() => {
+    const params = new URLSearchParams();
+
+    const dateIn = searchParams.get("dateIn");
+    const dateOut = searchParams.get("dateOut");
+    const timeIn = searchParams.get("timeIn");
+    const timeOut = searchParams.get("timeOut");
+    const mode = searchParams.get("mode");
+
+    if (dateIn) params.set("dateIn", dateIn);
+    if (dateOut) params.set("dateOut", dateOut);
+    if (timeIn) params.set("timeIn", timeIn);
+    if (timeOut) params.set("timeOut", timeOut);
+    if (mode) params.set("mode", mode);
+
+    return `/order/${spot.id}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+  }, [spot.id, searchParams]);
 
   return (
     <Card
@@ -105,7 +129,7 @@ export default function ParkingCard({
                 }`
               : "ไม่ระบุราคา"}
           </p>
-          <Link href={`/order/${spot.id}`}>
+          <Link href={orderUrl}>
             <Button className="ml-2">จองทันที</Button>
           </Link>
         </div>

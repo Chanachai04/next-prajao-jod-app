@@ -40,11 +40,9 @@ const PROFILE_STORAGE_KEY = "profile.sidebar.snapshot";
 
 function readProfileSnapshot(): ProfileState {
   if (typeof window === "undefined") return DEFAULT_PROFILE;
-
   try {
     const stored = window.sessionStorage.getItem(PROFILE_STORAGE_KEY);
     if (!stored) return DEFAULT_PROFILE;
-
     const parsed = JSON.parse(stored) as Partial<ProfileState>;
     return {
       email: parsed.email ?? "",
@@ -63,9 +61,15 @@ export default function Sidebar({
   currentPathname: string;
 }) {
   const router = useRouter();
-  const [profile, setProfile] = useState<ProfileState>(() =>
-    readProfileSnapshot()
-  );
+
+  const [profile, setProfile] = useState<ProfileState>(DEFAULT_PROFILE);
+
+  // โหลด snapshot หลัง hydration
+  useEffect(() => {
+    const snap = readProfileSnapshot();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProfile(snap);
+  }, []);
 
   const handleLogout = useCallback(async () => {
     await fetch("/api/logout", { method: "POST" });
@@ -82,7 +86,7 @@ export default function Sidebar({
     try {
       window.sessionStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(next));
     } catch {
-      // ignore sessionStorage errors
+      // ignore
     }
   }, []);
 
@@ -104,7 +108,7 @@ export default function Sidebar({
         imageUrl: data.imageUrl ?? null,
       });
     } catch (err) {
-      console.error("❌ fetchProfile error:", err);
+      console.error("fetchProfile error:", err);
     }
   }, [syncProfile]);
 

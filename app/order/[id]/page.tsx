@@ -6,21 +6,15 @@ import SelectForm from "@/components/form/SelectForm";
 import TimeForm from "@/components/form/TimeForm";
 import { Button } from "@/components/ui/button";
 import { Facility, Price, RentDetail, Schedule } from "@/types/order";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Clock,
-  MapPin,
-  Minimize2,
-  Share2,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, MapPin, Minimize2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 
 export default function Page() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
   const [rentDetail, setRentDetail] = useState<RentDetail | null>(null);
   const [price, setPrice] = useState<Price | null>(null);
   const [facilities, setFacilities] = useState<Facility[] | null>(null);
@@ -57,6 +51,38 @@ export default function Page() {
     oneYears: "1 ปี",
   };
 
+  // อ่านค่าจาก URL params
+  useEffect(() => {
+    if (!searchParams) return;
+
+    const dateInParam = searchParams.get("dateIn");
+    const dateOutParam = searchParams.get("dateOut");
+    const timeInParam = searchParams.get("timeIn");
+    const timeOutParam = searchParams.get("timeOut");
+    const mode = searchParams.get("mode");
+
+    if (dateInParam) {
+      const d = new Date(dateInParam);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (!isNaN(d.getTime())) setDateIn(d);
+    }
+    if (dateOutParam) {
+      const d = new Date(dateOutParam);
+      if (!isNaN(d.getTime())) setDateOut(d);
+    }
+    if (timeInParam) setTimeIn(timeInParam);
+    if (timeOutParam) setTimeOut(timeOutParam);
+
+    // ตั้งค่า mode จาก URL
+    if (mode === "monthly") {
+      setIsShow("month");
+    } else if (mode === "daily") {
+      setIsShow("day");
+    } else if (mode === "hourly") {
+      setIsShow("hour");
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const fetchOrder = async () => {
       const res = await fetch(`/api/order?id=${id}`, {
@@ -76,16 +102,58 @@ export default function Page() {
 
   // ตั้งค่า default ราคาตอนโหลดข้อมูลเสร็จ
   useEffect(() => {
-    if (price?.price_per_day) {
-      const timer = setTimeout(() => {
+    if (!price) return;
+
+    const timer = setTimeout(() => {
+      // ถ้ามี mode จาก URL ให้ใช้ตาม mode
+      if (isShow) {
+        // ตรวจสอบว่า mode ที่เลือกมีราคาไหม
+        if (isShow === "day" && price.price_per_day) {
+          setDisplayPrice(price.price_per_day);
+          setPriceSuffix("/ วัน");
+        } else if (isShow === "month" && price.price_per_month) {
+          setDisplayPrice(price.price_per_month);
+          setPriceSuffix("/ เดือน");
+        } else if (isShow === "hour" && price.price_per_hour) {
+          setDisplayPrice(price.price_per_hour);
+          setPriceSuffix("/ ชั่วโมง");
+        } else {
+          // ถ้า mode ที่เลือกไม่มีราคา ให้เลือกราคาที่มี
+          if (price.price_per_day) {
+            setIsShow("day");
+            setDisplayPrice(price.price_per_day);
+            setPriceSuffix("/ วัน");
+          } else if (price.price_per_month) {
+            setIsShow("month");
+            setDisplayPrice(price.price_per_month);
+            setPriceSuffix("/ เดือน");
+          } else if (price.price_per_hour) {
+            setIsShow("hour");
+            setDisplayPrice(price.price_per_hour);
+            setPriceSuffix("/ ชั่วโมง");
+          }
+        }
+        return;
+      }
+
+      // ถ้าไม่มี isShow จาก URL ให้เลือกราคาที่มี
+      if (price.price_per_day) {
         setIsShow("day");
         setDisplayPrice(price.price_per_day);
         setPriceSuffix("/ วัน");
-      }, 0);
+      } else if (price.price_per_month) {
+        setIsShow("month");
+        setDisplayPrice(price.price_per_month);
+        setPriceSuffix("/ เดือน");
+      } else if (price.price_per_hour) {
+        setIsShow("hour");
+        setDisplayPrice(price.price_per_hour);
+        setPriceSuffix("/ ชั่วโมง");
+      }
+    }, 0);
 
-      return () => clearTimeout(timer);
-    }
-  }, [price]);
+    return () => clearTimeout(timer);
+  }, [price, isShow]);
 
   const imageUrls =
     images.length > 0 ? images.map((img) => img.image_url) : [FALLBACK_IMAGE];
@@ -161,6 +229,7 @@ export default function Page() {
 
   const allGroups = groupedSchedules();
   if (isLoading) return <Loading />;
+
   return (
     <div className="container mx-auto min-h-screen">
       {/* Breadcrumb */}

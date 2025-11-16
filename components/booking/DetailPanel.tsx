@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { ArrowLeft, ArrowRight, MapPin, X } from "lucide-react";
 import { RentSpot } from "@/types/booking";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 type PriceKey = "hourly" | "daily" | "monthly";
 
@@ -49,6 +50,7 @@ export default function DetailPanel({
   onSelectImage,
   onSelectOption,
 }: DetailPanelProps) {
+  const searchParams = useSearchParams();
   const images = spot.images.length > 0 ? spot.images : [];
   const imageUrls =
     images.length > 0 ? images.map((img) => img.image_url) : [FALLBACK_IMAGE];
@@ -95,6 +97,28 @@ export default function DetailPanel({
     spot.facilities.length > 0
       ? spot.facilities.map((item) => item.name).join(", ")
       : "-";
+
+  // สร้าง URL พร้อม params
+  const orderUrl = useMemo(() => {
+    const params = new URLSearchParams();
+
+    // เพิ่ม params จาก searchParams
+    const dateIn = searchParams.get("dateIn");
+    const dateOut = searchParams.get("dateOut");
+    const timeIn = searchParams.get("timeIn");
+    const timeOut = searchParams.get("timeOut");
+    const mode = searchParams.get("mode");
+
+    if (dateIn) params.set("dateIn", dateIn);
+    if (dateOut) params.set("dateOut", dateOut);
+    if (timeIn) params.set("timeIn", timeIn);
+    if (timeOut) params.set("timeOut", timeOut);
+    if (mode) params.set("mode", mode);
+
+    return `/order/${spot.id}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+  }, [spot.id, searchParams]);
 
   return (
     <div className="w-lg bg-white">
@@ -190,7 +214,7 @@ export default function DetailPanel({
                   : "-"}
               </p>
             </div>
-            <Link href={`/order/${spot.id}`}>
+            <Link href={orderUrl}>
               <Button
                 type="button"
                 className="w-full md:w-1/2 mt-10 cursor-pointer hover:scale-105 transition-transform"

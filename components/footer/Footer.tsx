@@ -22,7 +22,10 @@ export default function Footer() {
             <p className="font-semibold mb-2">ติดต่อฝ่ายลูกค้าสัมพันธ์</p>
             <p className="text-sm md:text-base">บริษัท นินนินกลุ่ม จำกัด</p>
             <p className="text-sm md:text-base break-all">
-              อีเมล : prajaojodza007@gmail.com
+              อีเมล : s6652410030@sau.ac.th
+            </p>
+            <p className="text-sm md:text-base break-all">
+              อีเมล : s6652410007@sau.ac.th
             </p>
             <p className="text-sm md:text-base">โทร : 099-999-9999</p>
           </div>
