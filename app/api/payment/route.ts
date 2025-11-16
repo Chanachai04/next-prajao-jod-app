@@ -88,17 +88,37 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { userId, rentId, firstName, lastName, citizenId, phone, lineId } =
-      body;
+    const {
+      userId,
+      rentId,
+      firstName,
+      lastName,
+      citizenId,
+      phone,
+      lineId,
+      totalPrice,
+      duration,
+      mode,
+    } = body;
 
-    if (!userId || !rentId) {
+    // ตรวจสอบค่าที่จำเป็น
+    if (
+      !userId ||
+      !rentId ||
+      totalPrice === undefined ||
+      duration === undefined ||
+      !mode
+    ) {
       return NextResponse.json(
-        { message: "userId and rentId are required" },
+        {
+          message:
+            "userId, rentId, totalPrice, duration, and mode are required",
+        },
         { status: 400 }
       );
     }
 
-    // ตรวจสอบข้อมูลที่จำเป็น
+    // ตรวจสอบข้อมูลที่จำเป็น (ข้อมูล user)
     if (!firstName || !lastName || !citizenId || !phone) {
       return NextResponse.json(
         { message: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน" },
@@ -139,29 +159,31 @@ export async function POST(req: Request) {
       }
     }
 
-    // ตรวจสอบว่าเคยจองที่จอดนี้แล้วหรือไม่
-    const { data: existingHistory } = await supabase
-      .from("rent_history")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("rent_id", rentId)
-      .eq("status", true)
-      .single();
+    // ✅ ลบการตรวจสอบการจองซ้ำออก - อนุญาตให้จองได้หลายครั้ง
 
-    if (existingHistory) {
-      return NextResponse.json(
-        { message: "คุณได้จองที่จอดนี้แล้ว" },
-        { status: 400 }
-      );
-    }
-
-    // บันทึกข้อมูลการจองลง rent_history
-    const { error: historyError } = await supabase.from("rent_history").insert({
+    // สร้าง object ข้อมูลสำหรับบันทึกลง rent_history
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const historyData: any = {
       user_id: userId,
       rent_id: rentId,
       status: true,
       created_at: new Date().toISOString(),
-    });
+      total_price: totalPrice,
+    };
+
+    // เพิ่มคอลัมน์ระยะเวลา ตาม mode
+    if (mode === "hourly") {
+      historyData.parking_time_hour = duration;
+    } else if (mode === "daily") {
+      historyData.parking_time_day = duration;
+    } else if (mode === "monthly") {
+      historyData.parking_time_month = duration;
+    }
+
+    // บันทึกข้อมูลการจองลง rent_history
+    const { error: historyError } = await supabase
+      .from("rent_history")
+      .insert(historyData);
 
     if (historyError) {
       console.error("Error creating rent history:", historyError);

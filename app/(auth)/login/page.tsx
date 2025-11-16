@@ -14,8 +14,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams(); // <-- รับ query
-
+  const searchParams = useSearchParams();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);

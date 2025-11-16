@@ -5,13 +5,21 @@ import { Button } from "../ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { RentSpot } from "@/types/booking";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 interface ParkingCardProps {
   spot: RentSpot;
   onClick: () => void;
   isActive?: boolean;
+  // เพิ่ม props เพื่อรับค่า state จาก parent
+  currentSearchParams?: {
+    dateIn?: string;
+    dateOut?: string;
+    timeIn?: string;
+    timeOut?: string;
+    mode?: string; // "hourly" | "daily" | "monthly"
+    monthDurationKey?: string;
+  };
 }
 
 const PRICE_LABELS: Array<{
@@ -38,8 +46,8 @@ export default function ParkingCard({
   spot,
   onClick,
   isActive = false,
+  currentSearchParams,
 }: ParkingCardProps) {
-  const searchParams = useSearchParams();
   const coverImage = spot.images[0]?.image_url ?? FALLBACK_IMAGE;
   const availablePriceTags = PRICE_LABELS.filter(({ key }) => {
     const value = spot.price ? spot.price[key] : null;
@@ -62,26 +70,41 @@ export default function ParkingCard({
       ? "ชั่วโมง"
       : null;
 
-  // สร้าง URL พร้อม params
+  // สร้าง URL โดยใช้ค่าจาก currentSearchParams
   const orderUrl = useMemo(() => {
     const params = new URLSearchParams();
 
-    const dateIn = searchParams.get("dateIn");
-    const dateOut = searchParams.get("dateOut");
-    const timeIn = searchParams.get("timeIn");
-    const timeOut = searchParams.get("timeOut");
-    const mode = searchParams.get("mode");
+    if (currentSearchParams) {
+      const { dateIn, dateOut, timeIn, timeOut, mode, monthDurationKey } =
+        currentSearchParams;
 
-    if (dateIn) params.set("dateIn", dateIn);
-    if (dateOut) params.set("dateOut", dateOut);
-    if (timeIn) params.set("timeIn", timeIn);
-    if (timeOut) params.set("timeOut", timeOut);
-    if (mode) params.set("mode", mode);
+      // ใส่ dateIn เสมอ
+      if (dateIn) params.set("dateIn", dateIn);
+
+      // ใส่ mode เสมอ
+      if (mode) params.set("mode", mode);
+
+      // แยกตาม mode
+      if (mode === "monthly") {
+        // รายเดือน: ส่ง monthDurationKey
+        if (monthDurationKey) {
+          params.set("monthDurationKey", monthDurationKey);
+        }
+      } else if (mode === "daily") {
+        // รายวัน: ส่ง dateOut
+        if (dateOut) params.set("dateOut", dateOut);
+      } else if (mode === "hourly") {
+        // รายชั่วโมง: ส่ง dateOut, timeIn, timeOut
+        if (dateOut) params.set("dateOut", dateOut);
+        if (timeIn) params.set("timeIn", timeIn);
+        if (timeOut) params.set("timeOut", timeOut);
+      }
+    }
 
     return `/order/${spot.id}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-  }, [spot.id, searchParams]);
+  }, [spot.id, currentSearchParams]);
 
   return (
     <Card
