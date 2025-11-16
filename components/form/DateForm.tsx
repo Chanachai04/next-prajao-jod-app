@@ -32,7 +32,7 @@ export default function DateForm({
 
   const handleSelect = (selectedDate: Date) => {
     setDate!(selectedDate);
-    setOpen(false); // ปิด Popover อัตโนมัติ
+    setOpen(false);
   };
 
   return (
@@ -44,7 +44,7 @@ export default function DateForm({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={`w-full h-10 justify-start text-left font-normal ${className} mt-2`}
+            className={`w-full h-10 justify-start text-left font-normal ${className} mt-2 bg-white text-lg`}
             onClick={onClick}
             onChange={onChange}
             value={value}
@@ -54,7 +54,7 @@ export default function DateForm({
             {format(date ?? new Date(), "dd/MM/yyyy")}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
+        <PopoverContent className="w-auto p-0 ">
           <Calendar
             mode="single"
             selected={date}

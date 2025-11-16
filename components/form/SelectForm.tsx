@@ -15,6 +15,7 @@ interface SelectFormProps {
   itemList: Record<string, string>;
   leadingIcon?: ReactNode;
   className?: string;
+  value?: string; // <--- เพิ่ม prop นี้
   onValueChange?: (value: string) => void;
 }
 
@@ -24,17 +25,20 @@ export default function SelectForm({
   itemList,
   leadingIcon,
   className = "",
+  value,
   onValueChange,
 }: SelectFormProps) {
   return (
-    <div className={className}>
+    <div className="relative mt-2">
       {title && (
         <Label htmlFor="select" className="text-lg">
           {title}
         </Label>
       )}
-      <Select onValueChange={onValueChange}>
-        <SelectTrigger className="mt-2 bg-white">
+      <Select onValueChange={onValueChange} value={value}>
+        <SelectTrigger
+          className={`w-full h-10!  pr-3 bg-white ${className} text-lg`}
+        >
           <div className="flex items-center">
             {leadingIcon && <span className="mr-2">{leadingIcon}</span>}
             <SelectValue placeholder={placeholder} />
@@ -43,7 +47,7 @@ export default function SelectForm({
         <SelectContent>
           <SelectGroup>
             {Object.entries(itemList).map(([key, value]) => (
-              <SelectItem key={key} value={key}>
+              <SelectItem key={key} value={key} className="text-lg">
                 {value}
               </SelectItem>
             ))}

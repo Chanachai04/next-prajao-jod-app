@@ -40,6 +40,10 @@ interface SearchPanelProps {
   errorMessage?: string | null;
   emptyMessage?: string | null;
   onLocationChange: (payload: LocationChangePayload) => void;
+  // --- v v v เพิ่ม Props สำหรับจัดการ Duration รายเดือน v v v ---
+  monthDurationKey: string;
+  onMonthDurationChange: (value: string) => void;
+  // --- ^ ^ ^ ------------------------------------------- ^ ^ ^ ---
 }
 
 export default function SearchPanel({
@@ -64,7 +68,11 @@ export default function SearchPanel({
   errorMessage,
   emptyMessage,
   onLocationChange,
-}: SearchPanelProps) {
+  // --- v v v รับ Props v v v ---
+  monthDurationKey,
+  onMonthDurationChange,
+}: // --- ^ ^ ^ ----------- ^ ^ ^ ---
+SearchPanelProps) {
   const searchParams = useSearchParams();
   const isHourly = selectedOption === "hourly";
 
@@ -209,11 +217,15 @@ export default function SearchPanel({
                 setDate={setDateIn}
                 className="bg-white"
               />
+              {/* --- v v v ส่ง value และ onValueChange ให้ SelectForm v v v --- */}
               <SelectForm
                 itemList={timeOptions}
                 className="bg-white"
                 leadingIcon={<Minimize2 />}
+                value={monthDurationKey}
+                onValueChange={onMonthDurationChange}
               />
+              {/* --- ^ ^ ^ ------------------------------------------ ^ ^ ^ --- */}
             </div>
           </>
         )}

@@ -40,6 +40,9 @@ export default function Booking() {
   );
   const [timeIn, setTimeIn] = useState("00:00");
   const [timeOut, setTimeOut] = useState("01:00");
+  // --- v v v เพิ่ม State นี้ (Default ที่ 3 เดือน) v v v ---
+  const [monthDurationKey, setMonthDurationKey] = useState("threeMonths");
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOptionDetail, setSelectedOptionDetail] = useState<
     "hourly" | "daily" | "monthly"
@@ -80,10 +83,16 @@ export default function Booking() {
     const timeInStr = searchParams.get("timeIn");
     const timeOutStr = searchParams.get("timeOut");
     const provinceIdParam = searchParams.get("provinceId");
+    // --- v v v อ่านค่า Key จาก URL v v v ---
+    const monthDurationKeyParam = searchParams.get("monthDurationKey");
 
     if (mode === "monthly") {
       setSelectedOption("monthly");
       setSelectedOptionDetail("monthly");
+      // --- v v v ตั้งค่า State จาก URL v v v ---
+      if (monthDurationKeyParam) {
+        setMonthDurationKey(monthDurationKeyParam);
+      }
     } else if (mode === "daily") {
       setSelectedOption("hourly");
       setSelectedOptionDetail("daily");
@@ -376,6 +385,7 @@ export default function Booking() {
               onNavigate={navigateImage}
               onSelectImage={setCurrentIndex}
               onSelectOption={setSelectedOptionDetail}
+              monthDurationKey={monthDurationKey}
             />
           )}
 
@@ -401,6 +411,8 @@ export default function Booking() {
             errorMessage={fetchError}
             emptyMessage={emptyMessage}
             onLocationChange={handleLocationChange}
+            monthDurationKey={monthDurationKey}
+            onMonthDurationChange={setMonthDurationKey}
           />
         </>
       )}

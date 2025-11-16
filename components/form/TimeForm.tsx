@@ -33,7 +33,7 @@ export default function TimeForm({
         <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
         <Select value={time} onValueChange={setTime}>
           <SelectTrigger
-            className={`w-full h-10! pl-10 pr-3 text-lg ${className}`}
+            className={`w-full h-10! pl-10 pr-3 text-lg ${className} bg-white`}
           >
             <SelectValue placeholder="เลือกเวลา" />
           </SelectTrigger>

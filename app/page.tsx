@@ -22,6 +22,10 @@ export default function Home() {
   const [provinceId, setProvinceId] = useState<number | null>(null);
   const [districtId, setDistrictId] = useState<number | null>(null);
   const [subDistrictId, setSubDistrictId] = useState<number | null>(null);
+
+  // --- v v v เพิ่ม State นี้ (Default ที่ 3 เดือน) v v v ---
+  const [monthDurationKey, setMonthDurationKey] = useState("threeMonths");
+
   const timeOption = {
     threeMonths: "3 เดือน",
     sixMonths: "6 เดือน",
@@ -47,9 +51,17 @@ export default function Home() {
 
     // Dates/times
     if (dateIn) params.set("dateIn", dateIn.toISOString());
-    if (dateOut) params.set("dateOut", dateOut.toISOString());
-    if (timeIn) params.set("timeIn", timeIn);
-    if (timeOut) params.set("timeOut", timeOut);
+
+    // --- v v v แยก Logic การส่งค่าตาม mode v v v ---
+    if (selectedOption === "monthly") {
+      params.set("monthDurationKey", monthDurationKey); // ส่ง Key "threeMonths"
+    } else {
+      // Logic เดิมสำหรับ hourly/daily
+      if (dateOut) params.set("dateOut", dateOut.toISOString());
+      if (timeIn) params.set("timeIn", timeIn);
+      if (timeOut) params.set("timeOut", timeOut);
+    }
+    // --- ^ ^ ^ --------------------------------- ^ ^ ^ ---
 
     router.push(`/booking?${params.toString()}`);
   };
@@ -210,7 +222,10 @@ export default function Home() {
                     placeholder="เลือกจํานวนวัน"
                     itemList={timeOption}
                     leadingIcon={<Minimize2 />}
+                    value={monthDurationKey}
+                    onValueChange={setMonthDurationKey}
                   />
+                  {/* --- ^ ^ ^ ----------------------- ^ ^ ^ --- */}
                 </div>
               </>
             )}

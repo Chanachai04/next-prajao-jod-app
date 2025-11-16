@@ -16,6 +16,8 @@ interface DetailPanelProps {
   onNavigate: (direction: "prev" | "next") => void;
   onSelectImage: (index: number) => void;
   onSelectOption: (option: PriceKey) => void;
+  // --- v v v เพิ่ม Prop นี้เพื่อรับค่า v v v ---
+  monthDurationKey?: string;
 }
 
 const PRICE_KEY_MAP: Record<
@@ -49,6 +51,8 @@ export default function DetailPanel({
   onNavigate,
   onSelectImage,
   onSelectOption,
+  // --- v v v รับ Prop นี้เข้ามา v v v ---
+  monthDurationKey,
 }: DetailPanelProps) {
   const searchParams = useSearchParams();
   const images = spot.images.length > 0 ? spot.images : [];
@@ -98,27 +102,51 @@ export default function DetailPanel({
       ? spot.facilities.map((item) => item.name).join(", ")
       : "-";
 
+  // --- v v v แก้ไข useMemo นี้ ให้ส่งค่าได้ถูกต้อง v v v ---
   // สร้าง URL พร้อม params
   const orderUrl = useMemo(() => {
     const params = new URLSearchParams();
 
-    // เพิ่ม params จาก searchParams
+    // ดึงค่าจาก URL ที่เข้ามา (หน้า booking)
     const dateIn = searchParams.get("dateIn");
-    const dateOut = searchParams.get("dateOut");
-    const timeIn = searchParams.get("timeIn");
-    const timeOut = searchParams.get("timeOut");
-    const mode = searchParams.get("mode");
 
+    // ใส่ Date In เสมอ
     if (dateIn) params.set("dateIn", dateIn);
-    if (dateOut) params.set("dateOut", dateOut);
-    if (timeIn) params.set("timeIn", timeIn);
-    if (timeOut) params.set("timeOut", timeOut);
-    if (mode) params.set("mode", mode);
+
+    // ใช้ "selectedOptionDetail" (state ของ Panel นี้) เพื่อกำหนด mode ที่จะส่งไป
+    if (selectedOptionDetail === "monthly") {
+      params.set("mode", "monthly");
+      // ถ้าเป็นรายเดือน ให้ใช้ "monthDurationKey" (ที่รับมาจาก prop)
+      if (monthDurationKey) {
+        params.set("monthDurationKey", monthDurationKey);
+      }
+    } else if (selectedOptionDetail === "daily") {
+      params.set("mode", "daily");
+      // ถ้าเป็นรายวัน ให้ดึง dateOut จาก searchParams
+      const dateOut = searchParams.get("dateOut");
+      if (dateOut) params.set("dateOut", dateOut);
+    } else {
+      // "hourly"
+      params.set("mode", "hourly");
+      // ถ้ารายชั่วโมง ให้ดึง timeIn/timeOut/dateOut จาก searchParams
+      const dateOut = searchParams.get("dateOut");
+      const timeIn = searchParams.get("timeIn");
+      const timeOut = searchParams.get("timeOut");
+      if (dateOut) params.set("dateOut", dateOut);
+      if (timeIn) params.set("timeIn", timeIn);
+      if (timeOut) params.set("timeOut", timeOut);
+    }
 
     return `/order/${spot.id}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-  }, [spot.id, searchParams]);
+  }, [
+    spot.id,
+    searchParams,
+    selectedOptionDetail, // <--- เพิ่ม Dependency
+    monthDurationKey, // <--- เพิ่ม Dependency
+  ]);
+  // --- ^ ^ ^ ----------------------------------------- ^ ^ ^ ---
 
   return (
     <div className="w-lg bg-white">

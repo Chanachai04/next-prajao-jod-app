@@ -32,7 +32,10 @@ export default function Page() {
   const isLoading = !rentDetail || !price || !facilities || !schedule;
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
   const [priceSuffix, setPriceSuffix] = useState<string>("");
-  const [selectedMonthDuration, setSelectedMonthDuration] = useState<number>(3);
+
+  // --- v v v เปลี่ยน State นี้เป็น Key (string) และ default "threeMonths" v v v ---
+  const [selectedMonthKey, setSelectedMonthKey] =
+    useState<string>("threeMonths");
   const [userId, setUserId] = useState<string>("");
   const FALLBACK_IMAGE = "/image.jpg";
 
@@ -52,6 +55,13 @@ export default function Page() {
     oneYears: "1 ปี",
   };
 
+  // --- v v v สร้างตัวแปร number (3, 6, 12) จาก Key (string) โดยใช้ useMemo v v v ---
+  const selectedMonthDuration = useMemo(() => {
+    if (selectedMonthKey === "sixMonths") return 6;
+    if (selectedMonthKey === "oneYears") return 12;
+    return 3; // Default
+  }, [selectedMonthKey]);
+
   // อ่านค่าจาก URL params
   useEffect(() => {
     if (!searchParams) return;
@@ -61,6 +71,9 @@ export default function Page() {
     const timeInParam = searchParams.get("timeIn");
     const timeOutParam = searchParams.get("timeOut");
     const mode = searchParams.get("mode");
+    // --- v v v อ่านค่า Key และ Number(เผื่อไว้) จาก URL v v v ---
+    const monthDurationKeyParam = searchParams.get("monthDurationKey");
+    const monthDurationParam = searchParams.get("monthDuration");
 
     if (dateInParam) {
       const d = new Date(dateInParam);
@@ -77,6 +90,16 @@ export default function Page() {
     // ตั้งค่า mode จาก URL
     if (mode === "monthly") {
       setIsShow("month");
+      // --- v v v ตั้งค่า State จาก URL (Key มาก่อน) v v v ---
+      if (monthDurationKeyParam) {
+        setSelectedMonthKey(monthDurationKeyParam);
+      } else if (monthDurationParam) {
+        // ถ้าไม่มี Key ให้ใช้ Number (จาก link เก่า หรือจากหน้า payment)
+        const duration = parseInt(monthDurationParam);
+        if (duration === 6) setSelectedMonthKey("sixMonths");
+        else if (duration === 12) setSelectedMonthKey("oneYears");
+        else setSelectedMonthKey("threeMonths");
+      }
     } else if (mode === "daily") {
       setIsShow("day");
     } else if (mode === "hourly") {
@@ -242,6 +265,7 @@ export default function Page() {
 
     if (isShow === "month") {
       params.set("mode", "monthly");
+      // --- v v v ใช้ตัวแปร number ที่คำนวณจาก useMemo v v v ---
       params.set("monthDuration", String(selectedMonthDuration));
     } else if (isShow === "day") {
       params.set("mode", "daily");
@@ -261,7 +285,7 @@ export default function Page() {
     timeIn,
     timeOut,
     isShow,
-    selectedMonthDuration,
+    selectedMonthDuration, // <--- ใช้ตัวแปรจาก useMemo
   ]);
 
   if (isLoading) return <Loading />;
@@ -392,17 +416,16 @@ export default function Page() {
                 placeholder="เลือกวันที่เข้าจอด"
                 className="cursor-pointer"
               />
+              {/* --- v v v อัปเดต SelectForm v v v --- */}
               <SelectForm
                 title="จำนวนวัน"
                 placeholder="เลือกจำนวนวัน"
                 itemList={timeOption}
                 leadingIcon={<Minimize2 />}
-                onValueChange={(value) => {
-                  if (value === "threeMonths") setSelectedMonthDuration(3);
-                  else if (value === "sixMonths") setSelectedMonthDuration(6);
-                  else if (value === "oneYears") setSelectedMonthDuration(12);
-                }}
+                value={selectedMonthKey} // <--- ใช้ Key (string)
+                onValueChange={setSelectedMonthKey} // <--- อัปเดต Key (string)
               />
+              {/* --- ^ ^ ^ ----------------------- ^ ^ ^ --- */}
             </div>
           )}
 
