@@ -30,11 +30,11 @@ export default function AlertModal({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-sm text-center">
         <DialogHeader>
-          <div className="flex justify-center mb-3">
+          <div className="flex justify-center mb-3 ">
             {isSuccess ? (
-              <CheckCircle className="w-12 h-12 text-green-500" />
+              <CheckCircle className="w-12 h-12 text-green-500 " />
             ) : (
-              <XCircle className="w-12 h-12 text-red-500" />
+              <XCircle className="w-12 h-12 text-red-500 " />
             )}
           </div>
           <DialogTitle className="text-xl">
@@ -48,7 +48,7 @@ export default function AlertModal({
                 : "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่")}
           </p>
 
-          <Button className="mt-6 w-full" onClick={onClose}>
+          <Button className="mt-6 w-full cursor-pointer" onClick={onClose}>
             ปิด
           </Button>
         </DialogHeader>

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, LockKeyhole, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 export default function Register() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +16,7 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +53,10 @@ export default function Register() {
 
       if (res.ok) {
         window.dispatchEvent(new Event("loginStatusChanged"));
-        router.push("/");
+
+        // redirect หลังสมัครสำเร็จ
+        const redirectPath = searchParams.get("redirect") || "/";
+        router.push(redirectPath);
       } else {
         setError(data.message || "สมัครไม่สำเร็จ");
       }

@@ -1,6 +1,4 @@
-"use client";
-
-import { Label } from "../ui/label";
+import { ReactNode } from "react";
 import {
   Select,
   SelectContent,
@@ -8,68 +6,50 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { useState, useEffect } from "react";
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
-type SelectFormProps = {
+interface SelectFormProps {
   title?: string;
   placeholder?: string;
   itemList: Record<string, string>;
+  leadingIcon?: ReactNode;
   className?: string;
-  leadingIcon?: React.ReactNode;
-};
+  onValueChange?: (value: string) => void;
+}
 
 export default function SelectForm({
   title,
-  placeholder = "เลือก...",
+  placeholder,
   itemList,
   leadingIcon,
-  className,
+  className = "",
+  onValueChange,
 }: SelectFormProps) {
-  const [value, setValue] = useState<string>("");
-
-  // ตั้งค่าเริ่มต้นให้เป็นตัวแรกของ itemList
-  useEffect(() => {
-    const firstKey = Object.keys(itemList)[0];
-    if (firstKey) {
-      setTimeout(() => {
-        setValue(firstKey);
-      }, 0);
-    }
-  }, [itemList]);
-
   return (
-    <div>
+    <div className={className}>
       {title && (
         <Label htmlFor="select" className="text-lg">
           {title}
         </Label>
       )}
-      <div className="relative mt-2">
-        {leadingIcon && (
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6">
-            {leadingIcon}
-          </span>
-        )}
-        <Select onValueChange={setValue} value={value}>
-          <SelectTrigger
-            className={`pl-10 text-lg h-10! w-full cursor-pointer ${
-              className ?? ""
-            }`}
-          >
+      <Select onValueChange={onValueChange}>
+        <SelectTrigger className="mt-2 bg-white">
+          <div className="flex items-center">
+            {leadingIcon && <span className="mr-2">{leadingIcon}</span>}
             <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent className="z-50">
-            <SelectGroup>
-              {Object.entries(itemList).map(([key, label]) => (
-                <SelectItem key={key} value={key} className="text-lg py-3">
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {Object.entries(itemList).map(([key, value]) => (
+              <SelectItem key={key} value={key}>
+                {value}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

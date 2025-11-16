@@ -1,9 +1,12 @@
 import { supabase } from "@/lib/supabaseClient";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
+  const cookie = await cookies();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
+  const userId = cookie.get("userId")?.value;
   if (!id) {
     return NextResponse.json({ message: "ID is required" }, { status: 400 });
   }
@@ -56,6 +59,7 @@ export async function GET(req: Request) {
       facilities: facilities,
       schedules: schedules,
       images: images,
+      userId: userId,
     },
     { status: 200 }
   );

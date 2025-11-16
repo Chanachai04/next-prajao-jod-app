@@ -21,7 +21,7 @@ const TIME_OPTIONS = {
   oneYears: "1 ปี",
 };
 
-const EMPTY_MESSAGE = "ไม่พบที่จอดรบริเวณนี้";
+const EMPTY_MESSAGE = "ไม่พบที่จอดรถบริเวณนี้";
 
 type LocationChangePayload = {
   provinceName: string | null;
@@ -54,7 +54,15 @@ export default function Booking() {
   const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
   const [selectedSpot, setSelectedSpot] = useState<RentSpot | null>(null);
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [selectedSubdistrict, setSelectedSubdistrict] = useState<string | null>(
+    null
+  );
   const [appliedProvince, setAppliedProvince] = useState<string | null>(null);
+  const [appliedDistrict, setAppliedDistrict] = useState<string | null>(null);
+  const [appliedSubdistrict, setAppliedSubdistrict] = useState<string | null>(
+    null
+  );
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<
     string | null
   >(null);
@@ -195,11 +203,19 @@ export default function Booking() {
   const fetchParkingSpots = useCallback(
     async (override?: {
       province?: string | null;
+      district?: string | null;
+      subdistrict?: string | null;
       search?: string | null;
       displayEmptyMessage?: boolean;
     }) => {
       const provinceName =
         override?.province !== undefined ? override.province : appliedProvince;
+      const districtName =
+        override?.district !== undefined ? override.district : appliedDistrict;
+      const subdistrictName =
+        override?.subdistrict !== undefined
+          ? override.subdistrict
+          : appliedSubdistrict;
       const searchValue =
         override?.search !== undefined ? override.search : appliedSearchKeyword;
       const displayEmpty =
@@ -208,10 +224,13 @@ export default function Booking() {
           : true;
       const trimmedSearch =
         typeof searchValue === "string" ? searchValue.trim() : "";
+
       const hasProvince = Boolean(provinceName);
+      const hasDistrict = Boolean(districtName);
+      const hasSubdistrict = Boolean(subdistrictName);
       const hasSearch = Boolean(trimmedSearch);
 
-      if (!hasProvince && !hasSearch) {
+      if (!hasProvince && !hasDistrict && !hasSubdistrict && !hasSearch) {
         setSpots([]);
         setEmptyMessage(displayEmpty ? EMPTY_MESSAGE : null);
         setSelectedSpot(null);
@@ -227,6 +246,12 @@ export default function Booking() {
         const params = new URLSearchParams();
         if (provinceName) {
           params.set("province", provinceName);
+        }
+        if (districtName) {
+          params.set("district", districtName);
+        }
+        if (subdistrictName) {
+          params.set("subdistrict", subdistrictName);
         }
         if (trimmedSearch) {
           params.set("search", trimmedSearch);
@@ -267,7 +292,7 @@ export default function Booking() {
         setIsLoadingSpots(false);
       }
     },
-    [appliedProvince, appliedSearchKeyword]
+    [appliedProvince, appliedDistrict, appliedSubdistrict, appliedSearchKeyword]
   );
 
   useEffect(() => {
@@ -299,11 +324,12 @@ export default function Booking() {
     setIsShowing(true);
     setCurrentIndex(0);
     setSelectedOptionDetail("hourly");
-    // ไม่เปลี่ยนตำแหน่งแผนที่และ marker - แสดงแค่ mark ที่ค้นหามาเดิม
   };
 
   const handleLocationChange = (payload: LocationChangePayload) => {
     setSelectedProvince(payload.provinceName);
+    setSelectedDistrict(payload.districtName);
+    setSelectedSubdistrict(payload.subdistrictName);
     setMarkerAt(null);
   };
 
@@ -312,10 +338,14 @@ export default function Booking() {
     const normalizedSearch = trimmed ? trimmed : null;
 
     setAppliedProvince(selectedProvince);
+    setAppliedDistrict(selectedDistrict);
+    setAppliedSubdistrict(selectedSubdistrict);
     setAppliedSearchKeyword(normalizedSearch);
     await geocodeAndCenter();
     await fetchParkingSpots({
       province: selectedProvince,
+      district: selectedDistrict,
+      subdistrict: selectedSubdistrict,
       search: normalizedSearch,
       displayEmptyMessage: true,
     });

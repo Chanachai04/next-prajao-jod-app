@@ -10,7 +10,7 @@ import { ArrowLeft, ArrowRight, Clock, MapPin, Minimize2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 
 export default function Page() {
   const { id } = useParams();
@@ -32,7 +32,8 @@ export default function Page() {
   const isLoading = !rentDetail || !price || !facilities || !schedule;
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
   const [priceSuffix, setPriceSuffix] = useState<string>("");
-
+  const [selectedMonthDuration, setSelectedMonthDuration] = useState<number>(3);
+  const [userId, setUserId] = useState<string>("");
   const FALLBACK_IMAGE = "/image.jpg";
 
   const daysInfo: Record<string, { index: number }> = {
@@ -90,7 +91,8 @@ export default function Page() {
         cache: "no-store",
       });
       const data = await res.json();
-
+      console.log(data);
+      setUserId(data.userId);
       setRentDetail(data.rentDetail);
       setPrice(data.price);
       setFacilities(data.facilities);
@@ -228,12 +230,46 @@ export default function Page() {
   );
 
   const allGroups = groupedSchedules();
+
+  // สร้าง URL สำหรับไปหน้า payment
+  const buildPaymentUrl = useMemo(() => {
+    const params = new URLSearchParams();
+
+    if (dateIn) params.set("dateIn", dateIn.toISOString());
+    if (dateOut) params.set("dateOut", dateOut.toISOString());
+    if (timeIn) params.set("timeIn", timeIn);
+    if (timeOut) params.set("timeOut", timeOut);
+
+    if (isShow === "month") {
+      params.set("mode", "monthly");
+      params.set("monthDuration", String(selectedMonthDuration));
+    } else if (isShow === "day") {
+      params.set("mode", "daily");
+    } else if (isShow === "hour") {
+      params.set("mode", "hourly");
+    }
+    if (userId) {
+      params.set("userId", userId);
+    }
+
+    return `/payment/${id}${params.toString() ? `?${params.toString()}` : ""}`;
+  }, [
+    id,
+    userId,
+    dateIn,
+    dateOut,
+    timeIn,
+    timeOut,
+    isShow,
+    selectedMonthDuration,
+  ]);
+
   if (isLoading) return <Loading />;
 
   return (
     <div className="container mx-auto min-h-screen">
       {/* Breadcrumb */}
-      <div className="flex items-center  my-4">
+      <div className="flex items-center my-4">
         <p>
           <Link href="/" className="text-blue-500 hover:underline">
             หน้าหลัก
@@ -361,6 +397,11 @@ export default function Page() {
                 placeholder="เลือกจำนวนวัน"
                 itemList={timeOption}
                 leadingIcon={<Minimize2 />}
+                onValueChange={(value) => {
+                  if (value === "threeMonths") setSelectedMonthDuration(3);
+                  else if (value === "sixMonths") setSelectedMonthDuration(6);
+                  else if (value === "oneYears") setSelectedMonthDuration(12);
+                }}
               />
             </div>
           )}
@@ -407,7 +448,7 @@ export default function Page() {
             <p>{displayPrice !== null ? `฿ ${displayPrice} ` : "-"}</p>
           </div>
           <div>
-            <Link href={"/payment"}>
+            <Link href={buildPaymentUrl}>
               <Button className="w-full cursor-pointer">จองที่จอดนี้</Button>
             </Link>
           </div>
@@ -483,7 +524,7 @@ export default function Page() {
         <div className="flex flex-wrap gap-2 mt-2">
           {facilities && facilities.length > 0 ? (
             facilities.map((f) => (
-              <span key={f.id} className=" bg-gray-100 rounded-full">
+              <span key={f.id} className="bg-gray-100 rounded-full px-3 py-1">
                 {f.name}
               </span>
             ))

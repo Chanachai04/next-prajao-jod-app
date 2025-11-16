@@ -41,35 +41,14 @@ type RentDetailRow = {
   district: string | null;
   province: string | null;
   landmark: string | null;
-  latitude: number | null;
-  longitude: number | null;
-};
-
-const MAX_DISTANCE_KM = 5;
-const toRadians = (deg: number) => (deg * Math.PI) / 180;
-
-const calculateDistanceKm = (
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number
-) => {
-  const R = 6371;
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
 };
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const provinceParam = searchParams.get("province")?.trim();
+  const districtParam = searchParams.get("district")?.trim();
+  const subdistrictParam = searchParams.get("subdistrict")?.trim();
+  const searchParam = searchParams.get("search")?.trim();
   const modeParamRaw = searchParams.get("mode")?.trim()?.toLowerCase();
   const modeParam =
     modeParamRaw === "monthly" || modeParamRaw === "daily"
@@ -78,7 +57,7 @@ export async function GET(req: Request) {
       ? "hourly"
       : undefined;
 
-  const detailQuery = supabase
+  let detailQuery = supabase
     .from("rent_detail")
     .select(
       [
@@ -92,18 +71,23 @@ export async function GET(req: Request) {
         "district",
         "province",
         "landmark",
-        "latitude",
-        "longitude",
       ].join(",")
     );
+
+  // ใช้ subdistrict ก่อน จากนั้น district แล้วจึง province
+  if (subdistrictParam) {
+    detailQuery = detailQuery.eq("subdistrict", subdistrictParam);
+  } else if (districtParam) {
+    detailQuery = detailQuery.eq("district", districtParam);
+  } else if (provinceParam) {
+    detailQuery = detailQuery.eq("province", provinceParam);
+  }
 
   const {
     data: rentDetailData,
     error: rentDetailError,
     status,
-  } = provinceParam
-    ? await detailQuery.eq("province", provinceParam)
-    : await detailQuery;
+  } = await detailQuery;
 
   if (rentDetailError) {
     return NextResponse.json(
@@ -223,12 +207,10 @@ export async function GET(req: Request) {
     };
   });
 
-  const searchParam = searchParams.get("search")?.trim();
+  // กรองด้วย search keyword (free-text search)
   if (searchParam) {
     const keyword = searchParam.toLowerCase();
     data = data.filter((item) => {
-      // include name, address and landmark so free-text typed searches
-      // (when user doesn't pick a suggestion) can still find results
       const fields = [
         item.subdistrict,
         item.district,
@@ -243,39 +225,7 @@ export async function GET(req: Request) {
     });
   }
 
-  const latParam = searchParams.get("lat");
-  const lonParam = searchParams.get("lon");
-  const latNum = latParam ? Number(latParam) : null;
-  const lonNum = lonParam ? Number(lonParam) : null;
-  if (
-    latNum !== null &&
-    lonNum !== null &&
-    Number.isFinite(latNum) &&
-    Number.isFinite(lonNum)
-  ) {
-    data = data
-      .map((item) => {
-        if (
-          item.latitude === null ||
-          item.longitude === null ||
-          Number.isNaN(item.latitude) ||
-          Number.isNaN(item.longitude)
-        ) {
-          return { item, distance: Number.POSITIVE_INFINITY };
-        }
-        const distance = calculateDistanceKm(
-          latNum,
-          lonNum,
-          item.latitude,
-          item.longitude
-        );
-        return { item, distance };
-      })
-      .filter(({ distance }) => distance <= MAX_DISTANCE_KM)
-      .sort((a, b) => a.distance - b.distance)
-      .map(({ item }) => item);
-  }
-
+  // กรองตาม mode (hourly/monthly)
   if (modeParam === "hourly") {
     data = data.filter((item) => {
       const price = item.price;

@@ -12,29 +12,57 @@ export default function Navbar() {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null;
+
     const fetchData = async () => {
       try {
-        // 1. ตรวจสอบ login และดึง userId
         const res = await fetch("/api/me", {
           cache: "no-store",
           credentials: "include",
         });
+
         if (!res.ok) {
           setIsLoggedIn(false);
           setImage(null);
           return;
         }
+
         const data = await res.json();
         setIsLoggedIn(data.loggedIn);
 
-        // 2. ถ้ามี userId ดึง image ของ user
         if (data.userId) {
-          const { data: userData, error } = await supabase
+          // ดึงรูปครั้งแรก + กัน cache
+          const { data: userData } = await supabase
             .from("users")
             .select("image_url")
             .eq("id", data.userId)
             .single();
-          if (!error && userData) setImage(userData.image_url);
+
+          if (userData?.image_url) {
+            setImage(userData.image_url + `?t=${Date.now()}`);
+          }
+
+          // ======== Subscribe Realtime ========
+          channel = supabase
+            .channel("user-image-updates")
+            .on(
+              "postgres_changes",
+              {
+                event: "UPDATE",
+                schema: "public",
+                table: "users",
+                filter: `id=eq.${data.userId}`,
+              },
+              (payload) => {
+                const newUrl = payload.new.image_url;
+
+                // กัน cache → บังคับโหลดใหม่ทันที
+                setImage(newUrl + `?t=${Date.now()}`);
+              }
+            )
+            .subscribe();
+          // ====================================
         }
       } catch (err) {
         console.error(err);
@@ -45,10 +73,14 @@ export default function Navbar() {
 
     fetchData();
 
-    // Event listener สำหรับ login/logout
+    // login/logout event
     const handler = () => fetchData();
     window.addEventListener("loginStatusChanged", handler);
-    return () => window.removeEventListener("loginStatusChanged", handler);
+
+    return () => {
+      window.removeEventListener("loginStatusChanged", handler);
+      if (channel) supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
@@ -78,15 +110,17 @@ export default function Navbar() {
                     ปล่อยเช่าที่จอดรถ
                   </Button>
                 </Link>
+
                 <Link href="/rent" className="sm:hidden">
                   <Button variant="outline" className="px-2 py-1 h-8 text-sm">
                     เช่าที่จอด
                   </Button>
                 </Link>
+
                 <Link href="/profile/detail">
                   {image ? (
                     <Image
-                      src={image as string}
+                      src={image}
                       width={40}
                       height={40}
                       className="rounded-full h-10 border-2"
@@ -107,6 +141,7 @@ export default function Navbar() {
                     เข้าสู่ระบบ
                   </Button>
                 </Link>
+
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
@@ -115,6 +150,7 @@ export default function Navbar() {
                     ปล่อยเช่าที่จอดรถ
                   </Button>
                 </Link>
+
                 <Link href="/rent" className="sm:hidden">
                   <Button
                     variant="outline"
