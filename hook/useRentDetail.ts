@@ -197,13 +197,6 @@ export default function useRentDetail() {
     }
   };
 
-  const onPositionChange = (lat: number, lng: number) =>
-    setFormValues((prev) => ({
-      ...prev,
-      latitude: lat.toFixed(6),
-      longitude: lng.toFixed(6),
-    }));
-
   const toNumberOrNull = (value: string, field: string) => {
     if (!value.trim()) return null;
     const num = Number(value);
@@ -266,7 +259,6 @@ export default function useRentDetail() {
       setSubmitStatus({ type: "error", message: "กรุณากรอกจุดสังเกต" });
       return;
     }
-
 
     let pricePayload: {
       price_per_hour: number | null;
@@ -410,6 +402,5 @@ export default function useRentDetail() {
     toggleAllDay,
     handleProvinceSearchChange,
     handleSubmit,
-    onPositionChange,
   } as const;
 }
