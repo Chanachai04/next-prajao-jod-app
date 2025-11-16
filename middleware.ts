@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { supabase } from "./lib/supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
 // หน้าที่ต้อง login ก่อนถึงจะเข้าได้
 const protectedRoutes = ["/rent", "/rentdetail", "/profile", "/payment"];
@@ -20,7 +20,10 @@ const isAuthRoute = (path: string) =>
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const token = req.cookies.get("token")?.value;
-
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   // ไม่มี token
   if (!token) {
     if (isProtectedRoute(path)) {
