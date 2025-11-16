@@ -40,10 +40,8 @@ interface SearchPanelProps {
   errorMessage?: string | null;
   emptyMessage?: string | null;
   onLocationChange: (payload: LocationChangePayload) => void;
-  // --- v v v เพิ่ม Props สำหรับจัดการ Duration รายเดือน v v v ---
   monthDurationKey: string;
   onMonthDurationChange: (value: string) => void;
-  // --- ^ ^ ^ ------------------------------------------- ^ ^ ^ ---
 }
 
 export default function SearchPanel({
@@ -68,11 +66,9 @@ export default function SearchPanel({
   errorMessage,
   emptyMessage,
   onLocationChange,
-  // --- v v v รับ Props v v v ---
   monthDurationKey,
   onMonthDurationChange,
-}: // --- ^ ^ ^ ----------- ^ ^ ^ ---
-SearchPanelProps) {
+}: SearchPanelProps) {
   const searchParams = useSearchParams();
   const isHourly = selectedOption === "hourly";
 
@@ -117,6 +113,21 @@ SearchPanelProps) {
           });
     return byMode.length > 0 ? byMode : spots;
   }, [spots, selectedOption]);
+
+  // ✅ คำนวณ mode ที่แท้จริงตาม UI และเงื่อนไข
+  const actualMode = useMemo(() => {
+    if (selectedOption === "monthly") {
+      return "monthly";
+    }
+
+    // ถ้าเลือก hourly แต่ไม่มีเวลา = daily
+    if (!timeIn || !timeOut || (timeIn === "00:00" && timeOut === "00:00")) {
+      return "daily";
+    }
+
+    // ถ้ามีเวลา = hourly
+    return "hourly";
+  }, [selectedOption, timeIn, timeOut]);
 
   const renderStatus = () => {
     if (isLoading) {
@@ -217,7 +228,6 @@ SearchPanelProps) {
                 setDate={setDateIn}
                 className="bg-white"
               />
-              {/* --- v v v ส่ง value และ onValueChange ให้ SelectForm v v v --- */}
               <SelectForm
                 itemList={timeOptions}
                 className="bg-white"
@@ -225,7 +235,6 @@ SearchPanelProps) {
                 value={monthDurationKey}
                 onValueChange={onMonthDurationChange}
               />
-              {/* --- ^ ^ ^ ------------------------------------------ ^ ^ ^ --- */}
             </div>
           </>
         )}
@@ -268,6 +277,14 @@ SearchPanelProps) {
               spot={spot}
               isActive={spot.id === activeSpotId}
               onClick={() => onSelectSpot(spot)}
+              currentSearchParams={{
+                dateIn: dateIn?.toISOString(),
+                dateOut: dateOut?.toISOString(),
+                timeIn,
+                timeOut,
+                mode: actualMode, // ✅ ใช้ mode ที่คำนวณแล้ว
+                monthDurationKey,
+              }}
             />
           ))}
           {renderStatus()}

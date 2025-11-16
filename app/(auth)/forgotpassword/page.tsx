@@ -10,15 +10,16 @@ import { Mail } from "lucide-react";
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email) {
-      alert("กรุณากรอกอีเมล");
+      setError("กรุณากรอกอีเมล");
       return;
     }
-
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from("users")
@@ -60,15 +61,15 @@ export default function ResetPassword() {
                 className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
+            {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
           </div>
           <Button
             type="submit"
             className={`w-full rounded-lg font-medium text-white mt-2 cursor-pointer`}
           >
-            ถัดไป
+            {loading ? "กําลังโหลด..." : "ยืนยัน"}
           </Button>
         </form>
       </div>

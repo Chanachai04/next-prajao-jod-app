@@ -22,8 +22,9 @@ export default function Home() {
   const [provinceId, setProvinceId] = useState<number | null>(null);
   const [districtId, setDistrictId] = useState<number | null>(null);
   const [subDistrictId, setSubDistrictId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // --- v v v เพิ่ม State นี้ (Default ที่ 3 เดือน) v v v ---
   const [monthDurationKey, setMonthDurationKey] = useState("threeMonths");
 
   const timeOption = {
@@ -37,31 +38,35 @@ export default function Home() {
     { key: "monthly", label: "รายเดือน" },
   ];
 
-  const buildAndGoToBooking = () => {
+  const handleSubmit = () => {
+    if (!location.trim() && (!provinceId || !districtId || !subDistrictId)) {
+      setError("กรุณาเลือกจังหวัด อำเภอ และตำบล หรือพิมพ์ชื่อสถานที่");
+      return;
+    }
+    setError(null);
+
     const params = new URLSearchParams();
     params.set("mode", selectedOption);
+
     const trimmedLocation = location.trim();
     if (trimmedLocation) {
       params.set("location", trimmedLocation);
       params.set("search", trimmedLocation);
     }
+
     if (provinceId) params.set("provinceId", String(provinceId));
     if (districtId) params.set("districtId", String(districtId));
     if (subDistrictId) params.set("subDistrictId", String(subDistrictId));
 
     // Dates/times
     if (dateIn) params.set("dateIn", dateIn.toISOString());
-
-    // --- v v v แยก Logic การส่งค่าตาม mode v v v ---
     if (selectedOption === "monthly") {
-      params.set("monthDurationKey", monthDurationKey); // ส่ง Key "threeMonths"
+      params.set("monthDurationKey", monthDurationKey);
     } else {
-      // Logic เดิมสำหรับ hourly/daily
       if (dateOut) params.set("dateOut", dateOut.toISOString());
       if (timeIn) params.set("timeIn", timeIn);
       if (timeOut) params.set("timeOut", timeOut);
     }
-    // --- ^ ^ ^ --------------------------------- ^ ^ ^ ---
 
     router.push(`/booking?${params.toString()}`);
   };
@@ -69,7 +74,7 @@ export default function Home() {
   return (
     <div className="min-h-screen ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
-      <div className="flex flex-col xl:flex-row justify-between container mx-auto">
+      <div className="flex flex-col xl:flex-row justify-between container mx-auto ">
         <div className="mb-6 xl:mb-0">
           <Image
             src="/park.png"
@@ -225,14 +230,16 @@ export default function Home() {
                     value={monthDurationKey}
                     onValueChange={setMonthDurationKey}
                   />
-                  {/* --- ^ ^ ^ ----------------------- ^ ^ ^ --- */}
                 </div>
               </>
             )}
+            {error && (
+              <div className="text-red-600 my-2 text-sm mt-6">{error}</div>
+            )}
             <Button
               type="button"
-              onClick={buildAndGoToBooking}
-              className="mt-6 w-full text-lg py-6 cursor-pointer"
+              onClick={handleSubmit}
+              className=" w-full text-lg py-6 cursor-pointer"
             >
               ค้นหาที่จอดรถ
             </Button>

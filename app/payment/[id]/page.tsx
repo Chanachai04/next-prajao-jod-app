@@ -344,6 +344,11 @@ export default function Page() {
           citizenId: citizenId.trim(),
           phone: phone.trim(),
           lineId: lineId.trim() || null,
+
+          // [เพิ่มส่วนนี้]
+          totalPrice: payment.total,
+          duration: payment.duration,
+          mode: mode,
         }),
       });
 
@@ -443,7 +448,7 @@ export default function Page() {
             <hr className="border-t border-gray-300 my-4" />
 
             <div className="flex justify-between items-center">
-              <p className="font-semibold text-lg">รวม</p>
+              <p className="font-semibold text-lg">ราคารวม</p>
               <p className="font-bold text-xl text-blue-600">
                 ฿ {payment.total.toLocaleString()}
               </p>

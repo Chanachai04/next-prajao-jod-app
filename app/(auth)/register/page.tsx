@@ -7,6 +7,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import AlertModal from "@/components/ui/modal";
 export default function Register() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -14,7 +15,8 @@ export default function Register() {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"success" | "error">("success");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -49,17 +51,13 @@ export default function Register() {
         body: JSON.stringify({ email, password, phone }),
       });
 
-      const data = await res.json();
-
       if (res.ok) {
         window.dispatchEvent(new Event("loginStatusChanged"));
-
-        // redirect หลังสมัครสำเร็จ
-        const redirectPath = searchParams.get("redirect") || "/";
-        router.push(redirectPath);
+        setModalType("success");
       } else {
-        setError(data.message || "สมัครไม่สำเร็จ");
+        setModalType("error");
       }
+      setModalOpen(true); // เปิด modal ไม่ว่าจะ success หรือ error
     } catch (err) {
       console.error(err);
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
@@ -159,6 +157,22 @@ export default function Register() {
           </Button>
         </form>
       </div>
+      <AlertModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          if (modalType === "success") {
+            const redirectPath = searchParams.get("redirect") || "/";
+            router.push(redirectPath);
+          } // redirect หลังปิด modal
+        }}
+        type={modalType}
+        title={
+          modalType === "success"
+            ? "สมัครสมาชิกสําเร็จ"
+            : "สมัครสมาชิกไม่สําเร็จ"
+        }
+      />
     </div>
   );
 }
