@@ -13,7 +13,6 @@ export async function GET() {
       );
     }
 
-    // ดึงข้อมูลจาก rent_history ที่มี status = true
     const { data, error } = await supabase
       .from('rent_history')
       .select('id, parking_time_hour, parking_time_day, parking_time_month, total_price, created_at, rent_id')
@@ -29,14 +28,12 @@ export async function GET() {
       );
     }
 
-    // ดึงข้อมูล rent_detail และรูปภาพสำหรับแต่ละรายการ
     const formattedData = await Promise.all(
       (data || []).map(async (item) => {
         let name = 'N/A';
         let imageUrl = null;
 
         if (item.rent_id) {
-          // ดึงข้อมูลจาก rent_detail
           const { data: detailData, error: detailError } = await supabase
             .from('rent_detail')
             .select('name, image_id')
@@ -49,7 +46,6 @@ export async function GET() {
 
           name = detailData?.name || 'N/A';
 
-          // ดึงรูปภาพถ้ามี image_id
           if (detailData?.image_id) {
             console.log('Looking for image with id:', detailData.image_id);
             
@@ -70,7 +66,6 @@ export async function GET() {
           }
         }
 
-        // หาว่าใช้ระยะเวลาแบบไหน (hour, day, หรือ month)
         let parkingTime = null;
         let parkingType = null;
 

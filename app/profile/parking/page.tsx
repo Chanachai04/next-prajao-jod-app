@@ -59,90 +59,91 @@ export default function Parking() {
         </div>
 
         {/* ไอคอนลูกศร ติดกับ Sidebar */}
-        <div className="pt-10">
-          <div className="flex items-center">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="text-gray-700 text-xl font-semibold border-b">
-                    <th className="py-6 px-6 text-center min-w-[200px]">
-                      รูปภาพ
-                    </th>
-                    <th className="py-6 px-6 text-center min-w-[300px]">
-                      ชื่อสถานที่จอด
-                    </th>
-                    <th className="py-6 px-6 text-center min-w-[220px]">
-                      ประเภทที่จอด
-                    </th>
-                    <th className="py-6 px-6 text-center min-w-[180px]">
-                      จำนวนที่จอด
-                    </th>
+        <div className="pt-10 pr-50 overflow-y-auto max-h-[80vh] w-full lg:w-2/3">
+          <div className="overflow-x-auto flex justify-center">
+            {" "}
+            {/* จัดตารางให้กลาง */}
+            <table className="w-full max-w-[1200px] mx-auto border-collapse">
+              {" "}
+              {/* ใช้ max-w เพื่อกำหนดความกว้างของตาราง */}
+              <thead>
+                <tr className="text-gray-700 text-xl font-semibold border-b">
+                  <th className="py-6 px-6 text-center min-w-[200px]">
+                    รูปภาพ
+                  </th>
+                  <th className="py-6 px-6 text-center min-w-[300px]">
+                    ชื่อสถานที่จอด
+                  </th>
+                  <th className="py-6 px-6 text-center min-w-[220px]">
+                    ประเภทที่จอด
+                  </th>
+                  <th className="py-6 px-6 text-center min-w-[180px]">
+                    จำนวนที่จอด
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center text-gray-400 py-20 text-lg"
+                    >
+                      กำลังโหลดข้อมูล...
+                    </td>
                   </tr>
-                </thead>
-
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="text-center text-gray-400 py-20 text-lg"
-                      >
-                        กำลังโหลดข้อมูล...
+                ) : error ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center text-red-500 py-20 text-lg"
+                    >
+                      {error}
+                    </td>
+                  </tr>
+                ) : data.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="text-center text-gray-400 py-20 text-lg"
+                    >
+                      ไม่มีข้อมูล
+                    </td>
+                  </tr>
+                ) : (
+                  data.map((item, index) => (
+                    <tr
+                      key={index}
+                      className="border-b hover:bg-gray-50 text-lg"
+                    >
+                      <td className="py-6 px-6 text-center">
+                        {item.image_url ? (
+                          <Image
+                            src={item.image_url}
+                            alt={item.name}
+                            width={96}
+                            height={96}
+                            className="w-24 h-24 object-cover rounded-lg mx-auto"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">
+                              ไม่มีรูป
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-6 px-6 text-center">{item.name}</td>
+                      <td className="py-6 px-6 text-center">{item.type}</td>
+                      <td className="py-6 px-6 text-center">
+                        {item.total_slot}
                       </td>
                     </tr>
-                  ) : error ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="text-center text-red-500 py-20 text-lg"
-                      >
-                        {error}
-                      </td>
-                    </tr>
-                  ) : data.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="text-center text-gray-400 py-20 text-lg"
-                      >
-                        ไม่มีข้อมูล
-                      </td>
-                    </tr>
-                  ) : (
-                    data.map((item, index) => (
-                      <tr
-                        key={index}
-                        className="border-b hover:bg-gray-50 text-lg"
-                      >
-                        <td className="py-6 px-6 text-center">
-                          {item.image_url ? (
-                            <Image
-                              src={item.image_url}
-                              alt={item.name}
-                              width={96}
-                              height={96}
-                              className="w-24 h-24 object-cover rounded-lg mx-auto"
-                              unoptimized
-                            />
-                          ) : (
-                            <div className="w-24 h-24 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
-                              <span className="text-gray-400 text-xs">
-                                ไม่มีรูป
-                              </span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-6 px-6 text-center">{item.name}</td>
-                        <td className="py-6 px-6 text-center">{item.type}</td>
-                        <td className="py-6 px-6 text-center">
-                          {item.total_slot}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
