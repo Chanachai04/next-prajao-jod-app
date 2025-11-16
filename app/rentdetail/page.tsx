@@ -52,7 +52,7 @@ export default function RentDetail() {
   return (
     <>
       <form
-        className="min-h-screen container mx-auto px-4  py-5"
+        className="min-h-screen container mx-auto px-4  py-5"
         onSubmit={handleSubmit}
       >
         {/* --ส่วนหัว */}
@@ -83,7 +83,7 @@ export default function RentDetail() {
                 setFormValues((prev) => ({ ...prev, type: value }))
               }
             >
-              <SelectTrigger className="mt-2 min-h-10 w-full text-left text-lg">
+              <SelectTrigger className="mt-2 min-h-10 w-full text-left">
                 <SelectValue placeholder="เลือกประเภท" />
               </SelectTrigger>
               <SelectContent>
@@ -178,7 +178,7 @@ export default function RentDetail() {
           </div>
         </div>
 
-        {/* --checkbox */}
+        {/* --checkbox เวลาเปิดปิด */}
         <div className="py-5">
           <Label className="text-lg">เวลาเปิดปิดที่จอด *</Label>
 
@@ -288,18 +288,44 @@ export default function RentDetail() {
             </div>
           ))}
         </div>
-        {/* --รูปภาพ */}
+
+        {/* --- ส่วนรูปภาพ --- */}
         <div className="py-5">
           <Label className="text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
         </div>
 
+        {/* Input จริง ถูกซ่อนและมี ID */}
         <input
           type="file"
           accept="image/*"
           multiple
           onChange={handleImageChange}
-          className="image-container-horizontal"
+          id="file-upload"
+          className="hidden"
         />
+
+        {images.length === 0 && (
+          <Label
+            htmlFor="file-upload"
+            className="w-70 h-40 flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-400 rounded-lg text-gray-500 hover:bg-gray-50 transition"
+          >
+            <p>คลิกเพื่อเลือกไฟล์</p>
+          </Label>
+        )}
+
+        {images.length > 0 && (
+          <div className="mt-4">
+            {/* ปุ่มสำหรับเพิ่มรูปภาพอื่น ๆ เมื่อมีรูปแล้ว */}
+            <Label
+              htmlFor="file-upload"
+              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+            >
+              เพิ่มรูปภาพ
+            </Label>
+          </div>
+        )}
+
+        {/* ส่วนแสดงรูปภาพที่เลือกไว้ */}
         {images.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {images.map((file, index) => (
@@ -337,6 +363,7 @@ export default function RentDetail() {
             {submitStatus.message}
           </p>
         )}
+
         {/* --ราคา */}
         <div className="py-5">
           <h1 className="pb-3 text-2xl">ราคา</h1>
@@ -452,7 +479,7 @@ export default function RentDetail() {
         </div>
 
         <Button
-          className="px-12 h-12 cursor-pointer mt-6"
+          className="px-12 h-12 cursor-pointer mt-6 mb-10"
           type="submit"
           disabled={isSubmitting || !agreeTerms || !agreeFee}
         >
