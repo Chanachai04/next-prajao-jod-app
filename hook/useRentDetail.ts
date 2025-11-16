@@ -35,8 +35,6 @@ export default function useRentDetail() {
     price_per_day: "",
     price_per_month: "",
     deposit: "",
-    latitude: "",
-    longitude: "",
     owner_id: "",
   });
 
@@ -110,15 +108,6 @@ export default function useRentDetail() {
     ],
     []
   );
-
-  const markerPosition = React.useMemo<[number, number] | null>(() => {
-    const lat = Number(formValues.latitude);
-    const lng = Number(formValues.longitude);
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      return [lat, lng];
-    }
-    return null;
-  }, [formValues.latitude, formValues.longitude]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
@@ -278,23 +267,6 @@ export default function useRentDetail() {
       return;
     }
 
-    if (!formValues.latitude || !formValues.longitude) {
-      setSubmitStatus({
-        type: "error",
-        message: "กรุณาเลือกตำแหน่งบนแผนที่",
-      });
-      return;
-    }
-
-    const latitude = Number(formValues.latitude);
-    const longitude = Number(formValues.longitude);
-    if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-      setSubmitStatus({
-        type: "error",
-        message: "ละติจูด/ลองจิจูดไม่ถูกต้อง",
-      });
-      return;
-    }
 
     let pricePayload: {
       price_per_hour: number | null;
@@ -331,8 +303,6 @@ export default function useRentDetail() {
       district: formValues.district.trim(),
       province: formValues.province.trim(),
       landmark: formValues.landmark.trim(),
-      latitude,
-      longitude,
       owner_id: formValues.owner_id,
       price: pricePayload,
       facilities: selectedFacilities,
@@ -380,8 +350,6 @@ export default function useRentDetail() {
         price_per_day: "",
         price_per_month: "",
         deposit: "",
-        latitude: "",
-        longitude: "",
         owner_id: formValues.owner_id,
       });
       setSelectedFacilities([]);
@@ -434,7 +402,6 @@ export default function useRentDetail() {
     setAgreeTerms,
     agreeFee,
     setAgreeFee,
-    markerPosition,
     handleFieldChange,
     toggleFacility,
     toggleSelectAllDays,
