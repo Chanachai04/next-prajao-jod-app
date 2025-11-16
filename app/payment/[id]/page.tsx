@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import LabelAndInputForm from "@/components/form/LabelAndInputForm";
 import { Button } from "@/components/ui/button";
 import ConfirmModal from "@/components/ui/confirm";

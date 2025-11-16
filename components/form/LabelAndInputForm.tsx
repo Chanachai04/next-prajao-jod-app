@@ -10,6 +10,7 @@ interface LabelAndInputFormProps {
   placeholder?: string;
   type?: string;
   className?: string;
+  labelClassName?: string;
 }
 
 export default function LabelAndInputForm({
@@ -21,10 +22,11 @@ export default function LabelAndInputForm({
   placeholder,
   type = "text",
   className,
+  labelClassName,
 }: LabelAndInputFormProps) {
   return (
     <div>
-      <Label htmlFor={id} className="text-lg">
+      <Label htmlFor={id} className={`text-lg ${labelClassName}`}>
         {title}
       </Label>
       <Input
