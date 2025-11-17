@@ -51,17 +51,17 @@ export default function RentDetail() {
   return (
     <>
       <form
-        className="min-h-screen container mx-auto px-4  py-5"
+        className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5"
         onSubmit={handleSubmit}
       >
         {/* --ส่วนหัว */}
-        <div className="space-y-3">
-          <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
-          <h1 className="text-xl">ข้อมูลทั่วไปที่จอดรถ</h1>
+        <div className="space-y-2 sm:space-y-3">
+          <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
+          <h1 className="text-base sm:text-lg md:text-xl">ข้อมูลทั่วไปที่จอดรถ</h1>
         </div>
 
         {/* --ฟอร์มข้อมูลทั่วไป */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6 mt-4 sm:mt-5">
           {/* ชื่อที่จอดรถ */}
           <LabelAndInput
             title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร) *"
@@ -130,7 +130,7 @@ export default function RentDetail() {
             onChange={handleFieldChange("address")}
           />
 
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <LabelAndInput
               title="จังหวัด *"
               id="province"
@@ -178,12 +178,12 @@ export default function RentDetail() {
         </div>
 
         {/* --checkbox เวลาเปิดปิด */}
-        <div className="py-5">
-          <Label className="text-lg">เวลาเปิดปิดที่จอด *</Label>
+        <div className="py-4 sm:py-5">
+          <Label className="text-base sm:text-lg">เวลาเปิดปิดที่จอด *</Label>
 
           {/* หัวข้อ: วัน / เวลาเปิด / เวลาปิด */}
-          <div className="grid grid-cols-12 items-center py-2 gap-2">
-            <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
+          <div className="grid grid-cols-12 items-center py-2 gap-2 sm:gap-4">
+            <div className="col-span-12 sm:col-span-6 md:col-span-3 flex items-center gap-2">
               <Checkbox
                 id="everyday"
                 className="border border-black"
@@ -192,25 +192,25 @@ export default function RentDetail() {
                   toggleSelectAllDays(checked === true)
                 }
               />
-              <Label htmlFor="everyday">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
+              <Label htmlFor="everyday" className="text-sm sm:text-base">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
             </div>
-            <div className="col-span-6 sm:col-span-2"></div>
-            <Label className="col-span-6 sm:col-span-4 flex justify-start px-25">
+            <div className="hidden sm:block sm:col-span-2"></div>
+            <Label className="hidden sm:flex col-span-6 sm:col-span-4 md:col-span-4 justify-start">
               เวลาเปิด
             </Label>
-            <Label className="col-span-6 sm:col-span-3 flex justify-start px-25">
+            <Label className="hidden sm:flex col-span-6 sm:col-span-3 md:col-span-3 justify-start">
               เวลาปิด
             </Label>
           </div>
         </div>
 
         {/* --รายการวันจันทร์ - อาทิตย์ */}
-        <div className="space-y-1">
+        <div className="space-y-2 sm:space-y-1">
           {schedules.map((row, index) => (
-            <div key={row.day}>
-              <div className="grid grid-cols-12 items-center py-3 gap-2 sm:gap-4">
+            <div key={row.day} className="border-b sm:border-0 pb-3 sm:pb-0">
+              <div className="grid grid-cols-1 sm:grid-cols-12 items-start sm:items-center py-2 sm:py-3 gap-2 sm:gap-4">
                 {/* วัน */}
-                <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
+                <div className="col-span-1 sm:col-span-3 flex items-center gap-2">
                   <Checkbox
                     id={row.day}
                     className="border border-black"
@@ -219,11 +219,11 @@ export default function RentDetail() {
                       toggleDay(index, checked === true)
                     }
                   />
-                  <Label htmlFor={row.day}>{row.day}</Label>
+                  <Label htmlFor={row.day} className="text-sm sm:text-base">{row.day}</Label>
                 </div>
 
                 {/* เปิด 24 ชม. */}
-                <div className="col-span-6 sm:col-span-2 flex items-center gap-2">
+                <div className="col-span-1 sm:col-span-2 flex items-center gap-2">
                   <Checkbox
                     id={`${row.day}-24h`}
                     className="border border-black"
@@ -232,11 +232,12 @@ export default function RentDetail() {
                       toggleAllDay(index, checked === true)
                     }
                   />
-                  <Label htmlFor={`${row.day}-24h`}>เปิด 24 ชม.</Label>
+                  <Label htmlFor={`${row.day}-24h`} className="text-sm sm:text-base">เปิด 24 ชม.</Label>
                 </div>
 
                 {/* เวลาเปิด */}
-                <div className="col-span-6 sm:col-span-4 flex justify-start mt-2 sm:mt-0">
+                <div className="col-span-1 sm:col-span-4 flex flex-col sm:flex-row justify-start gap-1 sm:gap-0">
+                  <Label className="text-xs sm:hidden text-gray-600 mb-1">เวลาเปิด:</Label>
                   <Select
                     value={row.open_time}
                     onValueChange={(value) =>
@@ -244,7 +245,7 @@ export default function RentDetail() {
                     }
                     disabled={!row.selected || row.allDay}
                   >
-                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
+                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px] text-sm sm:text-base">
                       <SelectValue placeholder="06:00" />
                     </SelectTrigger>
                     <SelectContent>
@@ -260,7 +261,8 @@ export default function RentDetail() {
                 </div>
 
                 {/* เวลาปิด */}
-                <div className="col-span-6 sm:col-span-3 flex justify-start mt-2 sm:mt-0">
+                <div className="col-span-1 sm:col-span-3 flex flex-col sm:flex-row justify-start gap-1 sm:gap-0">
+                  <Label className="text-xs sm:hidden text-gray-600 mb-1">เวลาปิด:</Label>
                   <Select
                     value={row.close_time}
                     onValueChange={(value) =>
@@ -268,7 +270,7 @@ export default function RentDetail() {
                     }
                     disabled={!row.selected || row.allDay}
                   >
-                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px]">
+                    <SelectTrigger className="border-2 border-gray-400 w-full sm:w-[250px] text-sm sm:text-base">
                       <SelectValue placeholder="20:00" />
                     </SelectTrigger>
                     <SelectContent>
@@ -283,14 +285,14 @@ export default function RentDetail() {
                   </Select>
                 </div>
               </div>
-              <hr className="border-gray-300" />
+              <hr className="hidden sm:block border-gray-300" />
             </div>
           ))}
         </div>
 
         {/* --- ส่วนรูปภาพ --- */}
-        <div className="py-5">
-          <Label className="text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
+        <div className="py-4 sm:py-5">
+          <Label className="text-base sm:text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
         </div>
 
         {/* Input จริง ถูกซ่อนและมี ID */}
@@ -306,18 +308,18 @@ export default function RentDetail() {
         {images.length === 0 && (
           <Label
             htmlFor="file-upload"
-            className="w-70 h-40 flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-400 rounded-lg text-gray-500 hover:bg-gray-50 transition"
+            className="w-full sm:w-70 h-32 sm:h-40 flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-400 rounded-lg text-gray-500 hover:bg-gray-50 transition text-sm sm:text-base"
           >
             <p>คลิกเพื่อเลือกไฟล์</p>
           </Label>
         )}
 
         {images.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-3 sm:mt-4">
             {/* ปุ่มสำหรับเพิ่มรูปภาพอื่น ๆ เมื่อมีรูปแล้ว */}
             <Label
               htmlFor="file-upload"
-              className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+              className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
             >
               เพิ่มรูปภาพ
             </Label>
@@ -326,7 +328,7 @@ export default function RentDetail() {
 
         {/* ส่วนแสดงรูปภาพที่เลือกไว้ */}
         {images.length > 0 && (
-          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="mt-3 sm:mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3">
             {images.map((file, index) => (
               <div
                 key={index}
@@ -337,12 +339,12 @@ export default function RentDetail() {
                   height={100}
                   src={URL.createObjectURL(file)}
                   alt={`preview-${index}`}
-                  className="object-cover w-full h-40"
+                  className="object-cover w-full h-32 sm:h-40"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(index)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-75 sm:opacity-0 group-hover:opacity-100 transition text-sm sm:text-base"
                 >
                   ×
                 </button>
@@ -364,9 +366,9 @@ export default function RentDetail() {
         )}
 
         {/* --ราคา */}
-        <div className="py-5">
-          <h1 className="pb-3 text-2xl">ราคา</h1>
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="py-4 sm:py-5">
+          <h1 className="pb-2 sm:pb-3 text-xl sm:text-2xl">ราคา</h1>
+          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <LabelAndInput
               title="ราคาต่อชั่วโมง"
               id="priceperhour"
@@ -407,19 +409,20 @@ export default function RentDetail() {
             />
           </div>
 
-          <p className="text-sm">
+          <p className="text-xs sm:text-sm">
             *พระเจ้าจอด ทำการเก็บเงินสัญญา และอุปกรณ์การเข้าจอด
             จากผู้เช่าโดยจะทำการส่งมอบให้
-            <br />
+            <br className="hidden sm:block" />
+            <span className="sm:hidden"> </span>
             เจ้าของพื้นที่เมื่อผู้เช่าผิดสัญญาหรือทำอุปกรณ์เข้าจอดชำรุดหรือสูญหาย
           </p>
         </div>
         {/* --สิ่งอำนวยความสะดวก */}
         <hr className="border-gray-300" />
-        <div className="py-5">
-          <h1 className="pb-3 text-2xl">สิ่งอำนวยความสะดวก</h1>
+        <div className="py-4 sm:py-5">
+          <h1 className="pb-2 sm:pb-3 text-xl sm:text-2xl">สิ่งอำนวยความสะดวก</h1>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-3 py-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-2 sm:gap-y-3 py-2 sm:py-3">
             {facilityOptions.map((facility) => {
               const id = `facility-${facility}`;
               return (
@@ -441,35 +444,31 @@ export default function RentDetail() {
           </div>
 
           {/* --term */}
-          <div className="grid grid-cols-4 gap-y-3 py-3">
-            {" "}
-            <div className="flex items-center gap-2">
-              {" "}
+          <div className="grid grid-cols-1 gap-y-2 sm:gap-y-3 py-2 sm:py-3">
+            <div className="flex items-start gap-2">
               <Checkbox
                 id="agree_terms"
-                className="border border-black"
+                className="border border-black mt-1"
                 checked={agreeTerms}
                 onCheckedChange={(checked) => setAgreeTerms(checked === true)}
               />
-              <Label htmlFor="agree_terms" className="text-base">
+              <Label htmlFor="agree_terms" className="text-sm sm:text-base leading-relaxed">
                 อ่านและยอมรับ{" "}
-                <Link href="/terms" className="text-blue-500">
+                <Link href="/terms" className="text-blue-500 underline">
                   ข้อตกลงและเงื่อนไขในการให้บริการ
                 </Link>
               </Label>
             </div>
           </div>
-          <div className="grid grid-cols-4 gap-y-3">
-            {" "}
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              {" "}
+          <div className="grid grid-cols-1 gap-y-2 sm:gap-y-3">
+            <div className="flex items-start gap-2">
               <Checkbox
                 id="agree_fee"
-                className="border border-black"
+                className="border border-black mt-1"
                 checked={agreeFee}
                 onCheckedChange={(checked) => setAgreeFee(checked === true)}
               />
-              <Label htmlFor="agree_fee" className="text-base">
+              <Label htmlFor="agree_fee" className="text-sm sm:text-base leading-relaxed">
                 รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
                 ตาม คู่มือการใช้งาน
               </Label>
@@ -478,7 +477,7 @@ export default function RentDetail() {
         </div>
 
         <Button
-          className="px-12 h-12 cursor-pointer mt-6 mb-10"
+          className="w-full sm:w-auto px-8 sm:px-12 h-10 sm:h-12 cursor-pointer mt-4 sm:mt-6 mb-6 sm:mb-10 text-sm sm:text-base"
           type="submit"
           disabled={isSubmitting || !agreeTerms || !agreeFee}
         >

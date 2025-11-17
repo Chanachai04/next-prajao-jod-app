@@ -129,20 +129,20 @@ export default function Detail() {
   };
 
   return (
-    <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5 bg-gray-50">
+    <div className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-4 sm:py-5 bg-gray-50">
       <hr className="border-3 border-gray-600" />
       <div className="flex flex-col lg:flex-row bg-white shadow-sm overflow-hidden min-h-[80vh] lg:gap-x-8">
         {/* Sidebar */}
-        <div className="w-full lg:w-1/3 p-6 flex flex-col items-start min-h-[85vh]">
-          <h1 className="text-4xl md:text-5xl mb-6 text-gray-600">
+        <div className="w-full lg:w-1/3 p-4 sm:p-6 flex flex-col items-start min-h-[85vh]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6 text-gray-600">
             ข้อมูลส่วนตัว
           </h1>
           <Sidebar currentPathname={pathname} />
         </div>
 
         {/* Form Section */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center">
-          <div className="space-y-4">
+        <div className="w-full lg:w-1/2 flex flex-col justify-center p-4 sm:p-6 lg:p-0">
+          <div className="space-y-3 sm:space-y-4">
             <LabelAndInput
               title="อีเมล *"
               id="email"
@@ -199,11 +199,11 @@ export default function Detail() {
             />
           </div>
 
-          <hr className="my-6" />
+          <hr className="my-4 sm:my-6" />
 
           <div className="flex justify-start">
             <Button
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-sm sm:text-base"
               onClick={handleSave}
               disabled={loading}
             >
@@ -213,11 +213,11 @@ export default function Detail() {
         </div>
 
         {/* Image Section */}
-        <div className="w-full lg:w-1/3 p-6 flex flex-col mt-20 items-center">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">รูปภาพ</h2>
+        <div className="w-full lg:w-1/3 p-4 sm:p-6 flex flex-col mt-8 sm:mt-12 lg:mt-20 items-center">
+          <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-700">รูปภาพ</h2>
           <div
             className="border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 
-                w-40 h-40 cursor-pointer hover:bg-gray-200 transition"
+                w-32 h-32 sm:w-40 sm:h-40 cursor-pointer hover:bg-gray-200 transition"
             onClick={handleContainerClick}
           >
             {/* show preview only for newly selected local file; don't render server image */}
@@ -230,7 +230,7 @@ export default function Detail() {
                 height={160}
               />
             ) : (
-              <span className="text-gray-400 text-sm text-center">
+              <span className="text-gray-400 text-xs sm:text-sm text-center px-2">
                 ยังไม่ได้เลือกรูปภาพ
               </span>
             )}

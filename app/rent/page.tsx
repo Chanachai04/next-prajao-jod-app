@@ -86,15 +86,15 @@ export default function Rent() {
   };
 
   return (
-    <div className="min-h-screen container mx-auto  px-4  py-5  space-y-5">
+    <div className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5">
       {/* ส่วนหัว */}
-      <h1 className="text-3xl pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
-      <h1 className="text-xl">
+      <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
+      <h1 className="text-base sm:text-lg md:text-xl">
         กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ
       </h1>
 
       {/* ฟอร์ม */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-10 gap-y-4 sm:gap-y-6 mt-4 sm:mt-6">
         <LabelAndInput
           title="ชื่อ *"
           id="name"
@@ -153,17 +153,14 @@ export default function Rent() {
             setPhone(onlyNumbers);
           }}
         />
-        {error && <div className="text-red-600  text-sm">{error}</div>}
-        {/* ปุ่มบันทึก (อยู่ใต้คอลัมน์ขวา) */}
-        <div className="md:col-start-2 flex justify-end ">
+        {error && <div className="text-red-600 text-sm md:col-span-2">{error}</div>}
+        <div className="md:col-start-2 flex justify-end w-full md:w-auto">
           <Button
-            className="cursor-pointer px-10 text-white bg-blue-600 hover:bg-blue-700"
+            className="cursor-pointer w-full sm:w-auto px-6 sm:px-10 text-white bg-blue-600 hover:bg-blue-700 text-base sm:text-lg font-light"
             disabled={loading}
             onClick={handleSave}
           >
-            <div className="text-lg font-light">
-              {loading ? "กําลังบันทึก..." : "บันทึกข้อมูล"}
-            </div>
+            {loading ? "กําลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         </div>
       </div>
