@@ -11,6 +11,7 @@ interface LabelAndInputFormProps {
   type?: string;
   className?: string;
   labelClassName?: string;
+  maxLength?: number;
 }
 
 export default function LabelAndInputForm({
@@ -23,6 +24,7 @@ export default function LabelAndInputForm({
   type = "text",
   className,
   labelClassName,
+  maxLength,
 }: LabelAndInputFormProps) {
   return (
     <div>
@@ -36,6 +38,7 @@ export default function LabelAndInputForm({
         onChange={onChange}
         disabled={disabled}
         placeholder={placeholder}
+        maxLength={maxLength}
         className={`mt-2 ${
           disabled ? "bg-gray-100 cursor-not-allowed" : ""
         } ${className}`}

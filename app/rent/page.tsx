@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import { useRouter } from "next/navigation";
@@ -102,6 +102,7 @@ export default function Rent() {
           type="text"
           className="w-full"
           value={citizenId}
+          maxLength={13}
           onChange={(e) => setCitizenId(e.target.value)}
         />
 
