@@ -16,10 +16,12 @@ export async function proxy(req: NextRequest) {
     token &&
     userId
   ) {
-    // redirect กลับไปหน้าเดิมที่เคยตั้งใจเข้าผ่าน query redirect
-    const redirectTo = url.searchParams.get("redirect") || "/";
-    url.pathname = redirectTo;
-    return NextResponse.redirect(url);
+    // redirect กลับไปหน้าเดิมที่เคยตั้งใจเข้าก่อน login
+    const redirectTo = url.searchParams.get("redirect");
+    if (redirectTo) {
+      return NextResponse.redirect(new URL(redirectTo, req.url));
+    }
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   // ถ้าเป็น protected routes
@@ -31,6 +33,7 @@ export async function proxy(req: NextRequest) {
       loginUrl.searchParams.set("redirect", fullPath);
       return NextResponse.redirect(loginUrl);
     }
+
     // สำหรับ /payment/* ให้แน่ใจว่า userId อยู่ใน query
     if (url.pathname.startsWith("/payment")) {
       if (!url.searchParams.has("userId")) {
@@ -38,6 +41,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(url);
       }
     }
+
     // ถ้าเข้า /rent ต้องเช็ค is_checked
     if (url.pathname === "/rent") {
       const supabase = createClient(
@@ -61,7 +65,6 @@ export async function proxy(req: NextRequest) {
   return NextResponse.next();
 }
 
-// Apply middleware to these paths
 export const config = {
   matcher: ["/rent", "/rentdetail", "/profile", "/payment/:path*"],
 };
