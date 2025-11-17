@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 const protectedRoutes = ["/rent", "/rentdetail", "/profile", "/payment"];
 const authRoutes = ["/login", "/register", "/forgotpassword", "/reset"];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const userId = req.cookies.get("userId")?.value;
   const url = req.nextUrl.clone();
