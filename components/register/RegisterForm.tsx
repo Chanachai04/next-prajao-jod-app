@@ -164,7 +164,7 @@ export default function RegisterForm() {
           setModalOpen(false);
           if (modalType === "success") {
             const redirectPath = searchParams.get("redirect") || "/";
-            router.push(redirectPath);
+            router.push(decodeURIComponent(redirectPath));
           } // redirect หลังปิด modal
         }}
         type={modalType}
