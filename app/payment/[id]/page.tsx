@@ -59,6 +59,8 @@ export default function Page() {
   const [mode, setMode] = useState<"hourly" | "daily" | "monthly">("hourly");
   const [monthDuration, setMonthDuration] = useState<number>(3); // 3, 6, 12 เดือน
 
+  const [error, setError] = useState<string | null>(null);
+
   const FALLBACK_IMAGE = "/image.jpg";
 
   const userId = searchParams.get("userId");
@@ -134,7 +136,7 @@ export default function Page() {
         }
       } catch (error) {
         console.error("Error fetching payment data:", error);
-        alert("ไม่สามารถโหลดข้อมูลได้");
+        setError("ไม่สามารถโหลดข้อมูลได้");
       } finally {
         setIsLoading(false);
       }
@@ -301,7 +303,7 @@ export default function Page() {
   // จัดการการชำระเงิน
   const handlePayment = async () => {
     if (!userId) {
-      alert("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
+      setError("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
       return;
     }
 
@@ -311,19 +313,19 @@ export default function Page() {
       !citizenId.trim() ||
       !phone.trim()
     ) {
-      alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+      setError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
       setIsConfirm(false);
       return;
     }
 
     if (citizenId.length !== 13 || !/^\d+$/.test(citizenId)) {
-      alert("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
+      setError("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
       setIsConfirm(false);
       return;
     }
 
     if (phone.length !== 10 || !/^0\d{9}$/.test(phone)) {
-      alert("กรุณากรอกเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง");
+      setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง");
       setIsConfirm(false);
       return;
     }
@@ -367,7 +369,7 @@ export default function Page() {
     } catch (error) {
       console.error("Error processing payment:", error);
       setIsConfirm(false);
-      alert(
+      setError(
         error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการชำระเงิน"
       );
     } finally {
@@ -529,7 +531,7 @@ export default function Page() {
               <div></div>
             </div>
           </div>
-
+          {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
           {isUserDataExisting && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
@@ -548,15 +550,15 @@ export default function Page() {
                   !citizenId.trim() ||
                   !phone.trim()
                 ) {
-                  alert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
+                  setError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
                   return;
                 }
                 if (citizenId.length !== 13) {
-                  alert("กรุณากรอกเลขบัตรประชาชน 13 หลัก");
+                  setError("กรุณากรอกเลขบัตรประชาชน 13 หลัก");
                   return;
                 }
                 if (phone.length !== 10) {
-                  alert("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
+                  setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
                   return;
                 }
                 setIsConfirm(true);
