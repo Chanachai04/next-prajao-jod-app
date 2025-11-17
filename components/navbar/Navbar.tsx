@@ -48,6 +48,14 @@ export default function Navbar() {
     };
 
     fetchData();
+
+    // login/logout event
+    const handler = () => fetchData();
+    window.addEventListener("loginStatusChanged", handler);
+
+    return () => {
+      window.removeEventListener("loginStatusChanged", handler);
+    };
   }, []);
 
   return (
