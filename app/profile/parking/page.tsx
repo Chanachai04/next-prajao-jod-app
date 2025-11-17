@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Pen, Trash } from "lucide-react";
+import { Pen, Trash } from "lucide-react"; // เพิ่มการนำเข้าไอคอน
 import Link from "next/link";
 
 interface ParkingItem {
@@ -49,7 +49,7 @@ export default function Parking() {
     fetchParkingData();
   }, []);
 
-  // ฟังก์ชันลบข้อมูล
+  // ฟังก์ชันลบข้อมูล (ไม่ลบไฟล์ภาพจาก storage)
   const handleDelete = async (rentId: string) => {
     if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?")) {
       return;
@@ -92,7 +92,7 @@ export default function Parking() {
 
         {/* ไอคอนลูกศร ติดกับ Sidebar */}
         <div className="pt-10 pr-50 overflow-y-auto max-h-[80vh] w-full lg:w-2/3">
-          <div className=" flex justify-center">
+          <div className="overflow-x-auto flex justify-center">
             {/* จัดตารางให้กลาง */}
             <table className="w-full max-w-[1200px] mx-auto border-collapse">
               {/* ใช้ max-w เพื่อกำหนดความกว้างของตาราง */}
@@ -175,11 +175,12 @@ export default function Parking() {
                       {/* เพิ่มคอลัมน์ "การจัดการ" */}
                       <td className="py-6 px-6 text-center">
                         <div className="flex justify-center gap-4">
-                          <button className="text-blue-500 hover:text-blue-700">
-                            <Link href="/editrentdetail">
-                              <Pen size={20} />
-                            </Link>
-                          </button>
+                          <Link
+                            href={`/editrentdetail?rent_id=${item.id}`}
+                            className="text-blue-500 hover:text-blue-700"
+                          >
+                            <Pen size={20} />
+                          </Link>
                           <button
                             onClick={() => handleDelete(item.id)}
                             disabled={deletingId === item.id}

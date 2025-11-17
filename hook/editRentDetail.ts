@@ -6,10 +6,25 @@ type SubmitStatus =
   | { type: "success" | "error"; message: string }
   | null;
 
-export default function useRentDetail() {
+type ScheduleItem = {
+  day: string;
+  selected: boolean;
+  allDay: boolean;
+  open_time: string;
+  close_time: string;
+};
+
+export default function useEditRentDetail(rentId: string | null) {
   const [images, setImages] = React.useState<File[]>([]);
+  const [existingImages, setExistingImages] = React.useState<
+    Array<{ id: string; image_url: string }>
+  >([]);
+  const [originalExistingImages, setOriginalExistingImages] = React.useState<
+    Array<{ id: string; image_url: string }>
+  >([]);
   const [submitStatus, setSubmitStatus] = React.useState<SubmitStatus>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalType, setModalType] = React.useState<"success" | "error">(
     "success"
@@ -38,23 +53,21 @@ export default function useRentDetail() {
     owner_id: "",
   });
 
-  // Read owner id from cookie or API if available and set into formValues
+  // Read owner id from cookie or API
   React.useEffect(() => {
     const fetchUserId = async () => {
       if (typeof document === "undefined") return;
-      
-      // ลองอ่านจาก cookie ก่อน
+
       const cookieValue = document.cookie
         .split("; ")
         .find((row) => row.startsWith("userId="))
         ?.split("=")[1];
-      
+
       if (cookieValue) {
         setFormValues((prev) => ({ ...prev, owner_id: cookieValue }));
         return;
       }
 
-      // ถ้าอ่านจาก cookie ไม่ได้ ลองใช้ API
       try {
         const response = await fetch("/api/me");
         const data = await response.json();
@@ -69,11 +82,123 @@ export default function useRentDetail() {
     fetchUserId();
   }, []);
 
+  // Load data from API
+  React.useEffect(() => {
+    if (!rentId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`/api/editrentdetail?rent_id=${rentId}`);
+
+        if (!response.ok) {
+          throw new Error("ไม่สามารถดึงข้อมูลได้");
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.data) {
+          const { rentDetail, price, facilities, schedules, images } =
+            result.data;
+
+          // Set form values
+          setFormValues({
+            name: rentDetail.name || "",
+            type: rentDetail.type || "",
+            description: rentDetail.description || "",
+            total_slot: String(rentDetail.total_slot || ""),
+            address: rentDetail.address || "",
+            subdistrict: rentDetail.subdistrict || "",
+            district: rentDetail.district || "",
+            province: rentDetail.province || "",
+            landmark: rentDetail.landmark || "",
+            price_per_hour: price?.price_per_hour
+              ? String(price.price_per_hour)
+              : "",
+            price_per_day: price?.price_per_day
+              ? String(price.price_per_day)
+              : "",
+            price_per_month: price?.price_per_month
+              ? String(price.price_per_month)
+              : "",
+            deposit: price?.deposit ? String(price.deposit) : "",
+            owner_id: rentDetail.owner_id || "",
+          });
+
+          // Set facilities
+          if (facilities && facilities.length > 0) {
+            setSelectedFacilities(
+              facilities.map((f: { name: string }) => f.name)
+            );
+          }
+
+          // Set schedules
+          const dayLabels = [
+            "วันจันทร์",
+            "วันอังคาร",
+            "วันพุธ",
+            "วันพฤหัสบดี",
+            "วันศุกร์",
+            "วันเสาร์",
+            "วันอาทิตย์",
+          ];
+
+          const newSchedules: ScheduleItem[] = dayLabels.map((day) => {
+            const schedule = schedules?.find(
+              (s: { available_days?: string[] }) =>
+                s.available_days?.includes(day)
+            );
+            if (schedule) {
+              const openTime = schedule.open_time?.slice(0, 5) || "06:00";
+              const closeTime = schedule.close_time?.slice(0, 5) || "20:00";
+              const isAllDay = openTime === "00:00" && closeTime === "00:00";
+              return {
+                day,
+                selected: true,
+                allDay: isAllDay,
+                open_time: isAllDay ? "06:00" : openTime,
+                close_time: isAllDay ? "20:00" : closeTime,
+              };
+            }
+            return {
+              day,
+              selected: false,
+              allDay: false,
+              open_time: "06:00",
+              close_time: "20:00",
+            };
+          });
+          setSchedules(newSchedules);
+
+          // Set existing images
+          if (images && images.length > 0) {
+            setExistingImages(images);
+            setOriginalExistingImages(images);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch data:", err);
+        setSubmitStatus({
+          type: "error",
+          message:
+            err instanceof Error ? err.message : "ไม่สามารถดึงข้อมูลได้",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [rentId]);
+
   const [selectedFacilities, setSelectedFacilities] = React.useState<string[]>(
     []
   );
-  const [agreeTerms, setAgreeTerms] = React.useState(false);
-  const [agreeFee, setAgreeFee] = React.useState(false);
+  const [agreeTerms, setAgreeTerms] = React.useState(true); // Default true for edit
+  const [agreeFee, setAgreeFee] = React.useState(true); // Default true for edit
 
   const parkingTypes = React.useMemo(
     () => [
@@ -104,7 +229,7 @@ export default function useRentDetail() {
     []
   );
 
-  const [schedules, setSchedules] = React.useState(
+  const [schedules, setSchedules] = React.useState<ScheduleItem[]>(
     dayLabels.map((day) => ({
       day,
       selected: false,
@@ -137,6 +262,10 @@ export default function useRentDetail() {
   const removeImage = (index: number) =>
     setImages((prev) => prev.filter((_, i) => i !== index));
 
+  const removeExistingImage = (id: string) => {
+    setExistingImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
   const handleFieldChange =
     (field: keyof typeof formValues) =>
     (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -157,6 +286,7 @@ export default function useRentDetail() {
   const toggleSelectAllDays = (checked: boolean) => {
     setSchedules((prev) => prev.map((s) => ({ ...s, selected: checked })));
   };
+
   const toggleDay = (index: number, checked: boolean) => {
     setSchedules((prev) =>
       prev.map((s, i) =>
@@ -166,12 +296,15 @@ export default function useRentDetail() {
       )
     );
   };
+
   const changeTime = (
     index: number,
     field: "open_time" | "close_time",
     value: string
   ) => {
-    setSchedules((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+    );
   };
 
   const toggleAllDay = (index: number, checked: boolean) => {
@@ -229,14 +362,10 @@ export default function useRentDetail() {
     event.preventDefault();
     setSubmitStatus(null);
 
-    if (!agreeTerms) {
-      setSubmitStatus({ type: "error", message: "กรุณาอ่านและยอมรับข้อตกลง" });
-      return;
-    }
-    if (!agreeFee) {
+    if (!rentId) {
       setSubmitStatus({
         type: "error",
-        message: "โปรดยอมรับการเก็บค่าธรรมเนียม",
+        message: "ไม่พบ rent_id",
       });
       return;
     }
@@ -278,10 +407,6 @@ export default function useRentDetail() {
       setSubmitStatus({ type: "error", message: "กรุณากรอกจุดสังเกต" });
       return;
     }
-    if (!formValues.owner_id || !formValues.owner_id.trim()) {
-      setSubmitStatus({ type: "error", message: "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่" });
-      return;
-    }
 
     let pricePayload: {
       price_per_hour: number | null;
@@ -294,7 +419,10 @@ export default function useRentDetail() {
       pricePayload = {
         price_per_hour: toNumberOrNull(formValues.price_per_hour, "ราคาต่อชั่วโมง"),
         price_per_day: toNumberOrNull(formValues.price_per_day, "ราคาต่อวัน"),
-        price_per_month: toNumberOrNull(formValues.price_per_month, "ราคาต่อเดือน"),
+        price_per_month: toNumberOrNull(
+          formValues.price_per_month,
+          "ราคาต่อเดือน"
+        ),
         deposit: toNumberOrNull(
           formValues.deposit,
           "ค่าประกันบัตร อุปกรณ์เข้าจอด และสติ๊กเกอร์"
@@ -303,7 +431,8 @@ export default function useRentDetail() {
     } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error instanceof Error ? error.message : "ข้อมูลราคาไม่ถูกต้อง",
+        message:
+          error instanceof Error ? error.message : "ข้อมูลราคาไม่ถูกต้อง",
       });
       return;
     }
@@ -318,7 +447,6 @@ export default function useRentDetail() {
       district: formValues.district.trim(),
       province: formValues.province.trim(),
       landmark: formValues.landmark.trim(),
-      owner_id: formValues.owner_id,
       price: pricePayload,
       facilities: selectedFacilities,
       schedule: schedules
@@ -335,54 +463,38 @@ export default function useRentDetail() {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(payload));
       images.forEach((file) => formData.append("images", file, file.name));
+      
+      // หา image IDs ที่ถูกลบจริงๆ (เปรียบเทียบกับ original)
+      const deletedImageIds = originalExistingImages
+        .filter(
+          (original) => !existingImages.some((current) => current.id === original.id)
+        )
+        .map((img) => img.id);
+      
+      formData.append("deleted_image_ids", JSON.stringify(deletedImageIds));
 
-      const response = await fetch("/api/rentdetail", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/editrentdetail?rent_id=${rentId}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
-        throw new Error(body?.message || "บันทึกข้อมูลไม่สำเร็จ");
+        throw new Error(body?.message || "อัปเดตข้อมูลไม่สำเร็จ");
       }
 
-      setSubmitStatus({ type: "success", message: "บันทึกข้อมูลสำเร็จ" });
+      setSubmitStatus({ type: "success", message: "อัปเดตข้อมูลสำเร็จ" });
       setModalType("success");
-      setModalTitle("บันทึกข้อมูลสำเร็จ");
-      setModalDescription("ข้อมูลถูกบันทึกเรียบร้อยแล้ว");
+      setModalTitle("อัปเดตข้อมูลสำเร็จ");
+      setModalDescription("ข้อมูลถูกอัปเดตเรียบร้อยแล้ว");
       setModalOpen(true);
-      setFormValues({
-        name: "",
-        type: "",
-        description: "",
-        total_slot: "",
-        address: "",
-        subdistrict: "",
-        district: "",
-        province: "",
-        landmark: "",
-        price_per_hour: "",
-        price_per_day: "",
-        price_per_month: "",
-        deposit: "",
-        owner_id: formValues.owner_id,
-      });
-      setSelectedFacilities([]);
-      setSchedules(
-        dayLabels.map((day) => ({
-          day,
-          selected: false,
-          allDay: false,
-          open_time: "06:00",
-          close_time: "20:00",
-        }))
-      );
-      setAgreeTerms(false);
-      setAgreeFee(false);
-      setImages([]);
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "บันทึกข้อมูลไม่สำเร็จ";
+      const message =
+        error instanceof Error ? error.message : "อัปเดตข้อมูลไม่สำเร็จ";
       setSubmitStatus({ type: "error", message });
       setModalType("error");
       setModalTitle("เกิดข้อผิดพลาด");
@@ -397,10 +509,13 @@ export default function useRentDetail() {
 
   return {
     images,
+    existingImages,
     removeImage,
+    removeExistingImage,
     handleImageChange,
     submitStatus,
     isSubmitting,
+    isLoading,
     modalOpen,
     modalType,
     modalTitle,
@@ -427,3 +542,4 @@ export default function useRentDetail() {
     handleSubmit,
   } as const;
 }
+

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { Buffer } from "node:buffer";
+import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabaseClient";
 
 export const runtime = "nodejs";
@@ -33,6 +34,16 @@ type RentDetailPayload = {
 
 export async function POST(req: Request) {
   try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get("userId")?.value;
+
+    if (!userId) {
+      return NextResponse.json(
+        { message: "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบ" },
+        { status: 401 }
+      );
+    }
+
     const formData = await req.formData();
     const payloadRaw = formData.get("payload");
     const images = formData.getAll("images") as File[];
@@ -56,11 +67,13 @@ export async function POST(req: Request) {
       district,
       province,
       landmark,
-      owner_id,
       price,
       facilities,
       schedule,
     } = body;
+
+    // ใช้ owner_id จาก cookie แทนที่จะใช้จาก body (เพื่อความปลอดภัย)
+    const owner_id = userId;
 
     if (
       !name ||

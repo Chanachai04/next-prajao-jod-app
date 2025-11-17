@@ -13,17 +13,23 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
-import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
-import useRentDetail from "@/hook/useRentDetail";
+import useEditRentDetail from "@/hook/editRentDetail";
+import { useSearchParams } from "next/navigation";
 
 export default function EditRentDetail() {
+  const searchParams = useSearchParams();
+  const rentId = searchParams.get("rent_id");
+
   const {
     images,
+    existingImages,
     removeImage,
+    removeExistingImage,
     handleImageChange,
     submitStatus,
     isSubmitting,
+    isLoading,
     modalOpen,
     modalType,
     modalTitle,
@@ -35,8 +41,6 @@ export default function EditRentDetail() {
     schedules,
     facilityOptions,
     selectedFacilities,
-    agreeTerms,
-    agreeFee,
     handleFieldChange,
     toggleFacility,
     toggleSelectAllDays,
@@ -45,9 +49,23 @@ export default function EditRentDetail() {
     toggleAllDay,
     handleSubmit,
     setFormValues,
-    setAgreeTerms,
-    setAgreeFee,
-  } = useRentDetail();
+  } = useEditRentDetail(rentId);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen container mx-auto px-4 py-5 flex items-center justify-center">
+        <div className="text-lg">กำลังโหลดข้อมูล...</div>
+      </div>
+    );
+  }
+
+  if (!rentId) {
+    return (
+      <div className="min-h-screen container mx-auto px-4 py-5 flex items-center justify-center">
+        <div className="text-lg text-red-500">ไม่พบ rent_id</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -325,7 +343,35 @@ export default function EditRentDetail() {
           </div>
         )}
 
-        {/* ส่วนแสดงรูปภาพที่เลือกไว้ */}
+        {/* ส่วนแสดงรูปภาพเดิม */}
+        {existingImages.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            {existingImages.map((img) => (
+              <div
+                key={img.id}
+                className="relative border rounded-md overflow-hidden group"
+              >
+                <Image
+                  width={150}
+                  height={100}
+                  src={img.image_url}
+                  alt={`existing-${img.id}`}
+                  className="object-cover w-full h-40"
+                  unoptimized
+                />
+                <button
+                  type="button"
+                  onClick={() => removeExistingImage(img.id)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ส่วนแสดงรูปภาพที่เลือกไว้ใหม่ */}
         {images.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {images.map((file, index) => (
@@ -440,50 +486,14 @@ export default function EditRentDetail() {
               );
             })}
           </div>
-
-          {/* --term */}
-          <div className="grid grid-cols-4 gap-y-3 py-3">
-            {" "}
-            <div className="flex items-center gap-2">
-              {" "}
-              <Checkbox
-                id="agree_terms"
-                className="border border-black"
-                checked={agreeTerms}
-                onCheckedChange={(checked) => setAgreeTerms(checked === true)}
-              />
-              <Label htmlFor="agree_terms" className="text-base">
-                อ่านและยอมรับ{" "}
-                <Link href="/terms" className="text-blue-500">
-                  ข้อตกลงและเงื่อนไขในการให้บริการ
-                </Link>
-              </Label>
-            </div>
-          </div>
-          <div className="grid grid-cols-4 gap-y-3">
-            {" "}
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              {" "}
-              <Checkbox
-                id="agree_fee"
-                className="border border-black"
-                checked={agreeFee}
-                onCheckedChange={(checked) => setAgreeFee(checked === true)}
-              />
-              <Label htmlFor="agree_fee" className="text-base">
-                รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
-                ตาม คู่มือการใช้งาน
-              </Label>
-            </div>
-          </div>
         </div>
 
         <Button
           className="px-12 h-12 cursor-pointer mt-6 mb-10"
           type="submit"
-          disabled={isSubmitting || !agreeTerms || !agreeFee}
+          disabled={isSubmitting}
         >
-          {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
+          {isSubmitting ? "กำลังอัปเดต..." : "อัปเดตข้อมูล"}
         </Button>
         <AlertModal
           open={modalOpen}
