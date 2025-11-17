@@ -52,6 +52,7 @@ export default function RegisterForm() {
       });
 
       if (res.ok) {
+        router.refresh();
         window.dispatchEvent(new Event("loginStatusChanged"));
         setModalType("success");
       } else {
