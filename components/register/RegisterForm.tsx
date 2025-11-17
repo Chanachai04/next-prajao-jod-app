@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import AlertModal from "@/components/ui/modal";
+
 export default function RegisterForm() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -24,7 +25,6 @@ export default function RegisterForm() {
     e.preventDefault();
     setError(null);
 
-    // ตรวจความถูกต้องก่อน submit
     if (!phone) {
       setError("กรุณากรอกหมายเลขโทรศัพท์");
       return;
@@ -52,13 +52,13 @@ export default function RegisterForm() {
       });
 
       if (res.ok) {
-        router.refresh();
         window.dispatchEvent(new Event("loginStatusChanged"));
         setModalType("success");
+        setModalOpen(true);
       } else {
         setModalType("error");
+        setModalOpen(true);
       }
-      setModalOpen(true); // เปิด modal ไม่ว่าจะ success หรือ error
     } catch (err) {
       console.error(err);
       setError("เกิดข้อผิดพลาด กรุณาลองใหม่");
@@ -66,6 +66,7 @@ export default function RegisterForm() {
       setLoading(false);
     }
   };
+
   return (
     <div className="min-h-screen flex flex-col justify-center items-center ">
       <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px] ">
@@ -84,7 +85,6 @@ export default function RegisterForm() {
                 className="pl-10 pr-10 w-full text-sm md:text-lg h-10"
                 value={phone}
                 onChange={(e) => {
-                  // รับเฉพาะตัวเลข
                   const onlyNumbers = e.target.value.replace(/\D/g, "");
                   setPhone(onlyNumbers);
                 }}
@@ -160,12 +160,15 @@ export default function RegisterForm() {
       </div>
       <AlertModal
         open={modalOpen}
-        onClose={() => {
+        onClose={async () => {
           setModalOpen(false);
           if (modalType === "success") {
+            // รอให้ cookie set เสร็จ
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
             const redirectPath = searchParams.get("redirect") || "/";
-            router.push(decodeURIComponent(redirectPath));
-          } // redirect หลังปิด modal
+            window.location.href = decodeURIComponent(redirectPath);
+          }
         }}
         type={modalType}
         title={

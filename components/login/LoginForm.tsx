@@ -20,7 +20,6 @@ export default function LoginForm() {
     e.preventDefault();
     setError(null);
 
-    // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email) {
       setError("กรุณากรอกอีเมล");
@@ -30,7 +29,6 @@ export default function LoginForm() {
       return;
     }
 
-    // Validate password
     if (!password) {
       setError("กรุณากรอกรหัสผ่าน");
       return;
@@ -51,11 +49,16 @@ export default function LoginForm() {
       const data = await res.json();
 
       if (res.ok && data.message === "Login success") {
+        // รอให้ event ทำงานก่อน
         window.dispatchEvent(new Event("loginStatusChanged"));
-        router.refresh();
-        // ดึง path redirect จาก query ถ้าไม่มี default เป็น "/"
+
+        // รอให้ cookie set เสร็จ
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         const redirectPath = searchParams.get("redirect") || "/";
-        router.push(decodeURIComponent(redirectPath));
+
+        // ใช้ window.location แทน router.push เพื่อให้ refresh หน้าใหม่
+        window.location.href = decodeURIComponent(redirectPath);
       } else {
         setError(data.message || "เข้าสู่ระบบไม่สำเร็จ");
       }
