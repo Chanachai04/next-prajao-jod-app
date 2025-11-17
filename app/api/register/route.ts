@@ -61,7 +61,8 @@ export async function POST(req: Request) {
     res.cookies.set({
       name: "userId",
       value: newUser.id,
-      httpOnly: false,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
       path: "/",
       sameSite: "lax",
     });
