@@ -3,32 +3,9 @@ import { randomUUID } from "crypto";
 import { Buffer } from "node:buffer";
 import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabaseClient";
+import { EditRentDetailPayload } from "@/types/editRentDetail";
 
 export const runtime = "nodejs";
-
-type RentDetailPayload = {
-  name?: string;
-  type?: string;
-  description?: string;
-  total_slot?: number;
-  address?: string;
-  subdistrict?: string;
-  district?: string;
-  province?: string;
-  landmark?: string;
-  price?: {
-    price_per_hour?: number | null;
-    price_per_day?: number | null;
-    price_per_month?: number | null;
-    deposit?: number | null;
-  };
-  facilities?: string[];
-  schedule?: Array<{
-    day: string;
-    open_time: string;
-    close_time: string;
-  }>;
-};
 
 // GET - ดึงข้อมูล rent_detail พร้อมข้อมูลที่เกี่ยวข้อง
 export async function GET(req: Request) {
@@ -47,10 +24,7 @@ export async function GET(req: Request) {
     const rentId = searchParams.get("rent_id");
 
     if (!rentId) {
-      return NextResponse.json(
-        { message: "ไม่พบ rent_id" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "ไม่พบ rent_id" }, { status: 400 });
     }
 
     // ดึงข้อมูล rent_detail
@@ -129,10 +103,7 @@ export async function PUT(req: Request) {
     const rentId = searchParams.get("rent_id");
 
     if (!rentId) {
-      return NextResponse.json(
-        { message: "ไม่พบ rent_id" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "ไม่พบ rent_id" }, { status: 400 });
     }
 
     // ตรวจสอบว่า rent_id นี้เป็นของ owner_id นี้หรือไม่
@@ -161,7 +132,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    const body = JSON.parse(payloadRaw) as RentDetailPayload;
+    const body = JSON.parse(payloadRaw) as EditRentDetailPayload;
 
     const {
       name,
@@ -225,8 +196,7 @@ export async function PUT(req: Request) {
       typeof price?.price_per_day === "number" ? price.price_per_day : null;
     const pricePerMonth =
       typeof price?.price_per_month === "number" ? price.price_per_month : null;
-    const deposit =
-      typeof price?.deposit === "number" ? price.deposit : null;
+    const deposit = typeof price?.deposit === "number" ? price.deposit : null;
 
     const hasPrice =
       pricePerHour !== null ||
@@ -299,10 +269,7 @@ export async function PUT(req: Request) {
       try {
         const deletedImageIds: string[] = JSON.parse(deletedImageIdsRaw);
         if (Array.isArray(deletedImageIds) && deletedImageIds.length > 0) {
-          await supabase
-            .from("rent_images")
-            .delete()
-            .in("id", deletedImageIds);
+          await supabase.from("rent_images").delete().in("id", deletedImageIds);
         }
       } catch (err) {
         console.error("Error parsing deleted_image_ids:", err);
@@ -316,8 +283,7 @@ export async function PUT(req: Request) {
         if (!file || !file.size) continue;
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const fileExt =
-          file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
         const filePath = `${rentId}/${randomUUID()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
@@ -363,4 +329,3 @@ export async function PUT(req: Request) {
     );
   }
 }
-

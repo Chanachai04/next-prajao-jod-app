@@ -8,14 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
-
-interface AlertModalProps {
-  open: boolean;
-  onClose: () => void;
-  type: "success" | "error";
-  title?: string;
-  description?: string;
-}
+import { AlertModalProps } from "@/types/modal";
 
 export default function AlertModal({
   open,

@@ -3,34 +3,9 @@ import { randomUUID } from "crypto";
 import { Buffer } from "node:buffer";
 import { cookies } from "next/headers";
 import { supabase } from "@/lib/supabaseClient";
+import { RentDetailPayload } from "@/types/rentDetail";
 
 export const runtime = "nodejs";
-
-type RentDetailPayload = {
-  name?: string;
-  type?: string;
-  description?: string;
-  total_slot?: number;
-  address?: string;
-  subdistrict?: string;
-  district?: string;
-  province?: string;
-  landmark?: string;
-  owner_id?: string;
-  price?: {
-    price_per_hour?: number | null;
-    price_per_day?: number | null;
-    price_per_month?: number | null;
-    deposit?: number | null;
-  };
-  facilities?: string[];
-  schedule?: Array<{
-    day: string;
-    open_time: string;
-    close_time: string;
-  }>;
-};
-
 
 export async function POST(req: Request) {
   try {
@@ -130,8 +105,7 @@ export async function POST(req: Request) {
       typeof price?.price_per_day === "number" ? price.price_per_day : null;
     const pricePerMonth =
       typeof price?.price_per_month === "number" ? price.price_per_month : null;
-    const deposit =
-      typeof price?.deposit === "number" ? price.deposit : null;
+    const deposit = typeof price?.deposit === "number" ? price.deposit : null;
 
     const hasPrice =
       pricePerHour !== null ||
@@ -209,8 +183,7 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
-      scheduleIds =
-        scheduleData?.map((item) => item.id).filter(Boolean) ?? [];
+      scheduleIds = scheduleData?.map((item) => item.id).filter(Boolean) ?? [];
     }
 
     if (images.length > 0) {
@@ -220,8 +193,7 @@ export async function POST(req: Request) {
         if (!file || !file.size) continue;
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
-        const fileExt =
-          file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
         const filePath = `${data.id}/${randomUUID()}.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
@@ -306,12 +278,18 @@ export async function POST(req: Request) {
       // Try writing the full array first
       const payloadArray: Record<string, unknown> = {};
       payloadArray[column] = ids;
-      let res = await supabase.from("rent_detail").update(payloadArray).eq("id", data.id);
+      let res = await supabase
+        .from("rent_detail")
+        .update(payloadArray)
+        .eq("id", data.id);
       if (!res.error) return null;
       // If writing array failed, try single uuid (first element)
       const payloadSingle: Record<string, unknown> = {};
       payloadSingle[column] = ids[0];
-      res = await supabase.from("rent_detail").update(payloadSingle).eq("id", data.id);
+      res = await supabase
+        .from("rent_detail")
+        .update(payloadSingle)
+        .eq("id", data.id);
       if (!res.error) return null;
       // return last error
       return res.error;
@@ -365,4 +343,3 @@ export async function POST(req: Request) {
     );
   }
 }
-

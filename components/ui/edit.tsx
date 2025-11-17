@@ -1,6 +1,7 @@
 import React from "react";
 import { Pen, Trash } from "lucide-react";
 import styled from "styled-components";
+import { IconComponentProps } from "@/types/edit";
 
 // สร้าง style สำหรับวงกลมข้างนอก
 const IconWrapper = styled.div`
@@ -20,11 +21,6 @@ const IconContainer = styled.div`
   display: flex;
   gap: 20px;
 `;
-
-// กำหนดประเภทให้กับ 'icon' เพื่อหลีกเลี่ยงข้อผิดพลาดเกี่ยวกับ type
-interface IconComponentProps {
-  icon: React.ReactNode;
-}
 
 const IconComponent: React.FC<IconComponentProps> = ({ icon }) => (
   <IconWrapper>{icon}</IconWrapper>

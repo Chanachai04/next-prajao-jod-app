@@ -12,7 +12,8 @@ export default function Rent() {
   const [phone, setPhone] = useState<string>("");
   const [citizenId, setCitizenId] = useState<string>("");
   const [lineId, setLineId] = useState<string>("");
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchContact = async () => {
       try {
@@ -36,6 +37,25 @@ export default function Rent() {
 
   const handleSave = async () => {
     try {
+      if (!firstName) {
+        setError("กรุณากรอกชื่อ");
+        return;
+      } else if (!lastName) {
+        setError("กรุณากรอกนามสกุล");
+        return;
+      } else if (!email) {
+        setError("กรุณากรอกอีเมล");
+        return;
+      } else if (!citizenId || citizenId.length !== 13) {
+        setError("กรุณากรอกรหัสประจำตัวประชาชน 13 หลัก");
+        return;
+      } else if (!lineId) {
+        setError("กรุณากรอก Line ID");
+        return;
+      } else if (!phone || phone.length !== 10) {
+        setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
+        return;
+      }
       const res = await fetch("/api/rent", {
         method: "POST",
         credentials: "include",
@@ -49,15 +69,19 @@ export default function Rent() {
           phone,
         }),
       });
+
+      setLoading(true);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data?.message ?? "บันทึกข้อมูลไม่สำเร็จ");
+        setError(data?.message ?? "บันทึกข้อมูลไม่สำเร็จ");
         return;
       }
       router.replace("/rentdetail");
     } catch (e) {
       console.error(e);
-      alert("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,7 +127,10 @@ export default function Rent() {
           className="w-full"
           value={citizenId}
           maxLength={13}
-          onChange={(e) => setCitizenId(e.target.value)}
+          onChange={(e) => {
+            const onlyNumbers = e.target.value.replace(/\D/g, "");
+            setCitizenId(onlyNumbers);
+          }}
         />
 
         <LabelAndInput
@@ -120,16 +147,23 @@ export default function Rent() {
           type="text"
           className="w-full"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          maxLength={10}
+          onChange={(e) => {
+            const onlyNumbers = e.target.value.replace(/\D/g, "");
+            setPhone(onlyNumbers);
+          }}
         />
-
+        {error && <div className="text-red-600  text-sm">{error}</div>}
         {/* ปุ่มบันทึก (อยู่ใต้คอลัมน์ขวา) */}
-        <div className="md:col-start-2 flex justify-end pt-4">
+        <div className="md:col-start-2 flex justify-end ">
           <Button
-            className="px-10 text-white bg-blue-600 hover:bg-blue-700"
+            className="cursor-pointer px-10 text-white bg-blue-600 hover:bg-blue-700"
+            disabled={loading}
             onClick={handleSave}
           >
-            <div className="text-lg font-light">บันทึกข้อมูล</div>
+            <div className="text-lg font-light">
+              {loading ? "กําลังบันทึก..." : "บันทึกข้อมูล"}
+            </div>
           </Button>
         </div>
       </div>

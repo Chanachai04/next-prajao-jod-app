@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Minimize2 } from "lucide-react";
 import DateForm from "../form/DateForm";
@@ -9,42 +9,7 @@ import { Button } from "../ui/button";
 import ParkingCard from "./ParkingCard";
 import ProvinceSearch from "../form/ProvinceSearch";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
-import { RentSpot } from "@/types/booking";
-
-interface LocationChangePayload {
-  provinceName: string | null;
-  districtName: string | null;
-  subdistrictName: string | null;
-  displayText: string;
-}
-
-interface SearchPanelProps {
-  dateIn: Date | undefined;
-  setDateIn: React.Dispatch<React.SetStateAction<Date | undefined>>;
-  dateOut: Date | undefined;
-  setDateOut: React.Dispatch<React.SetStateAction<Date | undefined>>;
-  timeIn: string;
-  setTimeIn: React.Dispatch<React.SetStateAction<string>>;
-  timeOut: string;
-  setTimeOut: React.Dispatch<React.SetStateAction<string>>;
-  selectedOption: "hourly" | "monthly";
-  setSelectedOption: React.Dispatch<React.SetStateAction<"hourly" | "monthly">>;
-  timeOptions: Record<string, string>;
-  searchText: string;
-  setSearchText: React.Dispatch<React.SetStateAction<string>>;
-  onSearch: () => void;
-  spots: RentSpot[];
-  onSelectSpot: (spot: RentSpot) => void;
-  activeSpotId: string | null;
-  isLoading: boolean;
-  errorMessage?: string | null;
-  emptyMessage?: string | null;
-  onLocationChange: (payload: LocationChangePayload) => void;
-  monthDurationKey: string;
-  onMonthDurationChange: (value: string) => void;
-  error?: string | null;
-  loading?: boolean;
-}
+import { SearchPanelProps } from "@/types/booking";
 
 export default function SearchPanel({
   dateIn,

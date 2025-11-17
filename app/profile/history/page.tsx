@@ -3,16 +3,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-
-interface HistoryItem {
-  id: number;
-  name: string;
-  imageUrl: string | null;
-  parkingTime: number | null;
-  parkingType: string | null;
-  totalPrice: number;
-  createdAt: string;
-}
+import { HistoryItem } from "@/types/history";
 
 export default function History() {
   const pathname = usePathname();

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, LockKeyhole, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import AlertModal from "@/components/ui/modal";
 
 export default function RegisterForm() {
@@ -18,7 +18,6 @@ export default function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"success" | "error">("success");
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleRegister = async (e: React.FormEvent) => {

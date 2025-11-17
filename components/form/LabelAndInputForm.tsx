@@ -1,18 +1,6 @@
+import { LabelAndInputFormProps } from "@/types/labelAndInputForm";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-
-interface LabelAndInputFormProps {
-  title: string;
-  id: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
-  placeholder?: string;
-  type?: string;
-  className?: string;
-  labelClassName?: string;
-  maxLength?: number;
-}
 
 export default function LabelAndInputForm({
   title,

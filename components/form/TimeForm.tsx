@@ -7,13 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { TimeProps } from "@/types/timeForm";
 
-type TimeProps = {
-  title?: string;
-  time: string;
-  setTime: (time: string) => void;
-  className?: string;
-};
 export default function TimeForm({
   title,
   time,

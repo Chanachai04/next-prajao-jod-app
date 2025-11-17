@@ -6,21 +6,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { RentSpot } from "@/types/booking";
 import Link from "next/link";
 import { useMemo } from "react";
-
-interface ParkingCardProps {
-  spot: RentSpot;
-  onClick: () => void;
-  isActive?: boolean;
-  // เพิ่ม props เพื่อรับค่า state จาก parent
-  currentSearchParams?: {
-    dateIn?: string;
-    dateOut?: string;
-    timeIn?: string;
-    timeOut?: string;
-    mode?: string; // "hourly" | "daily" | "monthly"
-    monthDurationKey?: string;
-  };
-}
+import { ParkingCardProps } from "@/types/parking";
 
 const PRICE_LABELS: Array<{
   key: keyof NonNullable<RentSpot["price"]>;

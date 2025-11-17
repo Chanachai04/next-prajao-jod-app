@@ -2,9 +2,7 @@
 import React from "react";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
 
-type SubmitStatus =
-  | { type: "success" | "error"; message: string }
-  | null;
+type SubmitStatus = { type: "success" | "error"; message: string } | null;
 
 export default function useRentDetail() {
   const [images, setImages] = React.useState<File[]>([]);
@@ -42,13 +40,13 @@ export default function useRentDetail() {
   React.useEffect(() => {
     const fetchUserId = async () => {
       if (typeof document === "undefined") return;
-      
+
       // ลองอ่านจาก cookie ก่อน
       const cookieValue = document.cookie
         .split("; ")
         .find((row) => row.startsWith("userId="))
         ?.split("=")[1];
-      
+
       if (cookieValue) {
         setFormValues((prev) => ({ ...prev, owner_id: cookieValue }));
         return;
@@ -100,7 +98,8 @@ export default function useRentDetail() {
   );
 
   const timeOptions = React.useMemo(
-    () => Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`),
+    () =>
+      Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`),
     []
   );
 
@@ -171,7 +170,9 @@ export default function useRentDetail() {
     field: "open_time" | "close_time",
     value: string
   ) => {
-    setSchedules((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
+    setSchedules((prev) =>
+      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+    );
   };
 
   const toggleAllDay = (index: number, checked: boolean) => {
@@ -279,7 +280,10 @@ export default function useRentDetail() {
       return;
     }
     if (!formValues.owner_id || !formValues.owner_id.trim()) {
-      setSubmitStatus({ type: "error", message: "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่" });
+      setSubmitStatus({
+        type: "error",
+        message: "ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่",
+      });
       return;
     }
 
@@ -292,9 +296,15 @@ export default function useRentDetail() {
 
     try {
       pricePayload = {
-        price_per_hour: toNumberOrNull(formValues.price_per_hour, "ราคาต่อชั่วโมง"),
+        price_per_hour: toNumberOrNull(
+          formValues.price_per_hour,
+          "ราคาต่อชั่วโมง"
+        ),
         price_per_day: toNumberOrNull(formValues.price_per_day, "ราคาต่อวัน"),
-        price_per_month: toNumberOrNull(formValues.price_per_month, "ราคาต่อเดือน"),
+        price_per_month: toNumberOrNull(
+          formValues.price_per_month,
+          "ราคาต่อเดือน"
+        ),
         deposit: toNumberOrNull(
           formValues.deposit,
           "ค่าประกันบัตร อุปกรณ์เข้าจอด และสติ๊กเกอร์"
@@ -303,7 +313,8 @@ export default function useRentDetail() {
     } catch (error) {
       setSubmitStatus({
         type: "error",
-        message: error instanceof Error ? error.message : "ข้อมูลราคาไม่ถูกต้อง",
+        message:
+          error instanceof Error ? error.message : "ข้อมูลราคาไม่ถูกต้อง",
       });
       return;
     }
@@ -382,7 +393,8 @@ export default function useRentDetail() {
       setImages([]);
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "บันทึกข้อมูลไม่สำเร็จ";
+      const message =
+        error instanceof Error ? error.message : "บันทึกข้อมูลไม่สำเร็จ";
       setSubmitStatus({ type: "error", message });
       setModalType("error");
       setModalTitle("เกิดข้อผิดพลาด");

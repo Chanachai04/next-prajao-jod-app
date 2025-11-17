@@ -1,18 +1,7 @@
 "use client";
 import React from "react";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
-
-type SubmitStatus =
-  | { type: "success" | "error"; message: string }
-  | null;
-
-type ScheduleItem = {
-  day: string;
-  selected: boolean;
-  allDay: boolean;
-  open_time: string;
-  close_time: string;
-};
+import { ScheduleItem, SubmitStatus } from "@/types/editRentDetail";
 
 export default function useEditRentDetail(rentId: string | null) {
   const [images, setImages] = React.useState<File[]>([]);
@@ -183,8 +172,7 @@ export default function useEditRentDetail(rentId: string | null) {
         console.error("Failed to fetch data:", err);
         setSubmitStatus({
           type: "error",
-          message:
-            err instanceof Error ? err.message : "ไม่สามารถดึงข้อมูลได้",
+          message: err instanceof Error ? err.message : "ไม่สามารถดึงข้อมูลได้",
         });
       } finally {
         setIsLoading(false);
@@ -225,7 +213,8 @@ export default function useEditRentDetail(rentId: string | null) {
   );
 
   const timeOptions = React.useMemo(
-    () => Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`),
+    () =>
+      Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, "0")}:00`),
     []
   );
 
@@ -417,7 +406,10 @@ export default function useEditRentDetail(rentId: string | null) {
 
     try {
       pricePayload = {
-        price_per_hour: toNumberOrNull(formValues.price_per_hour, "ราคาต่อชั่วโมง"),
+        price_per_hour: toNumberOrNull(
+          formValues.price_per_hour,
+          "ราคาต่อชั่วโมง"
+        ),
         price_per_day: toNumberOrNull(formValues.price_per_day, "ราคาต่อวัน"),
         price_per_month: toNumberOrNull(
           formValues.price_per_month,
@@ -463,23 +455,21 @@ export default function useEditRentDetail(rentId: string | null) {
       const formData = new FormData();
       formData.append("payload", JSON.stringify(payload));
       images.forEach((file) => formData.append("images", file, file.name));
-      
+
       // หา image IDs ที่ถูกลบจริงๆ (เปรียบเทียบกับ original)
       const deletedImageIds = originalExistingImages
         .filter(
-          (original) => !existingImages.some((current) => current.id === original.id)
+          (original) =>
+            !existingImages.some((current) => current.id === original.id)
         )
         .map((img) => img.id);
-      
+
       formData.append("deleted_image_ids", JSON.stringify(deletedImageIds));
 
-      const response = await fetch(
-        `/api/editrentdetail?rent_id=${rentId}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
+      const response = await fetch(`/api/editrentdetail?rent_id=${rentId}`, {
+        method: "PUT",
+        body: formData,
+      });
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
@@ -542,4 +532,3 @@ export default function useEditRentDetail(rentId: string | null) {
     handleSubmit,
   } as const;
 }
-

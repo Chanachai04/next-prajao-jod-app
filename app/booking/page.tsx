@@ -6,7 +6,7 @@ import Loading from "./loading";
 import DetailPanel from "@/components/booking/DetailPanel";
 import SearchPanel from "@/components/booking/SearchPanel";
 import { useSearchParams } from "next/navigation";
-import { RentSpot } from "@/types/booking";
+import { LocationChangePayload, RentSpot } from "@/types/booking";
 import { provinces } from "@/lib/thaiData";
 
 type LatLng = [number, number];
@@ -22,13 +22,6 @@ const TIME_OPTIONS = {
 };
 
 const EMPTY_MESSAGE = "ไม่พบที่จอดรถบริเวณนี้";
-
-type LocationChangePayload = {
-  provinceName: string | null;
-  districtName: string | null;
-  subdistrictName: string | null;
-  displayText: string;
-};
 
 export default function Booking() {
   const searchParams = useSearchParams();

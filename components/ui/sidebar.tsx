@@ -4,21 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { User, History, ParkingCircle, LucideIcon, LogOut } from "lucide-react";
-
-interface MenuItem {
-  name: string;
-  href?: string;
-  icon: LucideIcon;
-  action?: () => void;
-}
-
-type ProfileState = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  imageUrl: string | null;
-};
+import { User, History, ParkingCircle, LogOut } from "lucide-react";
+import { MenuItem, ProfileState } from "@/types/sidebar";
 
 const DEFAULT_PROFILE: ProfileState = {
   email: "",

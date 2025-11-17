@@ -1,47 +1,12 @@
 import { supabase } from "@/lib/supabaseClient";
+import {
+  FacilityRow,
+  ImageRow,
+  PriceRow,
+  RentDetailRow,
+  ScheduleRow,
+} from "@/types/booking";
 import { NextResponse } from "next/server";
-
-type PriceRow = {
-  id: string;
-  rent_id: string;
-  price_per_hour: number | null;
-  price_per_day: number | null;
-  price_per_month: number | null;
-  deposit: number | null;
-};
-
-type FacilityRow = {
-  id: string;
-  rent_id: string;
-  name: string;
-};
-
-type ScheduleRow = {
-  id: string;
-  rent_id: string;
-  available_days: string[] | null;
-  open_time: string | null;
-  close_time: string | null;
-};
-
-type ImageRow = {
-  id: string;
-  rent_id: string;
-  image_url: string;
-};
-
-type RentDetailRow = {
-  id: string;
-  name: string | null;
-  type: string | null;
-  description: string | null;
-  total_slot: number | null;
-  address: string | null;
-  subdistrict: string | null;
-  district: string | null;
-  province: string | null;
-  landmark: string | null;
-};
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

@@ -11,13 +11,7 @@ export async function middleware(req: NextRequest) {
   const url = req.nextUrl.clone();
   const hasAuth = !!(token && userId);
 
-  // 🔍 Debug log (ลบออกได้เมื่อทดสอบเสร็จ)
-  console.log("=== MIDDLEWARE ===");
-  console.log("Path:", url.pathname);
-  console.log("Has Auth:", hasAuth);
-  console.log("==================");
-
-  // ✅ กรณีเข้าหน้า auth (login/register/forgotpassword)
+  // กรณีเข้าหน้า auth (login/register/forgotpassword)
   if (authRoutes.some((path) => url.pathname.startsWith(path))) {
     if (hasAuth) {
       // มี auth แล้ว → redirect ไปหน้าที่ต้องการหรือหน้าแรก
@@ -33,7 +27,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ✅ กรณีเข้าหน้า protected routes
+  // กรณีเข้าหน้า protected routes
   if (protectedRoutes.some((path) => url.pathname.startsWith(path))) {
     if (!hasAuth) {
       // ไม่มี auth → redirect ไป login พร้อมเก็บ path ปัจจุบัน
@@ -76,7 +70,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // ✅ ไม่ใช่ protected หรือ auth routes → ปล่อยผ่าน
+  // ไม่ใช่ protected หรือ auth routes → ปล่อยผ่าน
   return NextResponse.next();
 }
 

@@ -5,19 +5,7 @@ import { ArrowLeft, ArrowRight, MapPin, X } from "lucide-react";
 import { RentSpot } from "@/types/booking";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
-type PriceKey = "hourly" | "daily" | "monthly";
-
-interface DetailPanelProps {
-  spot: RentSpot;
-  currentIndex: number;
-  selectedOptionDetail: PriceKey;
-  onClose: () => void;
-  onNavigate: (direction: "prev" | "next") => void;
-  onSelectImage: (index: number) => void;
-  onSelectOption: (option: PriceKey) => void;
-  monthDurationKey?: string;
-}
+import { DetailPanelProps, PriceKey } from "@/types/detailPanel";
 
 const PRICE_KEY_MAP: Record<
   PriceKey,

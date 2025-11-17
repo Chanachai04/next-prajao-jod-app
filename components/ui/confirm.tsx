@@ -8,14 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
-
-interface ConfirmModalProps {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title?: string;
-  description?: string;
-}
+import { ConfirmModalProps } from "@/types/confirm";
 
 export default function ConfirmModal({
   open,

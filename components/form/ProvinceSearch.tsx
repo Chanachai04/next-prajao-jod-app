@@ -5,22 +5,7 @@ import { provinces, districts, subDistricts } from "@/lib/thaiData";
 import { Input } from "../ui/input";
 import { MapPin, X } from "lucide-react";
 import { Label } from "../ui/label";
-
-interface Option {
-  id: number;
-  name_th: string;
-  name_en: string;
-  type: "province" | "district" | "subDistrict";
-}
-
-interface ProvinceSearchProps {
-  onChange?: (
-    provinceId: number | null,
-    districtId: number | null,
-    subDistrictId: number | null
-  ) => void;
-  initialQuery?: string;
-}
+import { Option, ProvinceSearchProps } from "@/types/provinceSearch";
 
 export default function ProvinceSearch({
   onChange,

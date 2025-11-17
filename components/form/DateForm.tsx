@@ -5,18 +5,7 @@ import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
-
-type DateProps = {
-  title?: string;
-  date?: Date;
-  setDate?: (date: Date) => void;
-  placeholder?: string;
-  id: string;
-  className?: string;
-  onClick?: () => void;
-  onChange?: () => void;
-  value?: string;
-};
+import { DateProps } from "@/types/dateForm";
 
 export default function DateForm({
   title,

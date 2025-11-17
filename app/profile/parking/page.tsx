@@ -5,14 +5,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { Pen, Trash } from "lucide-react"; // เพิ่มการนำเข้าไอคอน
 import Link from "next/link";
-
-interface ParkingItem {
-  id: string;
-  image_url: string | null;
-  name: string;
-  type: string;
-  total_slot: string;
-}
+import { ParkingItem } from "@/types/parking";
 
 export default function Parking() {
   const pathname = usePathname();

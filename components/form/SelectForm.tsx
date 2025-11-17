@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import {
   Select,
   SelectContent,
@@ -8,16 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-
-interface SelectFormProps {
-  title?: string;
-  placeholder?: string;
-  itemList: Record<string, string>;
-  leadingIcon?: ReactNode;
-  className?: string;
-  value?: string; // <--- เพิ่ม prop นี้
-  onValueChange?: (value: string) => void;
-}
+import { SelectFormProps } from "@/types/selectForm";
 
 export default function SelectForm({
   title,
