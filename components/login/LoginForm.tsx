@@ -52,10 +52,10 @@ export default function LoginForm() {
 
       if (res.ok && data.message === "Login success") {
         window.dispatchEvent(new Event("loginStatusChanged"));
-
+        router.refresh();
         // ดึง path redirect จาก query ถ้าไม่มี default เป็น "/"
         const redirectPath = searchParams.get("redirect") || "/";
-        router.push(redirectPath);
+        router.push(decodeURIComponent(redirectPath));
       } else {
         setError(data.message || "เข้าสู่ระบบไม่สำเร็จ");
       }

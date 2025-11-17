@@ -1,19 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import {
-  User,
-  History,
-  Car,
-  ParkingCircle,
-  CalendarCheck,
-  LucideIcon,
-  LogOut,
-} from "lucide-react";
+import { User, History, ParkingCircle, LucideIcon, LogOut } from "lucide-react";
 
 interface MenuItem {
   name: string;
@@ -75,7 +67,7 @@ export default function Sidebar({
     await fetch("/api/logout", { method: "POST" });
     window.dispatchEvent(new Event("loginStatusChanged"));
     window.sessionStorage.removeItem(PROFILE_STORAGE_KEY);
-    router.push("/login");
+    router.push("/");
   }, [router]);
 
   const syncProfile = useCallback((next: ProfileState) => {
@@ -182,10 +174,10 @@ export default function Sidebar({
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-3 p-4 text-base transition-colors duration-200",
+                      "flex items-center space-x-3 p-4 text-base transition-colors duration-200 ",
                       isActive
                         ? "bg-blue-600 text-white font-bold"
-                        : "hover:bg-[#444444] text-gray-300"
+                        : "hover:bg-[#444444] text-gray-300 "
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -194,7 +186,7 @@ export default function Sidebar({
                 ) : (
                   <button
                     onClick={item.action}
-                    className="flex items-center space-x-3 p-4 w-full text-left text-base hover:bg-[#444444] text-gray-300"
+                    className="flex items-center space-x-3 p-4 w-full text-left text-base hover:bg-[#444444] text-gray-300 cursor-pointer"
                   >
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
