@@ -9,10 +9,18 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const userId = req.cookies.get("userId")?.value;
   const url = req.nextUrl.clone();
+  const hasAuth = !!(token && userId);
 
-  // ถ้า user เข้าหน้า login/register แต่มี token อยู่แล้ว
+  // 🔍 Debug log (ลบออกได้เมื่อทดสอบเสร็จ)
+  console.log("=== MIDDLEWARE ===");
+  console.log("Path:", url.pathname);
+  console.log("Has Auth:", hasAuth);
+  console.log("==================");
+
+  // ✅ กรณีเข้าหน้า auth (login/register/forgotpassword)
   if (authRoutes.some((path) => url.pathname.startsWith(path))) {
-    if (token && userId) {
+    if (hasAuth) {
+      // มี auth แล้ว → redirect ไปหน้าที่ต้องการหรือหน้าแรก
       const redirectTo = url.searchParams.get("redirect");
       if (redirectTo) {
         return NextResponse.redirect(
@@ -21,16 +29,21 @@ export async function middleware(req: NextRequest) {
       }
       return NextResponse.redirect(new URL("/", req.url));
     }
+    // ไม่มี auth → ปล่อยให้เข้าหน้า auth ได้
+    return NextResponse.next();
   }
 
-  // ถ้าเป็น protected routes
+  // ✅ กรณีเข้าหน้า protected routes
   if (protectedRoutes.some((path) => url.pathname.startsWith(path))) {
-    if (!token || !userId) {
+    if (!hasAuth) {
+      // ไม่มี auth → redirect ไป login พร้อมเก็บ path ปัจจุบัน
       const fullPath = req.nextUrl.pathname + req.nextUrl.search;
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("redirect", encodeURIComponent(fullPath));
       return NextResponse.redirect(loginUrl);
     }
+
+    // มี auth แล้ว → ตรวจสอบเงื่อนไขพิเศษ
 
     // สำหรับ /payment/* ให้แน่ใจว่า userId อยู่ใน query
     if (url.pathname.startsWith("/payment")) {
@@ -40,7 +53,7 @@ export async function middleware(req: NextRequest) {
       }
     }
 
-    // ถ้าเข้า /rent ต้องเช็ค is_checked
+    // สำหรับ /rent ต้องเช็ค is_checked
     if (url.pathname === "/rent") {
       try {
         const supabase = createClient(
@@ -63,6 +76,7 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // ✅ ไม่ใช่ protected หรือ auth routes → ปล่อยผ่าน
   return NextResponse.next();
 }
 

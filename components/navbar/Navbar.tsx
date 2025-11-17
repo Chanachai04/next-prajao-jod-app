@@ -111,6 +111,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {/* ✅ ปุ่มเข้าสู่ระบบ - ต้องเป็น Link ธรรมดา */}
                 <Link href="/login">
                   <Button
                     variant="outline"

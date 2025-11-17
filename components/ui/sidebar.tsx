@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { User, History, ParkingCircle, LucideIcon, LogOut } from "lucide-react";
@@ -52,23 +51,36 @@ export default function Sidebar({
 }: {
   currentPathname: string;
 }) {
-  const router = useRouter();
+  // ใช้ lazy initialization แทนการ set ใน useEffect
+  const [profile, setProfile] = useState<ProfileState>(() => {
+    // อ่านจาก sessionStorage ตั้งแต่ตอนสร้าง state
+    return readProfileSnapshot();
+  });
 
-  const [profile, setProfile] = useState<ProfileState>(DEFAULT_PROFILE);
-
-  // โหลด snapshot หลัง hydration
-  useEffect(() => {
-    const snap = readProfileSnapshot();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setProfile(snap);
-  }, []);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = useCallback(async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.dispatchEvent(new Event("loginStatusChanged"));
-    window.sessionStorage.removeItem(PROFILE_STORAGE_KEY);
-    router.push("/");
-  }, [router]);
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    try {
+      const res = await fetch("/api/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        window.dispatchEvent(new Event("loginStatusChanged"));
+        window.sessionStorage.removeItem(PROFILE_STORAGE_KEY);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      setIsLoggingOut(false);
+    }
+  }, [isLoggingOut]);
 
   const syncProfile = useCallback((next: ProfileState) => {
     setProfile(next);
@@ -107,6 +119,7 @@ export default function Sidebar({
   useEffect(() => {
     let isMounted = true;
 
+    // ✅ ใช้ Promise.resolve() เพื่อทำให้เป็น async
     const scheduleFetch = () => {
       Promise.resolve().then(() => {
         if (isMounted) {
@@ -124,6 +137,7 @@ export default function Sidebar({
     };
 
     window.addEventListener("loginStatusChanged", handleLoginStatusChanged);
+
     return () => {
       isMounted = false;
       window.removeEventListener(
@@ -137,7 +151,11 @@ export default function Sidebar({
     { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
     { name: "ประวัติการจอง", href: "/profile/history", icon: History },
     { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
-    { name: "ออกจากระบบ", icon: LogOut, action: handleLogout },
+    {
+      name: isLoggingOut ? "กำลังออกจากระบบ..." : "ออกจากระบบ",
+      icon: LogOut,
+      action: handleLogout,
+    },
   ];
 
   return (
@@ -158,9 +176,9 @@ export default function Sidebar({
           )}
         </Avatar>
         <p className="font-semibold text-lg">
-          {`${profile.firstName} ${profile.lastName}`.trim()}
+          {`${profile.firstName} ${profile.lastName}`.trim() || "ผู้ใช้งาน"}
         </p>
-        <p className="text-sm text-gray-400">{profile.email}</p>
+        <p className="text-sm text-gray-400">{profile.email || "ไม่มีอีเมล"}</p>
       </div>
 
       {/* ส่วนเมนูรายการ */}
@@ -174,10 +192,10 @@ export default function Sidebar({
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-3 p-4 text-base transition-colors duration-200 ",
+                      "flex items-center space-x-3 p-4 text-base transition-colors duration-200",
                       isActive
                         ? "bg-blue-600 text-white font-bold"
-                        : "hover:bg-[#444444] text-gray-300 "
+                        : "hover:bg-[#444444] text-gray-300"
                     )}
                   >
                     <item.icon className="h-5 w-5" />
@@ -186,7 +204,13 @@ export default function Sidebar({
                 ) : (
                   <button
                     onClick={item.action}
-                    className="flex items-center space-x-3 p-4 w-full text-left text-base hover:bg-[#444444] text-gray-300 cursor-pointer"
+                    disabled={isLoggingOut}
+                    className={cn(
+                      "flex items-center space-x-3 p-4 w-full text-left text-base transition-colors duration-200",
+                      isLoggingOut
+                        ? "opacity-50 cursor-not-allowed bg-[#444444]"
+                        : "hover:bg-[#444444] text-gray-300 cursor-pointer"
+                    )}
                   >
                     <item.icon className="h-5 w-5" />
                     <span>{item.name}</span>
