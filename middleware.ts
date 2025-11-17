@@ -76,10 +76,6 @@ export async function middleware(req: NextRequest) {
       ? NextResponse.redirect(new URL("/login", req.url))
       : NextResponse.next();
 
-    // ลบ cookie เก่า
-    res.cookies.delete({ name: "token", path: "/" });
-    res.cookies.delete({ name: "userId", path: "/" });
-
     return res;
   }
 }
