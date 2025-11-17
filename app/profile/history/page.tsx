@@ -104,7 +104,7 @@ export default function History() {
       {/* พื้นหลังขาว ไม่มีขอบโค้ง */}
       <div className="flex flex-col lg:flex-row bg-white shadow-sm overflow-hidden min-h-[80vh]">
         {/* Sidebar */}
-        <div className="w-full lg:w-1/3 p-6 flex flex-col items-start min-h-[85vh]">
+        <div className="w-full lg:w-1/3 max-w-[360px] p-6 flex flex-col items-start min-h-[85vh]">
           <h1 className="text-4xl md:text-5xl mb-6 text-gray-600">
             ประวัติการจอง
           </h1>
@@ -112,14 +112,10 @@ export default function History() {
         </div>
 
         {/* Content - Table Section */}
-        <div className="pt-10 pr-50 overflow-y-auto max-h-[80vh] w-full lg:w-2/3 ">
-          <div className="overflow-x-auto flex justify-center">
-            {""}
-            {/* จัดตารางให้กลาง */}
-            <table className="w-full max-w-[1200px] mx-auto border-collapse">
-              {""}
-              {/* ใช้ max-w เพื่อกำหนดความกว้างของตาราง */}
-              <thead>
+        <div className="flex-1 w-full overflow-y-auto max-h-[80vh]">
+          <div className="px-4 lg:px-8">
+            <table className="overflow-x-auto w-full border-collapse">
+              <thead className="sticky top-0 bg-white z-10 shadow-sm">
                 <tr className="text-gray-700 text-xl font-semibold border-b ">
                   <th className="py-6 px-6 text-center min-w-[200px]">
                     รูปภาพ
