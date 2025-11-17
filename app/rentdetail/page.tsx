@@ -14,7 +14,7 @@ import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
-import useRentDetail from "@/hook/useRentDetail";
+import useRentDetail from "@/types/useRentDetail";
 
 export default function RentDetail() {
   const {

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import AlertModal from "@/components/ui/modal";
-import useEditRentDetail from "@/hook/editRentDetail";
+import useEditRentDetail from "@/types/editRentDetail";
 import { useSearchParams } from "next/navigation";
 
 export default function EditRentDetail() {

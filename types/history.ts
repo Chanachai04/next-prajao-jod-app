@@ -1,5 +1,5 @@
 export interface HistoryItem {
-  id: number;
+  id: string | number;
   name: string;
   imageUrl: string | null;
   parkingTime: number | null;

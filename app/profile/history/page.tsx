@@ -4,12 +4,14 @@ import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { HistoryItem } from "@/types/history";
+import { Trash } from "lucide-react";
 
 export default function History() {
   const pathname = usePathname();
   const [data, setData] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     // ฟังก์ชันดึงข้อมูลจาก API
@@ -45,6 +47,34 @@ export default function History() {
 
     fetchHistory();
   }, []);
+
+  // ฟังก์ชันลบข้อมูลประวัติ
+  const handleDelete = async (historyId: HistoryItem["id"]) => {
+    const idParam = String(historyId);
+
+    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการจองนี้?")) {
+      return;
+    }
+
+    try {
+      setDeletingId(idParam);
+      const response = await fetch(`/api/history?id=${idParam}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "ไม่สามารถลบประวัติได้");
+      }
+
+      setData((prev) => prev.filter((item) => String(item.id) !== idParam));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการลบข้อมูล");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   // ฟังก์ชันแปลง parkingType เป็นภาษาไทย
   const getParkingTypeText = (type: string | null, time: number | null) => {
@@ -101,13 +131,16 @@ export default function History() {
                     จำนวนวันที่จอด
                   </th>
                   <th className="py-6 px-6 text-center min-w-[180px]">ราคา</th>
+                  <th className="py-6 px-6 text-center min-w-[150px]">
+                    การจัดการ
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5}
                       className="text-center text-gray-400 py-20 text-lg"
                     >
                       กำลังโหลดข้อมูล...
@@ -116,7 +149,7 @@ export default function History() {
                 ) : error ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5}
                       className="text-center text-red-500 py-20 text-lg"
                     >
                       เกิดข้อผิดพลาด: {error}
@@ -125,7 +158,7 @@ export default function History() {
                 ) : data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5}
                       className="text-center text-gray-400 py-20 text-lg"
                     >
                       ไม่มีประวัติการจอง
@@ -160,6 +193,19 @@ export default function History() {
                       </td>
                       <td className="py-6 px-6 text-center">
                         {formatPrice(item.totalPrice)}
+                      </td>
+                      <td className="py-6 px-6 text-center">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          disabled={deletingId === String(item.id)}
+                          className={`text-red-500 hover:text-red-700 ${
+                            deletingId === String(item.id)
+                              ? "opacity-50 cursor-not-allowed"
+                              : "cursor-pointer"
+                          }`}
+                        >
+                          <Trash size={20} />
+                        </button>
                       </td>
                     </tr>
                   ))
