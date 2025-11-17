@@ -43,7 +43,6 @@ export async function POST(req: Request) {
     // สร้าง JWT payload เก็บ userId
     const jwtToken = await new SignJWT({ userId: newUser.id })
       .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("7d")
       .sign(new TextEncoder().encode(SECRET_KEY));
 
     const res = NextResponse.json({ message: "Register success" });
@@ -55,6 +54,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
+      sameSite: "lax",
       // maxAge: 60 * 60 * 24 * 7,
     });
 
@@ -64,6 +64,7 @@ export async function POST(req: Request) {
       value: newUser.id,
       httpOnly: false,
       path: "/",
+      sameSite: "lax",
       // maxAge: 60 * 60 * 24 * 7,
     });
 

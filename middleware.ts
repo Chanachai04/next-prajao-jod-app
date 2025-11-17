@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
 import { createClient } from "@supabase/supabase-js";
 
 // หน้าที่ต้อง login ก่อนถึงจะเข้าได้
@@ -19,15 +18,19 @@ const isAuthRoute = (path: string) =>
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+
+  // อ่าน cookie
   const token = req.cookies.get("token")?.value;
+  const userId = req.cookies.get("userId")?.value;
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
-  // ไม่มี token
+
+  // ไม่มี token → ถ้าเข้า protected route → redirect login
   if (!token) {
     if (isProtectedRoute(path)) {
-      // ส่ง user ไป login พร้อมเก็บ path ที่อยากไป
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("redirect", path);
       return NextResponse.redirect(loginUrl);
@@ -35,11 +38,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // token มีแล้ว → ตรวจสอบความถูกต้อง
+  // token มีแล้ว
   try {
-    const userId = req.cookies.get("userId")?.value;
-
-    // login แล้วพยายามเข้าหน้า auth → redirect ไป /
+    // ถ้า login แล้วพยายามเข้าหน้า auth → redirect /
     if (isAuthRoute(path)) {
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -75,13 +76,15 @@ export async function middleware(req: NextRequest) {
       ? NextResponse.redirect(new URL("/login", req.url))
       : NextResponse.next();
 
-    res.cookies.delete("token");
-    res.cookies.delete("userId");
+    // ลบ cookie เก่า
+    res.cookies.delete({ name: "token", path: "/" });
+    res.cookies.delete({ name: "userId", path: "/" });
 
     return res;
   }
 }
-// อนุญาตให้ middleware ทํางาน
+
+// กำหนด matcher
 export const config = {
   matcher: [
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico)).*)",

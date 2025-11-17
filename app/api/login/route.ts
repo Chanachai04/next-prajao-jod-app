@@ -32,7 +32,6 @@ export async function POST(req: Request) {
     // สร้าง JWT token โดยเก็บ userId ใน payload
     const jwtToken = await new SignJWT({ userId: user.id })
       .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("7d") // token หมดอายุ 7 วัน
       .sign(new TextEncoder().encode(SECRET_KEY));
 
     // สร้าง response JSON แจ้ง login success
@@ -45,6 +44,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
+      sameSite: "lax",
       // maxAge: 60 * 60 * 24 * 7, // 7 วัน
     });
 
@@ -54,6 +54,7 @@ export async function POST(req: Request) {
       value: user.id,
       httpOnly: false,
       path: "/",
+      sameSite: "lax",
       // maxAge: 60 * 60 * 24 * 7,
     });
 
