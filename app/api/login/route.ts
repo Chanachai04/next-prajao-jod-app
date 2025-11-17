@@ -45,7 +45,6 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       path: "/",
       sameSite: "lax",
-      // maxAge: 60 * 60 * 24 * 7, // 7 วัน
     });
 
     // ตั้งค่า cookie สำหรับ userId (client JS สามารถอ่านได้)
@@ -55,7 +54,6 @@ export async function POST(req: Request) {
       httpOnly: false,
       path: "/",
       sameSite: "lax",
-      // maxAge: 60 * 60 * 24 * 7,
     });
 
     // ส่ง response กลับ client
