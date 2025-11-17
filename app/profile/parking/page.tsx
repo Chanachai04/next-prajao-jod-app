@@ -3,8 +3,11 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { Pen, Trash } from "lucide-react";
+import Link from "next/link";
 
 interface ParkingItem {
+  id: string;
   image_url: string | null;
   name: string;
   type: string;
@@ -16,6 +19,7 @@ export default function Parking() {
   const [data, setData] = useState<ParkingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // ดึงข้อมูลจาก API
   useEffect(() => {
@@ -44,6 +48,34 @@ export default function Parking() {
 
     fetchParkingData();
   }, []);
+
+  // ฟังก์ชันลบข้อมูล
+  const handleDelete = async (rentId: string) => {
+    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลนี้?")) {
+      return;
+    }
+
+    try {
+      setDeletingId(rentId);
+      const response = await fetch(`/api/parking?rent_id=${rentId}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "ไม่สามารถลบข้อมูลได้");
+      }
+
+      // ลบข้อมูลออกจาก state
+      setData((prevData) => prevData.filter((item) => item.id !== rentId));
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการลบข้อมูล");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen px-4 md:px-10 lg:px-20 py-5 bg-gray-50">
       <hr className="border-3 border-gray-600" />
@@ -60,11 +92,9 @@ export default function Parking() {
 
         {/* ไอคอนลูกศร ติดกับ Sidebar */}
         <div className="pt-10 pr-50 overflow-y-auto max-h-[80vh] w-full lg:w-2/3">
-          <div className="overflow-x-auto flex justify-center">
-            {""}
+          <div className=" flex justify-center">
             {/* จัดตารางให้กลาง */}
             <table className="w-full max-w-[1200px] mx-auto border-collapse">
-              {""}
               {/* ใช้ max-w เพื่อกำหนดความกว้างของตาราง */}
               <thead>
                 <tr className="text-gray-700 text-xl font-semibold border-b">
@@ -80,13 +110,16 @@ export default function Parking() {
                   <th className="py-6 px-6 text-center min-w-[180px]">
                     จำนวนที่จอด
                   </th>
+                  <th className="py-6 px-6 text-center min-w-[180px]">
+                    การจัดการ {/* เพิ่มคอลัมน์การจัดการ */}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5} // เปลี่ยนจาก 4 เป็น 5 เนื่องจากเพิ่มคอลัมน์
                       className="text-center text-gray-400 py-20 text-lg"
                     >
                       กำลังโหลดข้อมูล...
@@ -95,7 +128,7 @@ export default function Parking() {
                 ) : error ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5} // เปลี่ยนจาก 4 เป็น 5 เนื่องจากเพิ่มคอลัมน์
                       className="text-center text-red-500 py-20 text-lg"
                     >
                       {error}
@@ -104,7 +137,7 @@ export default function Parking() {
                 ) : data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={4}
+                      colSpan={5} // เปลี่ยนจาก 4 เป็น 5 เนื่องจากเพิ่มคอลัมน์
                       className="text-center text-gray-400 py-20 text-lg"
                     >
                       ไม่มีข้อมูล
@@ -138,6 +171,27 @@ export default function Parking() {
                       <td className="py-6 px-6 text-center">{item.type}</td>
                       <td className="py-6 px-6 text-center">
                         {item.total_slot}
+                      </td>
+                      {/* เพิ่มคอลัมน์ "การจัดการ" */}
+                      <td className="py-6 px-6 text-center">
+                        <div className="flex justify-center gap-4">
+                          <button className="text-blue-500 hover:text-blue-700">
+                            <Link href="/editrentdetail">
+                              <Pen size={20} />
+                            </Link>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            disabled={deletingId === item.id}
+                            className={`text-red-500 hover:text-red-700 ${
+                              deletingId === item.id
+                                ? "opacity-50 cursor-not-allowed"
+                                : "cursor-pointer"
+                            }`}
+                          >
+                            <Trash size={20} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
