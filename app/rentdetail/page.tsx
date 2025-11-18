@@ -367,18 +367,6 @@ export default function RentDetail() {
           </div>
         )}
 
-        {submitStatus && (
-          <p
-            className={`mt-4 text-sm ${
-              submitStatus.type === "success"
-                ? "text-green-600"
-                : "text-red-600"
-            }`}
-          >
-            {submitStatus.message}
-          </p>
-        )}
-
         {/* --ราคา */}
         <div className="py-4 sm:py-5">
           <h1 className="pb-2 sm:pb-3 text-xl sm:text-2xl">ราคา</h1>
@@ -497,6 +485,17 @@ export default function RentDetail() {
             </div>
           </div>
         </div>
+        {submitStatus && (
+          <p
+            className={`mt-4 text-sm ${
+              submitStatus.type === "success"
+                ? "text-green-600"
+                : "text-red-600"
+            }`}
+          >
+            {submitStatus.message}
+          </p>
+        )}
 
         <Button
           className="w-full sm:w-auto px-8 sm:px-12 h-10 sm:h-12 cursor-pointer mt-4 sm:mt-6 mb-6 sm:mb-10 text-sm sm:text-base"
