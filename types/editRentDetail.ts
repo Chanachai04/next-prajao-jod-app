@@ -460,6 +460,19 @@ export default function useEditRentDetail(rentId: string | null) {
       return;
     }
 
+    const hasAtLeastOnePrice =
+      pricePayload.price_per_hour !== null ||
+      pricePayload.price_per_day !== null ||
+      pricePayload.price_per_month !== null;
+
+    if (!hasAtLeastOnePrice) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณากรอกราคาอย่างน้อย 1 ช่อง",
+      });
+      return;
+    }
+
     const payload = {
       name: formValues.name.trim(),
       type: formValues.type,
