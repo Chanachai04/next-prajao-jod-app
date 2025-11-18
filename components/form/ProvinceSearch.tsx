@@ -10,6 +10,7 @@ import { Option, ProvinceSearchProps } from "@/types/provinceSearch";
 export default function ProvinceSearch({
   onChange,
   initialQuery,
+  hideLabel = false,
 }: ProvinceSearchProps) {
   const [query, setQuery] = useState(initialQuery ?? "");
   const [dropdown, setDropdown] = useState(false);
@@ -102,10 +103,12 @@ export default function ProvinceSearch({
 
   return (
     <div ref={wrapperRef} className="relative">
-      <Label htmlFor="search" className="text-lg">
-        สถานที่
-      </Label>
-      <div className="relative mt-2">
+      {!hideLabel && (
+        <Label htmlFor="search" className="text-lg">
+          สถานที่
+        </Label>
+      )}
+      <div className={`relative ${!hideLabel ? "mt-2" : ""}`}>
         <MapPin className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
         <Input
           type="text"

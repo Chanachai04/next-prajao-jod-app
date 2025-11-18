@@ -15,6 +15,7 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
 import useRentDetail from "@/types/useRentDetail";
+import LabelAndProvinceSearch from "@/components/form/LabelAndProvinceSearch";
 
 export default function RentDetail() {
   const {
@@ -56,8 +57,12 @@ export default function RentDetail() {
       >
         {/* --ส่วนหัว */}
         <div className="space-y-2 sm:space-y-3">
-          <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
-          <h1 className="text-base sm:text-lg md:text-xl">ข้อมูลทั่วไปที่จอดรถ</h1>
+          <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">
+            ปล่อยเช่าที่จอดรถ
+          </h1>
+          <h1 className="text-base sm:text-lg md:text-xl">
+            ข้อมูลทั่วไปที่จอดรถ
+          </h1>
         </div>
 
         {/* --ฟอร์มข้อมูลทั่วไป */}
@@ -131,35 +136,29 @@ export default function RentDetail() {
           />
 
           <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <LabelAndInput
+            <LabelAndProvinceSearch
               title="จังหวัด *"
+              mode="province"
               id="province"
-              type="text"
-              placeholder=""
-              className="w-full"
               value={formValues.province}
               onChange={handleFieldChange("province")}
             />
 
             {/* แขวง / เขต */}
-            <LabelAndInput
-              title="แขวง / ตำบล *"
-              id="subdistrict"
-              type="text"
-              placeholder=""
-              className="w-full"
-              value={formValues.subdistrict}
-              onChange={handleFieldChange("subdistrict")}
-            />
-
-            <LabelAndInput
-              title="เขต / อำเภอ *"
-              id="county"
-              type="text"
-              placeholder=""
-              className="w-full"
+            <LabelAndProvinceSearch
+              title="แขวง / เขต *"
+              mode="district"
+              id="district"
               value={formValues.district}
               onChange={handleFieldChange("district")}
+            />
+
+            <LabelAndProvinceSearch
+              title="ตำบล *"
+              mode="subDistrict"
+              id="subdistrict"
+              value={formValues.subdistrict}
+              onChange={handleFieldChange("subdistrict")}
             />
           </div>
 
@@ -192,7 +191,9 @@ export default function RentDetail() {
                   toggleSelectAllDays(checked === true)
                 }
               />
-              <Label htmlFor="everyday" className="text-sm sm:text-base">เลือกทั้งหมด (กรุณาเลือกเวลา)</Label>
+              <Label htmlFor="everyday" className="text-sm sm:text-base">
+                เลือกทั้งหมด (กรุณาเลือกเวลา)
+              </Label>
             </div>
             <div className="hidden sm:block sm:col-span-2"></div>
             <Label className="hidden sm:flex col-span-6 sm:col-span-4 md:col-span-4 justify-start">
@@ -219,7 +220,9 @@ export default function RentDetail() {
                       toggleDay(index, checked === true)
                     }
                   />
-                  <Label htmlFor={row.day} className="text-sm sm:text-base">{row.day}</Label>
+                  <Label htmlFor={row.day} className="text-sm sm:text-base">
+                    {row.day}
+                  </Label>
                 </div>
 
                 {/* เปิด 24 ชม. */}
@@ -232,12 +235,19 @@ export default function RentDetail() {
                       toggleAllDay(index, checked === true)
                     }
                   />
-                  <Label htmlFor={`${row.day}-24h`} className="text-sm sm:text-base">เปิด 24 ชม.</Label>
+                  <Label
+                    htmlFor={`${row.day}-24h`}
+                    className="text-sm sm:text-base"
+                  >
+                    เปิด 24 ชม.
+                  </Label>
                 </div>
 
                 {/* เวลาเปิด */}
                 <div className="col-span-1 sm:col-span-4 flex flex-col sm:flex-row justify-start gap-1 sm:gap-0">
-                  <Label className="text-xs sm:hidden text-gray-600 mb-1">เวลาเปิด:</Label>
+                  <Label className="text-xs sm:hidden text-gray-600 mb-1">
+                    เวลาเปิด:
+                  </Label>
                   <Select
                     value={row.open_time}
                     onValueChange={(value) =>
@@ -262,7 +272,9 @@ export default function RentDetail() {
 
                 {/* เวลาปิด */}
                 <div className="col-span-1 sm:col-span-3 flex flex-col sm:flex-row justify-start gap-1 sm:gap-0">
-                  <Label className="text-xs sm:hidden text-gray-600 mb-1">เวลาปิด:</Label>
+                  <Label className="text-xs sm:hidden text-gray-600 mb-1">
+                    เวลาปิด:
+                  </Label>
                   <Select
                     value={row.close_time}
                     onValueChange={(value) =>
@@ -292,7 +304,9 @@ export default function RentDetail() {
 
         {/* --- ส่วนรูปภาพ --- */}
         <div className="py-4 sm:py-5">
-          <Label className="text-base sm:text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
+          <Label className="text-base sm:text-lg">
+            รูปภาพ (ไม่เกิน 10 รูป)
+          </Label>
         </div>
 
         {/* Input จริง ถูกซ่อนและมี ID */}
@@ -420,7 +434,9 @@ export default function RentDetail() {
         {/* --สิ่งอำนวยความสะดวก */}
         <hr className="border-gray-300" />
         <div className="py-4 sm:py-5">
-          <h1 className="pb-2 sm:pb-3 text-xl sm:text-2xl">สิ่งอำนวยความสะดวก</h1>
+          <h1 className="pb-2 sm:pb-3 text-xl sm:text-2xl">
+            สิ่งอำนวยความสะดวก
+          </h1>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-2 sm:gap-y-3 py-2 sm:py-3">
             {facilityOptions.map((facility) => {
@@ -452,7 +468,10 @@ export default function RentDetail() {
                 checked={agreeTerms}
                 onCheckedChange={(checked) => setAgreeTerms(checked === true)}
               />
-              <Label htmlFor="agree_terms" className="text-sm sm:text-base leading-relaxed">
+              <Label
+                htmlFor="agree_terms"
+                className="text-sm sm:text-base leading-relaxed"
+              >
                 อ่านและยอมรับ{" "}
                 <Link href="/terms" className="text-blue-500 underline">
                   ข้อตกลงและเงื่อนไขในการให้บริการ
@@ -468,7 +487,10 @@ export default function RentDetail() {
                 checked={agreeFee}
                 onCheckedChange={(checked) => setAgreeFee(checked === true)}
               />
-              <Label htmlFor="agree_fee" className="text-sm sm:text-base leading-relaxed">
+              <Label
+                htmlFor="agree_fee"
+                className="text-sm sm:text-base leading-relaxed"
+              >
                 รับทราบว่ามีการเก็บค่าธรรมเนียมในการปล่อยเช่าและรอบการโอนเงินจากพระเจ้าจอด
                 ตาม คู่มือการใช้งาน
               </Label>

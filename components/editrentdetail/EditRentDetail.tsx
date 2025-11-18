@@ -15,6 +15,7 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import AlertModal from "@/components/ui/modal";
 import useEditRentDetail from "@/types/editRentDetail";
 import { useSearchParams } from "next/navigation";
+import LabelAndProvinceSearch from "../form/LabelAndProvinceSearch";
 
 export default function EditRentDetail() {
   const searchParams = useSearchParams();
@@ -152,35 +153,29 @@ export default function EditRentDetail() {
           />
 
           <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <LabelAndInput
+            <LabelAndProvinceSearch
               title="จังหวัด *"
+              mode="province"
               id="province"
-              type="text"
-              placeholder=""
-              className="w-full"
               value={formValues.province}
               onChange={handleFieldChange("province")}
             />
 
             {/* แขวง / เขต */}
-            <LabelAndInput
-              title="แขวง / ตำบล *"
-              id="subdistrict"
-              type="text"
-              placeholder=""
-              className="w-full"
-              value={formValues.subdistrict}
-              onChange={handleFieldChange("subdistrict")}
-            />
-
-            <LabelAndInput
-              title="เขต / อำเภอ *"
-              id="county"
-              type="text"
-              placeholder=""
-              className="w-full"
+            <LabelAndProvinceSearch
+              title="แขวง / เขต *"
+              mode="district"
+              id="district"
               value={formValues.district}
               onChange={handleFieldChange("district")}
+            />
+
+            <LabelAndProvinceSearch
+              title="ตำบล *"
+              mode="subDistrict"
+              id="subdistrict"
+              value={formValues.subdistrict}
+              onChange={handleFieldChange("subdistrict")}
             />
           </div>
 
