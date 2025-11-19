@@ -90,7 +90,11 @@ export default function ResetPassword() {
                 )}
               </button>
             </div>
-            {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
+            {error && (
+              <div className="text-red-600 my-2 text-sm sm:text-base">
+                {error}
+              </div>
+            )}
           </div>
 
           <Button

@@ -218,15 +218,15 @@ export default function History() {
           {/* Mobile Card View */}
           <div className="md:hidden px-4 space-y-4 py-4">
             {loading ? (
-              <div className="text-center text-gray-400 py-20 text-base">
+              <div className="text-center text-gray-400 py-20 text-sm sm:text-base">
                 กำลังโหลดข้อมูล...
               </div>
             ) : error ? (
-              <div className="text-center text-red-500 py-20 text-base">
+              <div className="text-center text-red-500 py-20 text-sm sm:text-base">
                 เกิดข้อผิดพลาด: {error}
               </div>
             ) : data.length === 0 ? (
-              <div className="text-center text-gray-400 py-20 text-base">
+              <div className="text-center text-gray-400 py-20 text-sm sm:text-base">
                 ไม่มีประวัติการจอง
               </div>
             ) : (

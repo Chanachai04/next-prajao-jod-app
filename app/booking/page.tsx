@@ -13,9 +13,7 @@ type LatLng = [number, number];
 
 const MapPicker = dynamic(() => import("@/components/map/MapPicker"), {
   ssr: false,
-  loading: () => (
-    <Loading/>
-  ),
+  loading: () => <Loading />,
 });
 
 const TIME_OPTIONS = {
@@ -380,10 +378,10 @@ export default function Booking() {
       </div>
 
       {/* Content Section */}
-      <div className="w-full lg:w-auto flex flex-col lg:flex-row">
+      <div className="w-full   lg:w-auto flex flex-col lg:flex-row">
         {/* Detail Panel - Full width on mobile, slides in on desktop */}
         {isShowing && selectedSpot && (
-          <div className="fixed lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
+          <div className="fixed h-full lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
             <DetailPanel
               spot={selectedSpot}
               currentIndex={currentIndex}

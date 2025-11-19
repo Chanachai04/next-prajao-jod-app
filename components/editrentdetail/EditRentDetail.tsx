@@ -137,7 +137,7 @@ export default function EditRentDetail() {
             title="จำนวนที่จอด (คัน) *"
             id="amount"
             type="number"
-            placeholder=""
+            placeholder="จำนวนที่จอด"
             className="w-full"
             value={formValues.total_slot}
             onChange={handleFieldChange("total_slot")}
@@ -146,7 +146,7 @@ export default function EditRentDetail() {
             title="ที่อยู่ (บ้านเลขที่ หมู่บ้าน ซอย ถนน) *"
             id="location"
             type="text"
-            placeholder=""
+            placeholder="ที่อยู่"
             className="w-full"
             value={formValues.address}
             onChange={handleFieldChange("address")}
@@ -403,7 +403,7 @@ export default function EditRentDetail() {
               title="ราคาต่อชั่วโมง"
               id="priceperhour"
               type="number"
-              placeholder=""
+              placeholder="20"
               className="w-full"
               value={formValues.price_per_hour}
               onChange={handleFieldChange("price_per_hour")}
@@ -412,7 +412,7 @@ export default function EditRentDetail() {
               title="ราคาต่อวัน"
               id="priceperday"
               type="number"
-              placeholder=""
+              placeholder="300"
               className="w-full"
               value={formValues.price_per_day}
               onChange={handleFieldChange("price_per_day")}
@@ -421,7 +421,7 @@ export default function EditRentDetail() {
               title="ราคาต่อเดือน"
               id="pricepermonth"
               type="number"
-              placeholder=""
+              placeholder="2500"
               className="w-full"
               value={formValues.price_per_month}
               onChange={handleFieldChange("price_per_month")}
@@ -432,7 +432,7 @@ export default function EditRentDetail() {
               title="ค่าประกันบัตร อุปกรณ์เข้าจอด และสติ๊กเกอร์ (เฉพาะรายเดือน)"
               id="deposit"
               type="number"
-              placeholder=""
+              placeholder="550"
               className="w-full"
               value={formValues.deposit}
               onChange={handleFieldChange("deposit")}
@@ -474,7 +474,7 @@ export default function EditRentDetail() {
         </div>
         {submitStatus && (
           <p
-            className={`mt-4 text-sm ${
+            className={`mt-4 text-sm sm:text-base ${
               submitStatus.type === "success"
                 ? "text-green-600"
                 : "text-red-600"

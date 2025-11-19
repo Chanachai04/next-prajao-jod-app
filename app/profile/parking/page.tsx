@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Pen, Trash } from "lucide-react"; // เพิ่มการนำเข้าไอคอน
+import { Pen, Trash } from "lucide-react";
 import Link from "next/link";
 import { ParkingItem } from "@/types/parking";
 
@@ -199,15 +199,15 @@ export default function Parking() {
           {/* Mobile Card View */}
           <div className="md:hidden px-4 space-y-4 py-4">
             {loading ? (
-              <div className="text-center text-gray-400 py-20 text-base">
+              <div className="text-center text-gray-400 py-20 text-sm sm:text-base">
                 กำลังโหลดข้อมูล...
               </div>
             ) : error ? (
-              <div className="text-center text-red-500 py-20 text-base">
+              <div className="text-center text-red-500 py-20 text-sm sm:text-base">
                 {error}
               </div>
             ) : data.length === 0 ? (
-              <div className="text-center text-gray-400 py-20 text-base">
+              <div className="text-center text-gray-400 py-20 text-sm sm:text-base">
                 ไม่มีข้อมูล
               </div>
             ) : (

@@ -126,7 +126,11 @@ export default function LoginForm() {
             </Link>
           </div>
 
-          {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
+          {error && (
+            <div className="text-red-600 my-2 text-sm sm:text-base ">
+              {error}
+            </div>
+          )}
 
           <Button
             className="my-2 w-full text-lg py-5 cursor-pointer"

@@ -19,25 +19,34 @@ export default function SelectForm({
   onValueChange,
 }: SelectFormProps) {
   return (
-    <div className="relative mt-2">
+    <div className="relative">
       {title && (
-        <Label htmlFor="select" className="text-lg">
+        <Label htmlFor="select" className="text-sm sm:text-base lg:text-lg">
           {title}
         </Label>
       )}
       <Select onValueChange={onValueChange} value={value}>
         <SelectTrigger
-          className={`w-full h-10!  pr-3 bg-white ${className} text-lg`}
+          className={`w-full h-9 sm:h-10! pr-3 bg-white ${className} text-sm sm:text-base lg:text-lg mt-1 sm:mt-2
+         `}
         >
           <div className="flex items-center">
-            {leadingIcon && <span className="mr-2">{leadingIcon}</span>}
+            {leadingIcon && (
+              <span className="mr-1 sm:mr-2 text-gray-500 [&>svg]:w-4 [&>svg]:h-4 sm:[&>svg]:w-5 sm:[&>svg]:h-5">
+                {leadingIcon}
+              </span>
+            )}
             <SelectValue placeholder={placeholder} />
           </div>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             {Object.entries(itemList).map(([key, value]) => (
-              <SelectItem key={key} value={key} className="text-lg">
+              <SelectItem
+                key={key}
+                value={key}
+                className="text-sm sm:text-base lg:text-lg"
+              >
                 {value}
               </SelectItem>
             ))}

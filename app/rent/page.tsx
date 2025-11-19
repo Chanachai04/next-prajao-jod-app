@@ -88,7 +88,9 @@ export default function Rent() {
   return (
     <div className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5">
       {/* ส่วนหัว */}
-      <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">ปล่อยเช่าที่จอดรถ</h1>
+      <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">
+        ปล่อยเช่าที่จอดรถ
+      </h1>
       <h1 className="text-base sm:text-lg md:text-xl">
         กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ
       </h1>
@@ -153,7 +155,11 @@ export default function Rent() {
             setPhone(onlyNumbers);
           }}
         />
-        {error && <div className="text-red-600 text-sm md:col-span-2">{error}</div>}
+        {error && (
+          <div className="text-red-600 text-sm sm:text-base md:col-span-2">
+            {error}
+          </div>
+        )}
         <div className="md:col-start-2 flex justify-end w-full md:w-auto">
           <Button
             className="cursor-pointer w-full sm:w-auto px-6 sm:px-10 text-white bg-blue-600 hover:bg-blue-700 text-base sm:text-lg font-light"

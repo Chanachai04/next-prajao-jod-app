@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="min-h-screen  ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
-      <div className="flex flex-col sm:flex-row justify-between container mx-auto ">
+      <div className="flex flex-col sm:flex-row justify-between container mx-auto lg:my-15 ">
         <div className="mb-6 xl:mb-0">
           <Image
             src="/park.png"
@@ -89,7 +89,7 @@ export default function Home() {
                 key={key}
                 onClick={() => setSelectedOption(key)}
                 variant={selectedOption === key ? "default" : "link"}
-                className={`text-sm md:text-lg cursor-pointer ${
+                className={`text-sm sm:text-base lg:text-lg cursor-pointer ${
                   selectedOption === key ? "text-white" : "text-black"
                 }`}
               >
@@ -232,12 +232,14 @@ export default function Home() {
               </>
             )}
             {error && (
-              <div className="text-red-600 my-2 text-sm mt-6">{error}</div>
+              <div className="text-red-600 my-2 text-sm sm:text-base mt-6">
+                {error}
+              </div>
             )}
             <Button
               type="button"
               onClick={handleSubmit}
-              className=" w-full text-lg py-6 cursor-pointer"
+              className=" w-full text-sm sm:text-base lg:text-lg py-4 sm:py-6 cursor-pointer"
             >
               ค้นหาที่จอดรถ
             </Button>
@@ -250,23 +252,29 @@ export default function Home() {
         <div className="container mx-auto py-20 px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start">
             <div className="mb-8 lg:mb-0">
-              <p className="text-3xl md:text-4xl font-bold text-center lg:text-left flex flex-col">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center lg:text-left flex flex-col">
                 ค้นหาที่จอดรถที่ดีที่สุดได้ที่ <br />
                 PRAJAO JOD
               </p>
               <div className="mt-4">
                 <div className="flex items-center">
-                  <MapPlus size={34} />
-                  <p className="text-lg pl-2 pb-2">ค้นหาที่จอดรถ</p>
+                  <MapPlus size={28} />
+                  <p className="text-sm sm:text-base lg:text-lg pl-2 pb-2">
+                    ค้นหาที่จอดรถ
+                  </p>
                 </div>
-                <p>ค้นหาที่จอดรถของคุณได้ง่าย สะดวกและสบายได้ที่ PRAJAO JOD</p>
+                <p className="text-sm sm:text-base lg:text-lg">
+                  ค้นหาที่จอดรถของคุณได้ง่าย สะดวกและสบายได้ที่ PRAJAO JOD
+                </p>
               </div>
               <div className="mt-4">
                 <div className="flex items-center">
-                  <MousePointerClick size={34} />
-                  <p className="text-lg pl-2 pb-2">จองที่จอดรถ</p>
+                  <MousePointerClick size={28} />
+                  <p className="text-sm sm:text-base lg:text-lg pl-2 pb-2">
+                    จองที่จอดรถ
+                  </p>
                 </div>
-                <p>
+                <p className="text-sm sm:text-base lg:text-lg">
                   จองที่จอดรถได้ทันที ชำระค่าบริการออนไลน์ ใช้สะดวก รวดเร็ว
                   ปลอดภัย
                 </p>
@@ -281,16 +289,52 @@ export default function Home() {
       {/* --------------------------------------- */}
       {/* -- พาร์ทเนอร์และผู้สนับสนุน -- */}
       <div className="container mx-auto py-20">
-        <p className="text-3xl md:text-4xl font-bold text-center">
+        <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center">
           พาร์ทเนอร์และผู้สนับสนุน
         </p>
         <div className="grid grid-cols-2 px-4 sm:grid-cols-3    items-center justify-items-center gap-4 mt-10 ">
-          <Image src="/sau.png" alt="sau" width={150} height={55} />
-          <Image src="/nvidia.png" alt="nvidia" width={114} height={114} />
-          <Image src="/microsoft.png" alt="microsoft" width={273} height={58} />
-          <Image src="/google.png" alt="google" width={234} height={79} />
-          <Image src="/tesla.png" alt="tesla" width={115} height={115} />
-          <Image src="/honda.png" alt="honda" width={172} height={110} />
+          <Image
+            src="/sau.png"
+            alt="sau"
+            width={150}
+            height={55}
+            className="w-30 sm:w-40"
+          />
+          <Image
+            src="/nvidia.png"
+            alt="nvidia"
+            width={114}
+            height={114}
+            className="w-30 sm:w-40"
+          />
+          <Image
+            src="/microsoft.png"
+            alt="microsoft"
+            width={273}
+            height={58}
+            className="w-30 sm:w-40"
+          />
+          <Image
+            src="/google.png"
+            alt="google"
+            width={234}
+            height={79}
+            className="w-30 sm:w-40"
+          />
+          <Image
+            src="/tesla.png"
+            alt="tesla"
+            width={115}
+            height={115}
+            className="w-30 sm:w-40"
+          />
+          <Image
+            src="/honda.png"
+            alt="honda"
+            width={172}
+            height={110}
+            className="w-30 sm:w-40"
+          />
         </div>
       </div>
       {/* --------------------------------------- */}

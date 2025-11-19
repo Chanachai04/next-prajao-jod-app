@@ -66,12 +66,15 @@ export default function Navbar() {
             href="/"
             className="font-bold text-white text-center flex justify-start items-center"
           >
-            <span className="text-sm md:text-lg leading-tight">
+            <span className="text-sm sm:text-base lg:text-lg leading-tight">
               PRAJAO
               <br />
               JOD
             </span>
-            <Car size={32} className="pl-1 sm:pl-2 sm:w-12 sm:h-12" />
+            <Car
+              size={32}
+              className="pl-1 sm:pl-2 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12"
+            />
           </Link>
 
           <div className="text-white flex gap-2 sm:gap-4">
@@ -80,7 +83,7 @@ export default function Navbar() {
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm sm:text-base lg:text-lg cursor-pointer"
                   >
                     ปล่อยเช่าที่จอดรถ
                   </Button>
@@ -101,11 +104,11 @@ export default function Navbar() {
                       src={image}
                       width={40}
                       height={40}
-                      className="rounded-full h-10 border-2"
+                      className="rounded-full w-8 h-8 sm:w-10 sm:h-10 border-2"
                       alt="profile"
                     />
                   ) : (
-                    <User size={40} className="border rounded-full p-1" />
+                    <User className="border rounded-full p-1 w-8 h-8 sm:w-10 sm:h-10" />
                   )}
                 </Link>
               </>
@@ -115,7 +118,7 @@ export default function Navbar() {
                 <Link href="/login">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm sm:text-base lg:text-lg cursor-pointer"
                   >
                     เข้าสู่ระบบ
                   </Button>
@@ -124,7 +127,7 @@ export default function Navbar() {
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
-                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm md:text-lg cursor-pointer"
+                    className="px-2 sm:px-4 py-1 sm:py-2 h-8 sm:h-10 text-sm sm:text-base lg:text-lg cursor-pointer"
                   >
                     ปล่อยเช่าที่จอดรถ
                   </Button>

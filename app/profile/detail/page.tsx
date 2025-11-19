@@ -57,7 +57,7 @@ export default function Detail() {
         setLineId(data.lineId ?? "");
         setServerImageUrl(data.imageUrl ?? null);
       } catch (e) {
-        console.error("❌ fetchContact error:", e);
+        console.error("fetchContact error:", e);
       }
     };
 
@@ -133,7 +133,7 @@ export default function Detail() {
       setModalDescription("ข้อมูลโปรไฟล์ของคุณถูกบันทึกเรียบร้อยแล้ว");
       setModalOpen(true);
     } catch (e) {
-      console.error("❌ handleSave error:", e);
+      console.error("handleSave error:", e);
       setModalType("error");
       setModalTitle("เกิดข้อผิดพลาด");
       setModalDescription("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
@@ -224,7 +224,9 @@ export default function Detail() {
 
           <hr className="my-4 sm:my-6" />
           {error && (
-            <div className="text-red-600 text-sm md:col-span-2">{error}</div>
+            <div className="text-red-600 text-sm sm:text-base md:col-span-2">
+              {error}
+            </div>
           )}
 
           <div className="flex justify-start">

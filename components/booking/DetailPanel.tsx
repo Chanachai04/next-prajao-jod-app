@@ -128,7 +128,7 @@ export default function DetailPanel({
   }, [spot.id, searchParams, selectedOptionDetail, monthDurationKey]);
 
   return (
-    <div className="w-full lg:w-lg bg-white">
+    <div className="w-full   lg:w-lg bg-white">
       {/* Image Gallery */}
       <div className="relative">
         <Image
@@ -171,7 +171,7 @@ export default function DetailPanel({
             alt={`thumbnail-${index}`}
             width={80}
             height={100}
-            className={`h-12 w-16 sm:h-16 sm:w-20 object-cover cursor-pointer border-2 transition-all rounded-lg flex-shrink-0 ${
+            className={`h-12 w-16 sm:h-16 sm:w-20 object-cover cursor-pointer border-2 transition-all rounded-lg shrink-0 ${
               index === currentIndex
                 ? "border-blue-500 scale-105"
                 : "border-transparent hover:border-gray-300"
@@ -183,10 +183,12 @@ export default function DetailPanel({
 
       {/* Details */}
       <div className="px-3 sm:px-4 max-h-[400px] sm:max-h-[500px] overflow-y-auto pb-6 sm:pb-8">
-        <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">{spot.name ?? "-"}</p>
+        <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">
+          {spot.name ?? "-"}
+        </p>
         <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 flex-shrink-0" />
-          <p className="text-sm sm:text-base text-gray-700 break-words">
+          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 shrink-0" />
+          <p className="text-sm sm:text-base lg:text-lg text-gray-700 wrap-break-word">
             {fullAddress || spot.province || "ไม่พบที่อยู่"}
           </p>
         </div>
@@ -203,19 +205,21 @@ export default function DetailPanel({
                   variant={selectedOptionDetail === key ? "default" : "link"}
                   className={`${
                     selectedOptionDetail === key ? "text-white" : "text-black"
-                  } text-xs sm:text-sm lg:text-base transition-all h-7 sm:h-8 cursor-pointer px-2 sm:px-4`}
+                  } text-sm sm:text-base lg:text-lg transition-all h-7 sm:h-8 cursor-pointer px-2 sm:px-4`}
                 >
                   {label}
                 </Button>
               ))
             ) : (
-              <span className="text-xs sm:text-sm text-gray-500">ไม่พบข้อมูลราคา</span>
+              <span className="text-sm sm:text-base lg:text-lg text-gray-500">
+                ไม่พบข้อมูลราคา
+              </span>
             )}
           </div>
           <div className="text-center">
-            <div className="flex justify-between my-3 sm:my-4 text-base sm:text-lg">
+            <div className="flex justify-between my-3 sm:my-4 text-sm sm:text-base lg:text-lg">
               <p>ราคาค่าจอด</p>
-              <p className="font-bold text-blue-600">
+              <p className="font-bold  text-blue-600">
                 {activePrice !== null && activePrice !== undefined
                   ? formatCurrency(activePrice as number)
                   : "-"}
@@ -224,7 +228,7 @@ export default function DetailPanel({
             <Link href={orderUrl}>
               <Button
                 type="button"
-                className="w-full sm:w-3/4 lg:w-1/2 mt-6 sm:mt-10 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base"
+                className="w-full  sm:w-3/4 lg:w-1/2 mt-6 sm:mt-10 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base lg:text-lg"
               >
                 จองทันที
               </Button>
@@ -233,20 +237,32 @@ export default function DetailPanel({
 
           <div>
             <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
-            <p className="font-medium text-sm sm:text-base">จุดสังเกตุ</p>
-            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1 break-words">{landmarkText}</p>
+            <p className="font-medium text-sm sm:text-base lg:text-lg">
+              จุดสังเกตุ
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-[#7C7C7C] mt-1 wrap-break-word">
+              {landmarkText}
+            </p>
           </div>
 
           <div>
             <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
-            <p className="font-medium text-sm sm:text-base">ประเภทที่จอด</p>
-            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1">{typeText}</p>
+            <p className="font-medium text-sm sm:text-base lg:text-lg">
+              ประเภทที่จอด
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-[#7C7C7C] mt-1">
+              {typeText}
+            </p>
           </div>
 
           <div>
             <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
-            <p className="font-medium text-sm sm:text-base">สิ่งอำนวยความสะดวก</p>
-            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1 break-words">{facilitiesText}</p>
+            <p className="font-medium text-sm sm:text-base lg:text-lg">
+              สิ่งอำนวยความสะดวก
+            </p>
+            <p className="text-sm sm:text-base lg:text-lg text-[#7C7C7C] mt-1 wrap-break-word">
+              {facilitiesText}
+            </p>
           </div>
         </div>
       </div>

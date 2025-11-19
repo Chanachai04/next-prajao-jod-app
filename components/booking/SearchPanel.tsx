@@ -101,9 +101,7 @@ export default function SearchPanel({
 
   const renderStatus = () => {
     if (isLoading) {
-      return (
-       <Loading/>
-      );
+      return <Loading />;
     }
     if (errorMessage) {
       return (
@@ -126,14 +124,16 @@ export default function SearchPanel({
   };
 
   return (
-    <div className="w-full lg:w-lg bg-[#EBEBEB] p-3 sm:p-4">
+    <div className="w-full min-h-screen lg:w-lg bg-[#EBEBEB] p-3 sm:p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSearch();
         }}
       >
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl my-2">{searchText || "สถานที่"}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl my-2">
+          {searchText || "สถานที่"}
+        </h1>
 
         {/* Province Search */}
         <ProvinceSearch
@@ -218,7 +218,9 @@ export default function SearchPanel({
             </div>
           </>
         )}
-        {error && <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>}
+        {error && (
+          <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>
+        )}
         <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
           <div className="flex gap-2">
             <Button

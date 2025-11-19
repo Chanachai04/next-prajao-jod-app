@@ -104,7 +104,7 @@ export default function ProvinceSearch({
   return (
     <div ref={wrapperRef} className="relative">
       {!hideLabel && (
-        <Label htmlFor="search" className="text-lg">
+        <Label htmlFor="search" className="text-sm sm:text-base lg:text-lg">
           สถานที่
         </Label>
       )}

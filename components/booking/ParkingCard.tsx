@@ -94,9 +94,8 @@ export default function ParkingCard({
 
   return (
     <Card
-      className={`mt-3 sm:mt-4 cursor-pointer transition-shadow ${
-        isActive ? "shadow-lg " : "hover:shadow-lg"
-      }`}
+      className={`mt-3 sm:mt-4 cursor-pointer transition-shadow   hover:shadow-lg
+      `}
       onClick={onClick}
     >
       <CardHeader className="p-3 sm:p-4 lg:p-6">
@@ -106,7 +105,7 @@ export default function ParkingCard({
             alt={spot.name ?? "รูปที่จอดรถ"}
             width={145}
             height={120}
-            className="rounded-xl w-[100px] h-[90px] sm:w-[120px] sm:h-[100px] lg:w-[145px] lg:h-[120px] object-cover flex-shrink-0"
+            className="rounded-xl w-[100px] h-[90px] sm:w-[120px] sm:h-[100px] lg:w-[145px] lg:h-[120px] object-cover shrink-0"
           />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-base sm:text-lg lg:text-xl line-clamp-2">
@@ -118,20 +117,22 @@ export default function ParkingCard({
                   availablePriceTags.map(({ key, label }) => (
                     <span
                       key={key}
-                      className="text-[10px] sm:text-xs lg:text-sm bg-blue-600 px-1.5 sm:px-2 py-0.5 sm:py-1 text-white rounded-sm"
+                      className="text-sm sm:text-base lg:text-lg bg-blue-600 px-1.5 sm:px-2 py-0.5 sm:py-1 text-white rounded-sm"
                     >
                       {label}
                     </span>
                   ))
                 ) : (
-                  <span className="text-[10px] sm:text-xs text-gray-500">ไม่พบข้อมูลราคา</span>
+                  <span className="text-sm sm:text-base lg:text-lg text-gray-500">
+                    ไม่พบข้อมูลราคา
+                  </span>
                 )}
               </div>
             </CardDescription>
           </div>
         </div>
         <div className="flex justify-between items-center mt-2 sm:mt-3">
-          <p className="text-sm sm:text-base font-medium truncate">
+          <p className="text-sm sm:text-base lg:text-lg font-medium truncate">
             {displayPrice !== null
               ? `${formatCurrency(displayPrice)}${
                   priceUnit ? `/${priceUnit}` : ""
@@ -139,7 +140,7 @@ export default function ParkingCard({
               : "ไม่ระบุราคา"}
           </p>
           <Link href={orderUrl}>
-            <Button className="ml-2 cursor-pointer hover:scale-105 transition-transform text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4">
+            <Button className="ml-2 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base lg:text-lg h-8 sm:h-9 px-3 sm:px-4">
               จองทันที
             </Button>
           </Link>

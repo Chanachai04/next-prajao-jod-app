@@ -26,24 +26,24 @@ export default function DateForm({
 
   return (
     <div>
-      <Label htmlFor={id} className="text-lg">
+      <Label htmlFor={id} className="text-sm sm:text-base lg:text-lg">
         {title}
       </Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={`w-full h-10 justify-start text-left font-normal ${className} mt-2 bg-white text-lg`}
+            className={`w-full h-9 sm:h-10 justify-start text-left font-normal ${className} mt-1 sm:mt-2 bg-white text-sm sm:text-base lg:text-lg`}
             onClick={onClick}
             onChange={onChange}
             value={value}
           >
-            <CalendarIcon className="text-gray-500 w-6! h-6!" />
+            <CalendarIcon className="text-gray-500 w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
 
             {format(date ?? new Date(), "dd/MM/yyyy")}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 ">
+        <PopoverContent className="w-auto p-0" align="start">
           <Calendar
             mode="single"
             selected={date}

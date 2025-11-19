@@ -220,8 +220,8 @@ export default function Page() {
     if (mode === "hourly") {
       return (
         <div className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <p className="text-gray-600">วัน-เวลาเข้าจอด</p>
+          <div className="flex justify-between ">
+            <p className="text-gray-600 ">วัน-เวลาเข้าจอด</p>
             <p className="font-medium">
               {formatDate(dateIn)}, {formatTime(timeIn)}
             </p>
@@ -232,7 +232,7 @@ export default function Page() {
               {formatDate(dateOut)}, {formatTime(timeOut)}
             </p>
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between ">
             <p className="text-gray-600">ระยะเวลาจอด</p>
             <p className="font-medium">
               {payment.duration} {payment.unit}
@@ -403,7 +403,9 @@ export default function Page() {
 
             {/* เกี่ยวกับราคา */}
             <div className="mt-3 sm:mt-4 border-t pt-3 sm:pt-4">
-              <p className="text-sm sm:text-base font-semibold mb-2">เกี่ยวกับราคา</p>
+              <p className="text-sm sm:text-base font-semibold mb-2">
+                เกี่ยวกับราคา
+              </p>
               <div className="space-y-1 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <p className="text-gray-600">ประกันสัญญา</p>
@@ -508,7 +510,9 @@ export default function Page() {
               <div></div>
             </div>
           </div>
-          {error && <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>}
+          {error && (
+            <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>
+          )}
           {isUserDataExisting && (
             <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-xs sm:text-sm text-blue-700">

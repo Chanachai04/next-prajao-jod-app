@@ -357,7 +357,7 @@ export default function Page() {
                 size={16}
                 className="mr-2 shrink-0 sm:w-[18px] sm:h-[18px]"
               />
-              <span className="wrap-break-word ">
+              <span className="wrap-break-word text-sm sm:text-base lg:text-lg">
                 เขต{rentDetail?.district} แขวง{rentDetail?.subdistrict}{" "}
                 {rentDetail?.province}
               </span>
@@ -365,7 +365,7 @@ export default function Page() {
 
             {/* Schedule */}
             <div
-              className={`mb-6 sm:mb-8 mt-3 sm:mt-4 text-sm sm:text-base ${
+              className={`mb-6 sm:mb-8 mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg ${
                 showAll ? "flex flex-col" : "flex items-center"
               }`}
             >
@@ -394,14 +394,14 @@ export default function Page() {
             <h1 className="text-base sm:text-lg font-semibold">
               เกี่ยวกับลานจอด
             </h1>
-            <p className="my-2 text-sm sm:text-base wrap-break-word">
+            <p className="my-2 text-sm sm:text-base lg:text-lg wrap-break-word">
               {rentDetail?.description}
             </p>
           </div>
 
           <div className="mb-6 sm:mb-8">
             <h1 className="text-base sm:text-lg font-semibold">จุดสังเกตุ</h1>
-            <p className="my-2 text-sm sm:text-base wrap-break-word">
+            <p className="my-2 text-sm sm:text-base lg:text-lg wrap-break-word">
               {rentDetail?.landmark}
             </p>
           </div>
@@ -415,13 +415,13 @@ export default function Page() {
                 facilities.map((f) => (
                   <span
                     key={f.id}
-                    className="bg-gray-100 rounded-full  sm:px-3 py-1 text-xs sm:text-sm"
+                    className="bg-gray-100 rounded-full  sm:px-3 py-1 text-sm sm:text-base lg:text-lg"
                   >
                     {f.name}
                   </span>
                 ))
               ) : (
-                <span className="text-sm sm:text-base">
+                <span className="text-sm sm:text-base lg:text-lg">
                   ไม่มีข้อมูลสิ่งอำนวยความสะดวก
                 </span>
               )}
@@ -445,7 +445,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_hour);
                   setPriceSuffix("/ ชั่วโมง");
                 }}
-                className="flex-1 cursor-pointer text-xs sm:text-sm"
+                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
               >
                 รายชั่วโมง
               </Button>
@@ -458,7 +458,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_day);
                   setPriceSuffix("/ วัน");
                 }}
-                className="flex-1 cursor-pointer text-xs sm:text-sm"
+                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
               >
                 รายวัน
               </Button>
@@ -472,7 +472,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_month);
                   setPriceSuffix("/ เดือน");
                 }}
-                className="flex-1 cursor-pointer text-xs sm:text-sm"
+                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
               >
                 รายเดือน
               </Button>
@@ -565,7 +565,7 @@ export default function Page() {
           </div>
           <div>
             <Link href={buildPaymentUrl}>
-              <Button className="w-full cursor-pointer h-9 sm:h-10 text-sm sm:text-base">
+              <Button className="w-full cursor-pointer h-9 sm:h-10 text-sm sm:text-base lg:text-lg">
                 จองที่จอดนี้
               </Button>
             </Link>
