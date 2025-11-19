@@ -288,10 +288,10 @@ export default function useEditRentDetail(rentId: string | null) {
 
   const handleFieldChange =
     (field: keyof typeof formValues) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = event.target.value;
-      setFormValues((prev) => ({ ...prev, [field]: value }));
-    };
+      (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = event.target.value;
+        setFormValues((prev) => ({ ...prev, [field]: value }));
+      };
 
   const toggleFacility = (facility: string, checked: boolean) => {
     setSelectedFacilities((prev) => {
@@ -332,12 +332,12 @@ export default function useEditRentDetail(rentId: string | null) {
       prev.map((s, i) =>
         i === index
           ? {
-              ...s,
-              allDay: checked,
-              selected: checked ? true : s.selected,
-              open_time: checked ? "00:00" : s.open_time,
-              close_time: checked ? "00:00" : s.close_time,
-            }
+            ...s,
+            allDay: checked,
+            selected: checked ? true : s.selected,
+            open_time: checked ? "00:00" : s.open_time,
+            close_time: checked ? "00:00" : s.close_time,
+          }
           : s
       )
     );
@@ -477,7 +477,8 @@ export default function useEditRentDetail(rentId: string | null) {
       return;
     }
 
-    if (images.length === 0) {
+    // ตรวจสอบว่ามีรูปภาพอย่างน้อย 1 รูป (รูปเก่าหรือรูปใหม่)
+    if (images.length === 0 && existingImages.length === 0) {
       setSubmitStatus({
         type: "error",
         message: "กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป",

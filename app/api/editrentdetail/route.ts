@@ -235,17 +235,52 @@ export async function PUT(req: Request) {
       }
     }
 
-    // อัปเดต facilities - ลบเก่าแล้วเพิ่มใหม่
-    await supabase.from("rent_facilities").delete().eq("rent_id", rentId);
+    // อัปเดต facilities - เปรียบเทียบและอัปเดตเฉพาะส่วนที่เปลี่ยนแปลง
+    const { data: existingFacilities } = await supabase
+      .from("rent_facilities")
+      .select("id, name")
+      .eq("rent_id", rentId);
 
-    if (Array.isArray(facilities) && facilities.length > 0) {
-      const uniqueFacilities = Array.from(new Set(facilities));
-      const facilityRows = uniqueFacilities.map((facilityName) => ({
+    const existingFacilityNames = (existingFacilities || []).map((f) => f.name);
+    const newFacilities = Array.isArray(facilities) ? Array.from(new Set(facilities)) : [];
+
+    // หา facilities ที่ต้องลบ (อยู่ในเก่าแต่ไม่อยู่ในใหม่)
+    const facilitiesToDelete = (existingFacilities || []).filter(
+      (f) => !newFacilities.includes(f.name)
+    );
+
+    // หา facilities ที่ต้องเพิ่ม (อยู่ในใหม่แต่ไม่อยู่ในเก่า)
+    const facilitiesToAdd = newFacilities.filter(
+      (name) => !existingFacilityNames.includes(name)
+    );
+
+    // ลบ facilities ที่ไม่ต้องการ
+    if (facilitiesToDelete.length > 0) {
+      const idsToDelete = facilitiesToDelete.map((f) => f.id);
+      const { error: deleteFacilitiesError } = await supabase
+        .from("rent_facilities")
+        .delete()
+        .in("id", idsToDelete);
+
+      if (deleteFacilitiesError) {
+        console.error("Delete facilities error:", deleteFacilitiesError);
+      }
+    }
+
+    // เพิ่ม facilities ใหม่
+    if (facilitiesToAdd.length > 0) {
+      const facilityRows = facilitiesToAdd.map((facilityName) => ({
         rent_id: rentId,
         name: facilityName,
       }));
 
-      await supabase.from("rent_facilities").insert(facilityRows);
+      const { error: insertFacilitiesError } = await supabase
+        .from("rent_facilities")
+        .insert(facilityRows);
+
+      if (insertFacilitiesError) {
+        console.error("Insert facilities error:", insertFacilitiesError);
+      }
     }
 
     // อัปเดต schedule - ลบเก่าแล้วเพิ่มใหม่
@@ -277,6 +312,7 @@ export async function PUT(req: Request) {
     }
 
     // เพิ่มรูปภาพใหม่ (ถ้ามี)
+    let firstNewImageId: string | null = null;
     if (images.length > 0) {
       const uploadedUrls: string[] = [];
       for (const file of images) {
@@ -313,8 +349,47 @@ export async function PUT(req: Request) {
           image_url: url,
         }));
 
-        await supabase.from("rent_images").insert(imageRows);
+        const { data: insertedImages, error: insertImagesError } = await supabase
+          .from("rent_images")
+          .insert(imageRows)
+          .select("id");
+
+        if (insertImagesError) {
+          console.error("Insert images error:", insertImagesError);
+        } else if (insertedImages && insertedImages.length > 0) {
+          // เก็บ ID ของรูปแรกที่อัปโหลด
+          firstNewImageId = insertedImages[0].id;
+        }
       }
+    }
+
+    // อัปเดต image_id ใน rent_detail ให้ชี้ไปที่รูปแรก
+    // ลำดับความสำคัญ: รูปใหม่ที่อัปโหลดรูปแรก > รูปเก่าที่เหลืออยู่รูปแรก
+    let imageIdToSet: string | null = null;
+
+    if (firstNewImageId) {
+      // ถ้ามีรูปใหม่ที่อัปโหลด ให้ใช้รูปแรกที่อัปโหลด
+      imageIdToSet = firstNewImageId;
+    } else {
+      // ถ้าไม่มีรูปใหม่ ให้ดึงรูปเก่าที่เหลืออยู่รูปแรก
+      const { data: remainingImages } = await supabase
+        .from("rent_images")
+        .select("id")
+        .eq("rent_id", rentId)
+        .order("created_at", { ascending: true })
+        .limit(1);
+
+      if (remainingImages && remainingImages.length > 0) {
+        imageIdToSet = remainingImages[0].id;
+      }
+    }
+
+    // อัปเดต image_id ใน rent_detail
+    if (imageIdToSet) {
+      await supabase
+        .from("rent_detail")
+        .update({ image_id: imageIdToSet })
+        .eq("id", rentId);
     }
 
     return NextResponse.json({
