@@ -223,6 +223,8 @@ export default function Detail() {
           </div>
 
           <hr className="my-4 sm:my-6" />
+          <div></div>
+
           {error && (
             <div className="text-red-600 text-sm sm:text-base md:col-span-2">
               {error}

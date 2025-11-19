@@ -112,7 +112,7 @@ export default function Parking() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="text-center text-gray-400 py-20 text-base sm:text-lg"
+                      className="text-center text-gray-400 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       กำลังโหลดข้อมูล...
                     </td>
@@ -121,7 +121,7 @@ export default function Parking() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="text-center text-red-500 py-20 text-base sm:text-lg"
+                      className="text-center text-red-500 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       {error}
                     </td>
@@ -130,7 +130,7 @@ export default function Parking() {
                   <tr>
                     <td
                       colSpan={5}
-                      className="text-center text-gray-400 py-20 text-base sm:text-lg"
+                      className="text-center text-gray-400 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       ไม่มีข้อมูล
                     </td>
@@ -139,7 +139,7 @@ export default function Parking() {
                   data.map((item, index) => (
                     <tr
                       key={index}
-                      className="border-b hover:bg-gray-50 text-base sm:text-lg"
+                      className="border-b hover:bg-gray-50 text-sm sm:text-base lg:text-lg"
                     >
                       <td className="py-4 sm:py-6 px-4 sm:px-6 text-center">
                         {item.image_url ? (
@@ -199,7 +199,7 @@ export default function Parking() {
           {/* Mobile Card View */}
           <div className="md:hidden px-4 space-y-4 py-4">
             {loading ? (
-              <div className="text-center text-gray-400 py-20 text-sm sm:text-base">
+              <div className="text-center text-gray-400 py-20 text-sm sm:text-base ">
                 กำลังโหลดข้อมูล...
               </div>
             ) : error ? (
@@ -229,13 +229,18 @@ export default function Parking() {
                         />
                       ) : (
                         <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center shrink-0">
-                          <span className="text-gray-400 text-xs">
-                            ไม่มีรูป
-                          </span>
+                          <Image
+                            src={"/placeholder.png"}
+                            alt={"ไม่มีรูปภาพ"}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-lg shrink-0"
+                            unoptimized
+                          />
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-semibold text-gray-800 truncate">
+                        <h3 className="text-sm font-semibold text-gray-800 truncate">
                           {item.name}
                         </h3>
                         <p className="text-sm text-gray-600 mt-1">
