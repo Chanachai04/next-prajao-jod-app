@@ -5,7 +5,7 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
   return (
-    <div className="bg-[#44444E] p-4 sm:p-6 md:p-10 ">
+    <div className="bg-[#44444E] p-4  ">
       <div className="container mx-auto text-white">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           <div className="text-sm md:text-lg">

@@ -128,7 +128,7 @@ export default function DetailPanel({
   }, [spot.id, searchParams, selectedOptionDetail, monthDurationKey]);
 
   return (
-    <div className="w-lg bg-white">
+    <div className="w-full lg:w-lg bg-white">
       {/* Image Gallery */}
       <div className="relative">
         <Image
@@ -136,34 +136,34 @@ export default function DetailPanel({
           alt={spot.name ?? "รูปที่จอดรถ"}
           width={800}
           height={250}
-          className="w-full h-[250px] object-cover"
+          className="w-full h-[200px] sm:h-[250px] object-cover"
         />
         <button
           onClick={onClose}
-          className="cursor-pointer absolute top-6 left-2 -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-colors z-10"
+          className="cursor-pointer absolute top-4 sm:top-6 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow hover:bg-gray-100 transition-colors z-10"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
         {imageUrls.length > 1 && (
           <>
             <button
               onClick={() => onNavigate("prev")}
-              className="cursor-pointer absolute top-1/2 left-2 -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
+              className="cursor-pointer absolute top-1/2 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
             </button>
             <button
               onClick={() => onNavigate("next")}
-              className="cursor-pointer absolute top-1/2 right-2 -translate-y-1/2 bg-white p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
+              className="cursor-pointer absolute top-1/2 right-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow hover:bg-gray-100 transition-colors"
             >
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
             </button>
           </>
         )}
       </div>
 
       {/* Thumbnails */}
-      <div className="bg-[#F9F3F3] h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-4">
+      <div className="bg-[#F9F3F3] h-[80px] sm:h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4">
         {imageUrls.map((img, index) => (
           <Image
             key={`${img}-${index}`}
@@ -171,7 +171,7 @@ export default function DetailPanel({
             alt={`thumbnail-${index}`}
             width={80}
             height={100}
-            className={`h-16 w-20 object-cover cursor-pointer border-2 transition-all rounded-lg ${
+            className={`h-12 w-16 sm:h-16 sm:w-20 object-cover cursor-pointer border-2 transition-all rounded-lg flex-shrink-0 ${
               index === currentIndex
                 ? "border-blue-500 scale-105"
                 : "border-transparent hover:border-gray-300"
@@ -182,19 +182,19 @@ export default function DetailPanel({
       </div>
 
       {/* Details */}
-      <div className="px-4 max-h-[500px] overflow-y-auto pb-8">
-        <p className="text-xl mt-4 font-semibold">{spot.name ?? "-"}</p>
+      <div className="px-3 sm:px-4 max-h-[400px] sm:max-h-[500px] overflow-y-auto pb-6 sm:pb-8">
+        <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">{spot.name ?? "-"}</p>
         <div className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-gray-600" />
-          <p className="text-gray-700">
+          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 flex-shrink-0" />
+          <p className="text-sm sm:text-base text-gray-700 break-words">
             {fullAddress || spot.province || "ไม่พบที่อยู่"}
           </p>
         </div>
-        <hr className="border border-[#7C7C7C] my-4" />
+        <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
 
         <div>
-          <p className="text-xl mb-2 font-semibold">ข้อมูลราคา</p>
-          <div className="flex flex-wrap gap-2 md:gap-4">
+          <p className="text-lg sm:text-xl mb-2 font-semibold">ข้อมูลราคา</p>
+          <div className="flex flex-wrap gap-2">
             {availablePriceKeys.length > 0 ? (
               availablePriceKeys.map(({ key, label }) => (
                 <Button
@@ -203,17 +203,17 @@ export default function DetailPanel({
                   variant={selectedOptionDetail === key ? "default" : "link"}
                   className={`${
                     selectedOptionDetail === key ? "text-white" : "text-black"
-                  } text-sm md:text-lg transition-all h-8 cursor-pointer`}
+                  } text-xs sm:text-sm lg:text-base transition-all h-7 sm:h-8 cursor-pointer px-2 sm:px-4`}
                 >
                   {label}
                 </Button>
               ))
             ) : (
-              <span className="text-sm text-gray-500">ไม่พบข้อมูลราคา</span>
+              <span className="text-xs sm:text-sm text-gray-500">ไม่พบข้อมูลราคา</span>
             )}
           </div>
           <div className="text-center">
-            <div className="flex justify-between my-4 text-lg">
+            <div className="flex justify-between my-3 sm:my-4 text-base sm:text-lg">
               <p>ราคาค่าจอด</p>
               <p className="font-bold text-blue-600">
                 {activePrice !== null && activePrice !== undefined
@@ -224,7 +224,7 @@ export default function DetailPanel({
             <Link href={orderUrl}>
               <Button
                 type="button"
-                className="w-full md:w-1/2 mt-10 cursor-pointer hover:scale-105 transition-transform"
+                className="w-full sm:w-3/4 lg:w-1/2 mt-6 sm:mt-10 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base"
               >
                 จองทันที
               </Button>
@@ -232,21 +232,21 @@ export default function DetailPanel({
           </div>
 
           <div>
-            <hr className="border border-[#7C7C7C] my-4" />
-            <p className="font-medium">จุดสังเกตุ</p>
-            <p className="text-sm text-[#7C7C7C] mt-1">{landmarkText}</p>
+            <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
+            <p className="font-medium text-sm sm:text-base">จุดสังเกตุ</p>
+            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1 break-words">{landmarkText}</p>
           </div>
 
           <div>
-            <hr className="border border-[#7C7C7C] my-4" />
-            <p className="font-medium">ประเภทที่จอด</p>
-            <p className="text-sm text-[#7C7C7C] mt-1">{typeText}</p>
+            <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
+            <p className="font-medium text-sm sm:text-base">ประเภทที่จอด</p>
+            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1">{typeText}</p>
           </div>
 
           <div>
-            <hr className="border border-[#7C7C7C] my-4" />
-            <p className="font-medium">สิ่งอำนวยความสะดวก</p>
-            <p className="text-sm text-[#7C7C7C] mt-1">{facilitiesText}</p>
+            <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
+            <p className="font-medium text-sm sm:text-base">สิ่งอำนวยความสะดวก</p>
+            <p className="text-xs sm:text-sm text-[#7C7C7C] mt-1 break-words">{facilitiesText}</p>
           </div>
         </div>
       </div>

@@ -365,34 +365,34 @@ export default function Page() {
   }
 
   return (
-    <div className="container mx-auto min-h-screen py-4 md:py-10">
+    <div className="container mx-auto min-h-screen py-4 px-4 sm:px-6 md:py-10">
       {/* Breadcrumb */}
 
       <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-10">
         {/* ซ้าย - สรุปการจอง */}
         <div className="w-full lg:w-1/3">
           {/* ข้อมูลที่จอด */}
-          <div className="border border-gray-300 rounded-2xl p-4 shadow hover:shadow-lg">
-            <div className="flex">
+          <div className="border border-gray-300 rounded-2xl p-3 sm:p-4 shadow hover:shadow-lg">
+            <div className="flex gap-3 sm:gap-4">
               <Image
                 src={paymentData.image || FALLBACK_IMAGE}
                 width={100}
                 height={100}
                 alt={paymentData.rentDetail.name}
-                className="rounded-2xl w-[100px] h-[100px] object-cover shrink-0"
+                className="rounded-2xl w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] object-cover shrink-0"
               />
-              <div className="ml-4 flex-1 min-w-0">
-                <p className="font-semibold text-lg truncate">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base sm:text-lg truncate">
                   {paymentData.rentDetail.name}
                 </p>
-                <p className="text-sm text-gray-600 mt-1">
+                <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">
                   {paymentData.rentDetail.subdistrict}
                   {paymentData.rentDetail.subdistrict && ", "}
                   {paymentData.rentDetail.district}
                   {paymentData.rentDetail.district && ", "}
                   {paymentData.rentDetail.province}
                 </p>
-                <span className="inline-block py-1 px-3 bg-blue-400 text-white rounded-lg text-xs mt-2">
+                <span className="inline-block py-1 px-2 sm:px-3 bg-blue-400 text-white rounded-lg text-xs mt-2">
                   {getModeLabel()}
                 </span>
               </div>
@@ -402,9 +402,9 @@ export default function Page() {
             {renderBookingDetails()}
 
             {/* เกี่ยวกับราคา */}
-            <div className="mt-4 border-t pt-4">
-              <p className="text-base font-semibold mb-2">เกี่ยวกับราคา</p>
-              <div className="space-y-1 text-sm">
+            <div className="mt-3 sm:mt-4 border-t pt-3 sm:pt-4">
+              <p className="text-sm sm:text-base font-semibold mb-2">เกี่ยวกับราคา</p>
+              <div className="space-y-1 text-xs sm:text-sm">
                 <div className="flex justify-between">
                   <p className="text-gray-600">ประกันสัญญา</p>
                   <p className="font-medium">
@@ -424,15 +424,15 @@ export default function Page() {
               </div>
             </div>
 
-            <hr className="border-t border-gray-300 my-4" />
+            <hr className="border-t border-gray-300 my-3 sm:my-4" />
 
             <div className="flex justify-between items-center">
-              <p className="font-semibold text-lg">ราคารวม</p>
-              <p className="font-bold text-xl text-blue-600">
+              <p className="font-semibold text-base sm:text-lg">ราคารวม</p>
+              <p className="font-bold text-lg sm:text-xl text-blue-600">
                 ฿ {payment.total.toLocaleString()}
               </p>
             </div>
-            <p className="text-center text-xs text-gray-500 mt-4 leading-relaxed">
+            <p className="text-center text-[10px] sm:text-xs text-gray-500 mt-3 sm:mt-4 leading-relaxed">
               *ชำระเงินประกันก็ต่อเมื่อได้รับการยืนยันการเข้าจอดจากเจ้าของพื้นที่แล้ว
               เมื่อสิ้นสุดสัญญาผู้เช่าจะได้รับเงินประกันคืน
             </p>
@@ -441,12 +441,12 @@ export default function Page() {
 
         {/* ขวา - ข้อมูลผู้จอง */}
         <div className="w-full lg:w-2/3">
-          <h2 className="text-2xl md:text-3xl font-semibold mb-6">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6">
             ข้อมูลผู้จอง
           </h2>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <LabelAndInputForm
                 title="ชื่อ *"
                 id="first_name"
@@ -465,7 +465,7 @@ export default function Page() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <LabelAndInputForm
                 title="รหัสประจำตัวประชาชน *"
                 id="citizen_id"
@@ -496,7 +496,7 @@ export default function Page() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
               <LabelAndInputForm
                 title="Line ID"
                 id="line_id"
@@ -508,18 +508,18 @@ export default function Page() {
               <div></div>
             </div>
           </div>
-          {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
+          {error && <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>}
           {isUserDataExisting && (
-            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-700">
+            <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs sm:text-sm text-blue-700">
                 ℹ️ ข้อมูลของคุณถูกบันทึกไว้แล้ว สามารถแก้ไขได้ในหน้าโปรไฟล์
               </p>
             </div>
           )}
 
-          <div className="flex justify-end mt-8">
+          <div className="flex justify-end mt-6 sm:mt-8">
             <Button
-              className="cursor-pointer px-12 py-4 text-lg"
+              className="cursor-pointer w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg"
               onClick={() => {
                 if (
                   !firstName.trim() ||

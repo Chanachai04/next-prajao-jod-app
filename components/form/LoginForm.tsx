@@ -70,9 +70,9 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center">
-      <div className="border rounded-2xl p-10 shadow-2xl sm:w-[500px]">
-        <p className="text-4xl">เข้าสู่ระบบ</p>
+    <div className="min-h-screen flex flex-col justify-center items-center px-4">
+      <div className="border rounded-2xl p-6 sm:p-10 shadow-2xl w-full max-w-[500px]">
+        <p className="text-2xl sm:text-4xl">เข้าสู่ระบบ</p>
         <form onSubmit={handleSubmit}>
           <div className="my-2">
             <Label htmlFor="email" className="text-lg">

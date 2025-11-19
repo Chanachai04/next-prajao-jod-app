@@ -33,7 +33,6 @@ export default function Page() {
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
   const [priceSuffix, setPriceSuffix] = useState<string>("");
 
-  // --- v v v เปลี่ยน State นี้เป็น Key (string) และ default "threeMonths" v v v ---
   const [selectedMonthKey, setSelectedMonthKey] =
     useState<string>("threeMonths");
   const [userId, setUserId] = useState<string>("");
@@ -55,7 +54,6 @@ export default function Page() {
     oneYears: "1 ปี",
   };
 
-  // --- v v v สร้างตัวแปร number (3, 6, 12) จาก Key (string) โดยใช้ useMemo v v v ---
   const selectedMonthDuration = useMemo(() => {
     if (selectedMonthKey === "sixMonths") return 6;
     if (selectedMonthKey === "oneYears") return 12;
@@ -90,7 +88,6 @@ export default function Page() {
     // ตั้งค่า mode จาก URL
     if (mode === "monthly") {
       setIsShow("month");
-      // --- v v v ตั้งค่า State จาก URL (Key มาก่อน) v v v ---
       if (monthDurationKeyParam) {
         setSelectedMonthKey(monthDurationKeyParam);
       } else if (monthDurationParam) {
@@ -285,16 +282,16 @@ export default function Page() {
     timeIn,
     timeOut,
     isShow,
-    selectedMonthDuration, // <--- ใช้ตัวแปรจาก useMemo
+    selectedMonthDuration,
   ]);
 
   if (isLoading) return <Loading />;
 
   return (
-    <div className="container mx-auto min-h-screen">
+    <div className="container mx-auto min-h-screen px-4 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
-      <div className="flex items-center my-4">
-        <p>
+      <div className="flex items-center my-3 sm:my-4">
+        <p className="text-sm sm:text-base truncate">
           <Link href="/" className="text-blue-500 hover:underline">
             หน้าหลัก
           </Link>{" "}
@@ -302,45 +299,144 @@ export default function Page() {
         </p>
       </div>
 
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
         {/* Main Image */}
-        <div className="relative w-2/4">
+        <div className="relative w-full lg:w-2/4">
           <Image
             src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
             alt={rentDetail?.name ?? "รูปที่จอดรถ"}
             width={800}
             height={250}
-            className="w-full h-[400px] object-cover cursor-pointer rounded-2xl"
+            className="w-full h-[250px] sm:h-[350px] lg:h-[400px] object-cover cursor-pointer rounded-2xl"
           />
 
           {imageUrls.length > 1 && (
             <>
               <button
                 onClick={() => onNavigate("prev")}
-                className="absolute top-1/2 left-2 -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
 
               <button
                 onClick={() => onNavigate("next")}
-                className="absolute top-1/2 right-2 -translate-y-1/2 bg-white p-2 rounded-full shadow cursor-pointer"
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
               >
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
             </>
           )}
         </div>
+        {/* Thumbnails */}
+        <div className="h-[50px] sm:h-[100px] w-full lg:w-2/4 flex justify-start lg:justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4 mt-3 sm:mt-4">
+          {imageUrls.map((img, idx) => (
+            <Image
+              key={`${img}-${idx}`}
+              src={img}
+              width={80}
+              height={100}
+              alt=""
+              className={`h-12 w-16 sm:h-16 sm:w-20 object-cover border-2 rounded-lg cursor-pointer shrink-0 ${
+                idx === currentIndex
+                  ? "border-blue-500 scale-105"
+                  : "border-transparent"
+              }`}
+              onClick={() => onSelectImage(idx)}
+            />
+          ))}
+        </div>
 
+        <div>
+          <div className="mt-4 sm:mt-6">
+            <h1 className="text-xl sm:text-2xl mb-2 font-semibold">
+              {rentDetail?.name}
+            </h1>
+            <div className="flex items-center text-sm sm:text-base">
+              <MapPin
+                size={16}
+                className="mr-2 shrink-0 sm:w-[18px] sm:h-[18px]"
+              />
+              <span className="wrap-break-word ">
+                เขต{rentDetail?.district} แขวง{rentDetail?.subdistrict}{" "}
+                {rentDetail?.province}
+              </span>
+            </div>
+
+            {/* Schedule */}
+            <div
+              className={`mb-6 sm:mb-8 mt-3 sm:mt-4 text-sm sm:text-base ${
+                showAll ? "flex flex-col" : "flex items-center"
+              }`}
+            >
+              {allGroups.length > 0 &&
+                allGroups
+                  .map((g, index) => {
+                    const showButton = index === 0 && allGroups.length > 1;
+
+                    return renderScheduleGroup({
+                      ...g,
+                      button: showButton ? (
+                        <button
+                          onClick={() => setShowAll(!showAll)}
+                          className="text-blue-500 underline ml-2 text-sm sm:text-base"
+                        >
+                          {showAll ? "ย่อ" : "เพิ่มเติม"}
+                        </button>
+                      ) : undefined,
+                    });
+                  })
+                  .filter((_, i) => showAll || i === 0)}
+            </div>
+          </div>
+
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-base sm:text-lg font-semibold">
+              เกี่ยวกับลานจอด
+            </h1>
+            <p className="my-2 text-sm sm:text-base wrap-break-word">
+              {rentDetail?.description}
+            </p>
+          </div>
+
+          <div className="mb-6 sm:mb-8">
+            <h1 className="text-base sm:text-lg font-semibold">จุดสังเกตุ</h1>
+            <p className="my-2 text-sm sm:text-base wrap-break-word">
+              {rentDetail?.landmark}
+            </p>
+          </div>
+
+          <div className="mb-6 sm:mb-8 pb-4">
+            <h1 className="text-base sm:text-lg font-semibold">
+              สิ่งอำนวยความสะดวก
+            </h1>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {facilities && facilities.length > 0 ? (
+                facilities.map((f) => (
+                  <span
+                    key={f.id}
+                    className="bg-gray-100 rounded-full  sm:px-3 py-1 text-xs sm:text-sm"
+                  >
+                    {f.name}
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm sm:text-base">
+                  ไม่มีข้อมูลสิ่งอำนวยความสะดวก
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
         {/* Price Box */}
-        <div className="bg-white h-full w-1/3 ml-10 p-4 rounded-2xl border border-gray-300 shadow-sm">
+        <div className="mb-4 bg-white h-full w-full lg:w-1/3 p-4 sm:p-6 rounded-2xl border border-gray-300 shadow-sm">
           {/* Dynamic Price */}
-          <p className="text-2xl font-bold mb-4">
+          <p className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
             {displayPrice !== null ? `฿ ${displayPrice} ${priceSuffix}` : "-"}
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-3 sm:mb-4">
             {price?.price_per_hour && (
               <Button
                 variant={isShow === "hour" ? "default" : "outline"}
@@ -349,7 +445,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_hour);
                   setPriceSuffix("/ ชั่วโมง");
                 }}
-                className="flex-1 cursor-pointer"
+                className="flex-1 cursor-pointer text-xs sm:text-sm"
               >
                 รายชั่วโมง
               </Button>
@@ -362,7 +458,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_day);
                   setPriceSuffix("/ วัน");
                 }}
-                className="flex-1 cursor-pointer"
+                className="flex-1 cursor-pointer text-xs sm:text-sm"
               >
                 รายวัน
               </Button>
@@ -376,7 +472,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_month);
                   setPriceSuffix("/ เดือน");
                 }}
-                className="flex-1 cursor-pointer"
+                className="flex-1 cursor-pointer text-xs sm:text-sm"
               >
                 รายเดือน
               </Button>
@@ -385,7 +481,7 @@ export default function Page() {
 
           {/* Form Content */}
           {isShow === "day" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <DateForm
                 id="dateIn"
                 title="วันที่เข้าจอด"
@@ -406,7 +502,7 @@ export default function Page() {
           )}
 
           {isShow === "month" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <DateForm
                 id="dateIn"
                 title="วันที่เข้าจอด"
@@ -428,7 +524,7 @@ export default function Page() {
 
           {isShow === "hour" && (
             <>
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <DateForm
                   id="dateIn"
                   title="วันที่เข้าจอด"
@@ -445,7 +541,7 @@ export default function Page() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <DateForm
                   id="dateOut"
                   title="วันที่นำรถออก"
@@ -463,96 +559,17 @@ export default function Page() {
               </div>
             </>
           )}
-          <div className="flex justify-between items-center text-lg my-2 font-semibold">
+          <div className="flex justify-between items-center text-base sm:text-lg my-2 sm:my-3 font-semibold">
             <p>ราคารวม</p>
             <p>{displayPrice !== null ? `฿ ${displayPrice} ` : "-"}</p>
           </div>
           <div>
             <Link href={buildPaymentUrl}>
-              <Button className="w-full cursor-pointer h-10">
+              <Button className="w-full cursor-pointer h-9 sm:h-10 text-sm sm:text-base">
                 จองที่จอดนี้
               </Button>
             </Link>
           </div>
-        </div>
-      </div>
-
-      {/* Thumbnails */}
-      <div className="h-[100px] w-2/4 flex justify-center items-center space-x-2 overflow-x-auto px-4">
-        {imageUrls.map((img, idx) => (
-          <Image
-            key={`${img}-${idx}`}
-            src={img}
-            width={80}
-            height={100}
-            alt=""
-            className={`h-16 w-20 object-cover border-2 rounded-lg cursor-pointer  ${
-              idx === currentIndex
-                ? "border-blue-500 scale-105"
-                : "border-transparent"
-            }`}
-            onClick={() => onSelectImage(idx)}
-          />
-        ))}
-      </div>
-
-      <div>
-        <h1 className="text-2xl mb-2 font-semibold">{rentDetail?.name}</h1>
-        <div className="flex items-center">
-          <MapPin size={18} className="mr-2" />
-          <span>
-            {rentDetail?.district}, {rentDetail?.subdistrict},{" "}
-            {rentDetail?.province}
-          </span>
-        </div>
-
-        {/* Schedule */}
-        <div
-          className={`mb-8 ${showAll ? "flex flex-col" : "flex items-center"}`}
-        >
-          {allGroups.length > 0 &&
-            allGroups
-              .map((g, index) => {
-                const showButton = index === 0 && allGroups.length > 1;
-
-                return renderScheduleGroup({
-                  ...g,
-                  button: showButton ? (
-                    <button
-                      onClick={() => setShowAll(!showAll)}
-                      className="text-blue-500 underline ml-2"
-                    >
-                      {showAll ? "ย่อ" : "เพิ่มเติม"}
-                    </button>
-                  ) : undefined,
-                });
-              })
-              .filter((_, i) => showAll || i === 0)}
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <h1 className="text-lg font-semibold">เกี่ยวกับลานจอด</h1>
-        <p className="my-2">{rentDetail?.description}</p>
-      </div>
-
-      <div className="mb-8">
-        <h1 className="text-lg font-semibold">จุดสังเกตุ</h1>
-        <p className="my-2">{rentDetail?.landmark}</p>
-      </div>
-
-      <div className="mb-8">
-        <h1 className="text-lg font-semibold">สิ่งอำนวยความสะดวก</h1>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {facilities && facilities.length > 0 ? (
-            facilities.map((f) => (
-              <span key={f.id} className="bg-gray-100 rounded-full px-3 py-1">
-                {f.name}
-              </span>
-            ))
-          ) : (
-            <p>ไม่มีข้อมูลสิ่งอำนวยความสะดวก</p>
-          )}
         </div>
       </div>
     </div>

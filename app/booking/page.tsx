@@ -2,17 +2,20 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Loading from "./loading";
 import DetailPanel from "@/components/booking/DetailPanel";
 import SearchPanel from "@/components/booking/SearchPanel";
 import { useSearchParams } from "next/navigation";
 import { LocationChangePayload, RentSpot } from "@/types/booking";
 import { provinces } from "@/lib/thaiData";
+import Loading from "./loading";
 
 type LatLng = [number, number];
 
 const MapPicker = dynamic(() => import("@/components/map/MapPicker"), {
   ssr: false,
+  loading: () => (
+    <Loading/>
+  ),
 });
 
 const TIME_OPTIONS = {
@@ -139,7 +142,6 @@ export default function Booking() {
     setAppliedProvince(computedProvince);
     setAppliedSearchKeyword(computedSearch);
     setIsInitialised(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const geocodeAndCenter = useCallback(async () => {
@@ -302,7 +304,6 @@ export default function Booking() {
       displayEmptyMessage: false,
     });
     firstFetchRef.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInitialised]);
 
   useEffect(() => {
@@ -365,8 +366,9 @@ export default function Booking() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="flex-1  relative">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Map Section - Hidden on mobile and tablet */}
+      <div className="max-sm:hidden  lg:flex-1 relative">
         <MapPicker
           zoom={13}
           height="100vh"
@@ -375,11 +377,13 @@ export default function Booking() {
           onMapReady={() => setIsMapLoaded(true)}
           interactive={false}
         />
-        {!isMapLoaded && <Loading />}
       </div>
-      {isMapLoaded && (
-        <>
-          {isShowing && selectedSpot && (
+
+      {/* Content Section */}
+      <div className="w-full lg:w-auto flex flex-col lg:flex-row">
+        {/* Detail Panel - Full width on mobile, slides in on desktop */}
+        {isShowing && selectedSpot && (
+          <div className="fixed lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
             <DetailPanel
               spot={selectedSpot}
               currentIndex={currentIndex}
@@ -390,8 +394,15 @@ export default function Booking() {
               onSelectOption={setSelectedOptionDetail}
               monthDurationKey={monthDurationKey}
             />
-          )}
+          </div>
+        )}
 
+        {/* Search Panel - Always visible */}
+        <div
+          className={`w-full lg:w-lg ${
+            isShowing ? "hidden lg:block" : "block"
+          }`}
+        >
           <SearchPanel
             dateIn={dateIn}
             setDateIn={setDateIn}
@@ -419,8 +430,8 @@ export default function Booking() {
             monthDurationKey={monthDurationKey}
             onMonthDurationChange={setMonthDurationKey}
           />
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

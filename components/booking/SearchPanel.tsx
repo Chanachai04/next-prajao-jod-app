@@ -10,6 +10,7 @@ import ParkingCard from "./ParkingCard";
 import ProvinceSearch from "../form/ProvinceSearch";
 import { districts, provinces, subDistricts } from "@/lib/thaiData";
 import { SearchPanelProps } from "@/types/booking";
+import Loading from "@/app/booking/loading";
 
 export default function SearchPanel({
   dateIn,
@@ -101,9 +102,7 @@ export default function SearchPanel({
   const renderStatus = () => {
     if (isLoading) {
       return (
-        <p className="text-xl text-center text-gray-500 mt-4 overflow-hidden">
-          กำลังโหลดข้อมูล...
-        </p>
+       <Loading/>
       );
     }
     if (errorMessage) {
@@ -127,14 +126,14 @@ export default function SearchPanel({
   };
 
   return (
-    <div className="w-lg bg-[#EBEBEB] p-4">
+    <div className="w-full lg:w-lg bg-[#EBEBEB] p-3 sm:p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           onSearch();
         }}
       >
-        <h1 className="text-4xl my-2">{searchText || "สถานที่"}</h1>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl my-2">{searchText || "สถานที่"}</h1>
 
         {/* Province Search */}
         <ProvinceSearch
@@ -173,7 +172,7 @@ export default function SearchPanel({
         {/* Form Section */}
         {isHourly ? (
           <>
-            <div className="grid grid-cols-2 gap-2 my-4">
+            <div className="grid  grid-cols-2 gap-2 my-3 sm:my-4">
               <DateForm
                 id="dateIn"
                 date={dateIn}
@@ -186,7 +185,7 @@ export default function SearchPanel({
                 className="bg-white"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2 my-4">
+            <div className="grid grid-cols-2 gap-2 my-3 sm:my-4">
               <DateForm
                 id="dateOut"
                 date={dateOut}
@@ -202,7 +201,7 @@ export default function SearchPanel({
           </>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-2 my-4">
+            <div className="grid grid-cols-2 gap-2 my-3 sm:my-4">
               <DateForm
                 id="dateIn"
                 date={dateIn}
@@ -219,13 +218,13 @@ export default function SearchPanel({
             </div>
           </>
         )}
-        {error && <div className="text-red-600 my-2 text-sm">{error}</div>}
-        <div className="flex justify-between">
-          <div>
+        {error && <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>}
+        <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
+          <div className="flex gap-2">
             <Button
               type="button"
               onClick={() => setSelectedOption("hourly")}
-              className={`text-lg rounded-full mr-2 cursor-pointer ${
+              className={`text-sm sm:text-base lg:text-lg rounded-md flex-1 sm:flex-none cursor-pointer ${
                 isHourly ? "" : "bg-white text-black"
               }`}
             >
@@ -234,7 +233,7 @@ export default function SearchPanel({
             <Button
               type="button"
               onClick={() => setSelectedOption("monthly")}
-              className={`text-lg rounded-full cursor-pointer ${
+              className={`text-sm sm:text-base lg:text-lg rounded-md flex-1 sm:flex-none cursor-pointer ${
                 !isHourly ? "" : "bg-white text-black"
               }`}
             >
@@ -245,7 +244,7 @@ export default function SearchPanel({
           <Button
             type="submit"
             onClick={onSearch}
-            className="text-lg cursor-pointer"
+            className="text-sm sm:text-base lg:text-lg cursor-pointer w-full sm:w-auto"
             disabled={loading}
           >
             {loading ? "กำลังค้นหา..." : "ค้นหา"}
@@ -253,7 +252,7 @@ export default function SearchPanel({
         </div>
 
         {/* Parking List */}
-        <div className="mt-2 flex-1 overflow-y-auto pr-2 max-h-[600px]">
+        <div className="mt-2 flex-1 overflow-y-auto pr-1 sm:pr-2 max-h-[400px] sm:max-h-[500px] lg:max-h-[600px]">
           {filteredSpots.map((spot) => (
             <ParkingCard
               key={spot.id}

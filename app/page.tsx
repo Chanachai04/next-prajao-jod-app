@@ -70,19 +70,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen  ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
-      <div className="flex flex-col xl:flex-row justify-between container mx-auto ">
+      <div className="flex flex-col sm:flex-row justify-between container mx-auto ">
         <div className="mb-6 xl:mb-0">
           <Image
             src="/park.png"
             alt="Park Image"
             width={410}
             height={500}
-            className="mt-10 hidden xl:block w-full max-w-sm xl:max-w-md"
+            className="mt-10 hidden xl:block w-full max-w-sm sm:max-w-md"
           />
         </div>
-        <div className="flex flex-col mt-10 sm:mt-10 justify-center w-full xl:w-2/3">
+        <div className="flex flex-col px-4 md:mt-4 xl:px-0  mt-2  justify-center w-full xl:w-2/3">
           <div className="flex flex-wrap gap-2 md:gap-4">
             {options.map(({ key, label }) => (
               <Button
@@ -247,7 +247,7 @@ export default function Home() {
       {/* --------------------------------------- */}
       {/* -- รายละเอียดเกี่ยวกับเว็บ -- */}
       <div className="bg-white">
-        <div className="container mx-auto py-20">
+        <div className="container mx-auto py-20 px-4">
           <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start">
             <div className="mb-8 lg:mb-0">
               <p className="text-3xl md:text-4xl font-bold text-center lg:text-left flex flex-col">
@@ -284,7 +284,7 @@ export default function Home() {
         <p className="text-3xl md:text-4xl font-bold text-center">
           พาร์ทเนอร์และผู้สนับสนุน
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 items-center justify-items-center gap-4 mt-10">
+        <div className="grid grid-cols-2 px-4 sm:grid-cols-3    items-center justify-items-center gap-4 mt-10 ">
           <Image src="/sau.png" alt="sau" width={150} height={55} />
           <Image src="/nvidia.png" alt="nvidia" width={114} height={114} />
           <Image src="/microsoft.png" alt="microsoft" width={273} height={58} />
