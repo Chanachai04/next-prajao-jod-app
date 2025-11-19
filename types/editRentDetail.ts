@@ -530,6 +530,10 @@ export default function useEditRentDetail(rentId: string | null) {
         )
         .map((img) => img.id);
 
+      console.log("Original existing images:", originalExistingImages.map(img => img.id));
+      console.log("Current existing images:", existingImages.map(img => img.id));
+      console.log("Deleted image IDs to send:", deletedImageIds);
+
       formData.append("deleted_image_ids", JSON.stringify(deletedImageIds));
 
       const response = await fetch(`/api/editrentdetail?rent_id=${rentId}`, {
@@ -547,6 +551,24 @@ export default function useEditRentDetail(rentId: string | null) {
       setModalTitle("อัปเดตข้อมูลสำเร็จ");
       setModalDescription("ข้อมูลถูกอัปเดตเรียบร้อยแล้ว");
       setModalOpen(true);
+
+      // Clear images state และ reload ข้อมูลจาก database
+      setImages([]);
+
+      // Reload ข้อมูลจาก database
+      if (rentId) {
+        const reloadResponse = await fetch(`/api/editrentdetail?rent_id=${rentId}`);
+        if (reloadResponse.ok) {
+          const reloadResult = await reloadResponse.json();
+          if (reloadResult.success && reloadResult.data) {
+            const { images: reloadedImages } = reloadResult.data;
+            if (reloadedImages && reloadedImages.length > 0) {
+              setExistingImages(reloadedImages);
+              setOriginalExistingImages(reloadedImages);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error(error);
       const message =

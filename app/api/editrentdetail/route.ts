@@ -330,23 +330,67 @@ export async function PUT(req: Request) {
 
     // ลบรูปภาพที่ถูกลบ (ถ้ามี)
     const deletedImageIdsRaw = formData.get("deleted_image_ids");
+    console.log("Deleted image IDs raw:", deletedImageIdsRaw);
+
     if (deletedImageIdsRaw && typeof deletedImageIdsRaw === "string") {
       try {
         const deletedImageIds: string[] = JSON.parse(deletedImageIdsRaw);
+        console.log("Parsed deleted image IDs:", deletedImageIds);
+
         if (Array.isArray(deletedImageIds) && deletedImageIds.length > 0) {
-          await supabase.from("rent_images").delete().in("id", deletedImageIds);
+          console.log("Deleting images with IDs:", deletedImageIds);
+
+          // ขั้นตอนที่ 1: ตรวจสอบว่า image_id ใน rent_detail ตรงกับรูปที่จะลบหรือไม่
+          const { data: currentRentDetail } = await supabase
+            .from("rent_detail")
+            .select("image_id")
+            .eq("id", rentId)
+            .single();
+
+          // ถ้า image_id ตรงกับรูปที่จะลบ ให้เซ็ตเป็น null ก่อน
+          if (currentRentDetail?.image_id && deletedImageIds.includes(currentRentDetail.image_id)) {
+            console.log("Setting image_id to null before deleting");
+            await supabase
+              .from("rent_detail")
+              .update({ image_id: null })
+              .eq("id", rentId);
+          }
+
+          // ขั้นตอนที่ 2: ลบรูปภาพ
+          const { error: deleteImagesError } = await supabase
+            .from("rent_images")
+            .delete()
+            .in("id", deletedImageIds);
+
+          if (deleteImagesError) {
+            console.error("Delete images error:", deleteImagesError);
+          } else {
+            console.log("Successfully deleted images");
+          }
+        } else {
+          console.log("No images to delete");
         }
       } catch (err) {
         console.error("Error parsing deleted_image_ids:", err);
       }
+    } else {
+      console.log("No deleted_image_ids provided");
     }
 
     // เพิ่มรูปภาพใหม่ (ถ้ามี)
     let firstNewImageId: string | null = null;
+    console.log("Number of new images to upload:", images.length);
+
     if (images.length > 0) {
       const uploadedUrls: string[] = [];
       for (const file of images) {
-        if (!file || !file.size) continue;
+        if (!file || !file.size) {
+          console.log("Skipping invalid file");
+          continue;
+        }
+
+        console.log("Uploading file:", file.name, "size:", file.size);
+
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -369,9 +413,12 @@ export async function PUT(req: Request) {
           .getPublicUrl(filePath);
 
         if (publicUrlData?.publicUrl) {
+          console.log("Uploaded image URL:", publicUrlData.publicUrl);
           uploadedUrls.push(publicUrlData.publicUrl);
         }
       }
+
+      console.log("Total uploaded URLs:", uploadedUrls.length);
 
       if (uploadedUrls.length > 0) {
         const imageRows = uploadedUrls.map((url) => ({
@@ -389,8 +436,11 @@ export async function PUT(req: Request) {
         } else if (insertedImages && insertedImages.length > 0) {
           // เก็บ ID ของรูปแรกที่อัปโหลด
           firstNewImageId = insertedImages[0].id;
+          console.log("First new image ID:", firstNewImageId);
         }
       }
+    } else {
+      console.log("No new images to upload");
     }
 
     // อัปเดต image_id ใน rent_detail ให้ชี้ไปที่รูปแรก
@@ -399,27 +449,39 @@ export async function PUT(req: Request) {
 
     if (firstNewImageId) {
       // ถ้ามีรูปใหม่ที่อัปโหลด ให้ใช้รูปแรกที่อัปโหลด
+      console.log("Using first new image ID:", firstNewImageId);
       imageIdToSet = firstNewImageId;
     } else {
-      // ถ้าไม่มีรูปใหม่ ให้ดึงรูปเก่าที่เหลืออยู่รูปแรก
+      // ถ้าไม่มีรูปใหม่ ให้ดึงรูปเก่าที่เหลืออยู่รูปแรก (เรียงตาม created_at จากเก่าไปใหม่)
       const { data: remainingImages } = await supabase
         .from("rent_images")
-        .select("id")
+        .select("id, created_at")
         .eq("rent_id", rentId)
         .order("created_at", { ascending: true })
         .limit(1);
 
       if (remainingImages && remainingImages.length > 0) {
+        console.log("Using first existing image ID:", remainingImages[0].id);
         imageIdToSet = remainingImages[0].id;
       }
     }
 
     // อัปเดต image_id ใน rent_detail
     if (imageIdToSet) {
-      await supabase
+      console.log("Updating rent_detail with image_id:", imageIdToSet);
+
+      const { error: updateImageIdError } = await supabase
         .from("rent_detail")
         .update({ image_id: imageIdToSet })
         .eq("id", rentId);
+
+      if (updateImageIdError) {
+        console.error("Update image_id error:", updateImageIdError);
+      } else {
+        console.log("Successfully updated image_id");
+      }
+    } else {
+      console.log("No image_id to set");
     }
 
     return NextResponse.json({
