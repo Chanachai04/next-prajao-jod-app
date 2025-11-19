@@ -402,6 +402,10 @@ export default function useEditRentDetail(rentId: string | null) {
       setSubmitStatus({ type: "error", message: "กรุณากรอกจำนวนที่จอด" });
       return;
     }
+    if (Number(formValues.total_slot) <= 0) {
+      setSubmitStatus({ type: "error", message: "จำนวนที่จอดต้องมากกว่า 0" });
+      return;
+    }
     if (Number.isNaN(Number(formValues.total_slot))) {
       setSubmitStatus({ type: "error", message: "จำนวนที่จอดต้องเป็นตัวเลข" });
       return;
@@ -469,6 +473,24 @@ export default function useEditRentDetail(rentId: string | null) {
       setSubmitStatus({
         type: "error",
         message: "กรุณากรอกราคาอย่างน้อย 1 ช่อง",
+      });
+      return;
+    }
+
+    if (images.length === 0) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป",
+      });
+      return;
+    }
+
+    // ต้องเลือกเวลาอย่างน้อย 1 วัน
+    const selectedDays = schedules.filter((s) => s.selected);
+    if (selectedDays.length === 0) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณาเลือกวันที่เปิดทำการอย่างน้อย 1 วัน",
       });
       return;
     }

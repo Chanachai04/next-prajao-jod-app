@@ -258,7 +258,10 @@ export default function useRentDetail() {
       setSubmitStatus({ type: "error", message: "จำนวนที่จอดต้องเป็นตัวเลข" });
       return;
     }
-
+    if (Number(formValues.total_slot) <= 0) {
+      setSubmitStatus({ type: "error", message: "จำนวนที่จอดต้องมากกว่า 0" });
+      return;
+    }
     if (!formValues.address.trim()) {
       setSubmitStatus({ type: "error", message: "กรุณากรอกที่อยู่" });
       return;
@@ -331,6 +334,24 @@ export default function useRentDetail() {
       });
       return;
     }
+
+    if (images.length === 0) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป",
+      });
+      return;
+}
+
+    // ต้องเลือกเวลาอย่างน้อย 1 วัน
+    const selectedDays = schedules.filter((s) => s.selected);
+    if (selectedDays.length === 0) {
+      setSubmitStatus({
+        type: "error",
+        message: "กรุณาเลือกวันที่เปิดทำการอย่างน้อย 1 วัน",
+      });
+      return;
+}
 
     const payload = {
       name: formValues.name.trim(),
