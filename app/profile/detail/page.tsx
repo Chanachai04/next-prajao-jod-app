@@ -20,6 +20,7 @@ export default function Detail() {
   const [lineId, setLineId] = useState<string>("");
   const [image, setImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [serverImageUrl, setServerImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -54,7 +55,6 @@ export default function Detail() {
         setLastName(data.lastName ?? "");
         setCitizenId(data.citizenId ?? "");
         setLineId(data.lineId ?? "");
-        // keep server image URL separate from the local preview
         setServerImageUrl(data.imageUrl ?? null);
       } catch (e) {
         console.error("❌ fetchContact error:", e);
@@ -81,8 +81,23 @@ export default function Detail() {
   };
 
   const handleSave = async () => {
-    if (!firstName || !lastName || !email) {
-      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+    if (!firstName) {
+      setError("กรุณากรอกชื่อ");
+      return;
+    } else if (!lastName) {
+      setError("กรุณากรอกนามสกุล");
+      return;
+    } else if (!email) {
+      setError("กรุณากรอกอีเมล");
+      return;
+    } else if (!citizenId || citizenId.length !== 13) {
+      setError("กรุณากรอกรหัสประจำตัวประชาชน 13 หลัก");
+      return;
+    } else if (!lineId) {
+      setError("กรุณากรอก Line ID");
+      return;
+    } else if (!phone || phone.length !== 10) {
+      setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
       return;
     }
 
@@ -175,9 +190,13 @@ export default function Detail() {
               id="id"
               type="text"
               value={citizenId}
-              onChange={(e) => setCitizenId(e.target.value)}
+              onChange={(e) => {
+                const onlyNumbers = e.target.value.replace(/\D/g, "");
+                setCitizenId(onlyNumbers);
+              }}
               className="border-gray-300 w-full text-gray-700"
               labelClassName="text-grey-500"
+              maxLength={13}
             />
             <LabelAndInput
               title="Line ID"
@@ -193,13 +212,20 @@ export default function Detail() {
               id="phonenumber"
               type="text"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const onlyNumbers = e.target.value.replace(/\D/g, "");
+                setPhone(onlyNumbers);
+              }}
               className="border-gray-300 w-full text-gray-700"
               labelClassName="text-grey-500"
+              maxLength={10}
             />
           </div>
 
           <hr className="my-4 sm:my-6" />
+          {error && (
+            <div className="text-red-600 text-sm md:col-span-2">{error}</div>
+          )}
 
           <div className="flex justify-start">
             <Button
@@ -214,7 +240,9 @@ export default function Detail() {
 
         {/* Image Section */}
         <div className="w-full lg:w-1/3 p-4 sm:p-6 flex flex-col mt-8 sm:mt-12 lg:mt-20 items-center">
-          <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-700">รูปภาพ</h2>
+          <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-700">
+            รูปภาพ
+          </h2>
           <div
             className="border border-gray-300 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 
                 w-32 h-32 sm:w-40 sm:h-40 cursor-pointer hover:bg-gray-200 transition"
