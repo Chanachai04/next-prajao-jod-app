@@ -72,7 +72,7 @@ export default function Home() {
   return (
     <div className="min-h-screen  ">
       {/* -- ค้นหาและเลือกช่วงเวลา -- */}
-      <div className="flex flex-col sm:flex-row justify-between container mx-auto lg:my-15 ">
+      <div className="flex mb-6 flex-col md:mb-10 sm:flex-row justify-between container mx-auto lg:my-15 ">
         <div className="mb-6 xl:mb-0">
           <Image
             src="/park.png"
@@ -82,7 +82,7 @@ export default function Home() {
             className="mt-10 hidden xl:block w-full max-w-sm sm:max-w-md"
           />
         </div>
-        <div className="flex flex-col px-4 md:mt-4 xl:px-0  mt-2  justify-center w-full xl:w-2/3">
+        <div className="flex flex-col px-4 md:mt-10  xl:px-0  justify-center w-full xl:w-2/3">
           <div className="flex flex-wrap gap-2 md:gap-4">
             {options.map(({ key, label }) => (
               <Button
