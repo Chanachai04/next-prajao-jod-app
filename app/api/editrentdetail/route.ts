@@ -235,44 +235,65 @@ export async function PUT(req: Request) {
       }
     }
 
-    // อัปเดต facilities - เปรียบเทียบและอัปเดตเฉพาะส่วนที่เปลี่ยนแปลง
+    // อัปเดต facilities - ลบทั้งหมดแล้วเพิ่มใหม่
+    // ขั้นตอนที่ 1: ดึงข้อมูล facilities เก่า
     const { data: existingFacilities } = await supabase
       .from("rent_facilities")
       .select("id, name")
       .eq("rent_id", rentId);
 
-    const existingFacilityNames = (existingFacilities || []).map((f) => f.name);
-    const newFacilities = Array.isArray(facilities) ? Array.from(new Set(facilities)) : [];
+    const newFacilities = Array.isArray(facilities)
+      ? Array.from(new Set(facilities))
+      : [];
 
-    // หา facilities ที่ต้องลบ (อยู่ในเก่าแต่ไม่อยู่ในใหม่)
-    const facilitiesToDelete = (existingFacilities || []).filter(
-      (f) => !newFacilities.includes(f.name)
-    );
+    console.log("Existing facilities:", (existingFacilities || []).map(f => f.name));
+    console.log("New facilities:", newFacilities);
 
-    // หา facilities ที่ต้องเพิ่ม (อยู่ในใหม่แต่ไม่อยู่ในเก่า)
-    const facilitiesToAdd = newFacilities.filter(
-      (name) => !existingFacilityNames.includes(name)
-    );
+    // ขั้นตอนที่ 2: เซ็ต facilities_id ใน rent_detail เป็น null ก่อน (เพื่อหลีกเลี่ยง foreign key constraint)
+    if (existingFacilities && existingFacilities.length > 0) {
+      console.log("Setting facilities_id to null in rent_detail");
 
-    // ลบ facilities ที่ไม่ต้องการ
-    if (facilitiesToDelete.length > 0) {
-      const idsToDelete = facilitiesToDelete.map((f) => f.id);
-      const { error: deleteFacilitiesError } = await supabase
-        .from("rent_facilities")
-        .delete()
-        .in("id", idsToDelete);
+      const { error: nullifyError } = await supabase
+        .from("rent_detail")
+        .update({ facilities_id: null })
+        .eq("id", rentId);
 
-      if (deleteFacilitiesError) {
-        console.error("Delete facilities error:", deleteFacilitiesError);
+      if (nullifyError) {
+        console.error("Nullify facilities_id error:", nullifyError);
       }
     }
 
-    // เพิ่ม facilities ใหม่
-    if (facilitiesToAdd.length > 0) {
-      const facilityRows = facilitiesToAdd.map((facilityName) => ({
+    // ขั้นตอนที่ 3: ลบ facilities เก่าทั้งหมด
+    if (existingFacilities && existingFacilities.length > 0) {
+      console.log("Deleting all existing facilities for rent_id:", rentId);
+
+      const { error: deleteFacilitiesError } = await supabase
+        .from("rent_facilities")
+        .delete()
+        .eq("rent_id", rentId);
+
+      if (deleteFacilitiesError) {
+        console.error("Delete facilities error:", deleteFacilitiesError);
+        return NextResponse.json(
+          {
+            message: "ไม่สามารถอัปเดตสิ่งอำนวยความสะดวกได้ กรุณาลองใหม่อีกครั้ง",
+            error: deleteFacilitiesError.message
+          },
+          { status: 500 }
+        );
+      } else {
+        console.log("Successfully deleted all existing facilities");
+      }
+    }
+
+    // ขั้นตอนที่ 4: เพิ่ม facilities ใหม่ทั้งหมด
+    if (newFacilities.length > 0) {
+      const facilityRows = newFacilities.map((facilityName) => ({
         rent_id: rentId,
         name: facilityName,
       }));
+
+      console.log("Inserting new facilities:", facilityRows);
 
       const { error: insertFacilitiesError } = await supabase
         .from("rent_facilities")
@@ -280,6 +301,15 @@ export async function PUT(req: Request) {
 
       if (insertFacilitiesError) {
         console.error("Insert facilities error:", insertFacilitiesError);
+        return NextResponse.json(
+          {
+            message: "ไม่สามารถเพิ่มสิ่งอำนวยความสะดวกได้",
+            error: insertFacilitiesError.message
+          },
+          { status: 500 }
+        );
+      } else {
+        console.log("Successfully inserted new facilities");
       }
     }
 
