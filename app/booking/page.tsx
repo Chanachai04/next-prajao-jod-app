@@ -366,7 +366,7 @@ export default function Booking() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Map Section - Hidden on mobile and tablet */}
-      <div className="max-sm:hidden md:hidden lg:flex-1 relative">
+      <div className="max-sm:hidden  lg:flex-1 relative">
         <MapPicker
           zoom={13}
           height="100vh"
