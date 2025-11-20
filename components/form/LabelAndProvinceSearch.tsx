@@ -36,7 +36,9 @@ export default function LabelAndProvinceSearch({
 }: LabelAndProvinceSearchProps) {
   const [query, setQuery] = useState(initialQuery ?? String(value ?? ""));
   const [dropdown, setDropdown] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const prevValueRef = useRef<string>("");
   const prevInitialQueryRef = useRef<string>("");
 
@@ -73,14 +75,67 @@ export default function LabelAndProvinceSearch({
   const handleSelect = (option: Option) => {
     setQuery(option.name_th);
     setDropdown(false);
+    setHighlightedIndex(-1);
 
-    // Create a synthetic event to match the expected onChange signature
     const syntheticEvent = {
       target: { value: option.name_th },
     } as React.ChangeEvent<HTMLInputElement>;
 
     onChange(syntheticEvent);
   };
+
+  // จัดการ keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!dropdown || filteredOptions.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < filteredOptions.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (
+          highlightedIndex >= 0 &&
+          highlightedIndex < filteredOptions.length
+        ) {
+          handleSelect(filteredOptions[highlightedIndex]);
+        }
+        break;
+      case "Escape":
+        e.preventDefault();
+        setDropdown(false);
+        setHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // scroll to highlighted item
+  useEffect(() => {
+    if (highlightedIndex >= 0 && listRef.current) {
+      const highlightedElement = listRef.current.children[
+        highlightedIndex
+      ] as HTMLElement;
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({
+          block: "nearest",
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [highlightedIndex]);
+
+  // reset highlighted index เมื่อ filtered options เปลี่ยน
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHighlightedIndex(-1);
+  }, [query]);
 
   // sync value from parent
   useEffect(() => {
@@ -115,6 +170,7 @@ export default function LabelAndProvinceSearch({
         !wrapperRef.current.contains(event.target as Node)
       ) {
         setDropdown(false);
+        setHighlightedIndex(-1);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -124,6 +180,7 @@ export default function LabelAndProvinceSearch({
   const handleClear = () => {
     setQuery("");
     setDropdown(false);
+    setHighlightedIndex(-1);
     const syntheticEvent = {
       target: { value: "" },
     } as React.ChangeEvent<HTMLInputElement>;
@@ -134,7 +191,7 @@ export default function LabelAndProvinceSearch({
     if (placeholder) return placeholder;
     if (mode === "province") return "พิมพ์ชื่อจังหวัด";
     if (mode === "district") return "พิมพ์ชื่อเขต/อำเภอ";
-    if (mode === "subDistrict") return "พิมพ์ชื่อแขว/ตำบล";
+    if (mode === "subDistrict") return "พิมพ์ชื่อแขวง/ตำบล";
     return "พิมพ์จังหวัดหรือบริเวณใกล้เคียง";
   };
 
@@ -152,11 +209,12 @@ export default function LabelAndProvinceSearch({
           onChange={(e) => {
             setQuery(e.target.value);
             setDropdown(true);
-            // Also update parent if user is typing
             onChange(e);
           }}
           onFocus={() => setDropdown(true)}
+          onKeyDown={handleKeyDown}
           className="w-full"
+          autoComplete="off"
         />
         {query && (
           <button
@@ -170,14 +228,20 @@ export default function LabelAndProvinceSearch({
 
         {dropdown && filteredOptions.length > 0 && (
           <ul
+            ref={listRef}
             className="absolute left-0 top-full w-full max-h-72 overflow-auto rounded shadow-lg bg-white border z-1000 mt-1"
             style={{ boxShadow: "0 4px 6px rgba(0,0,0,0.1)" }}
           >
-            {filteredOptions.map((o) => (
+            {filteredOptions.map((o, index) => (
               <li
                 key={`${o.type}-${o.id}`}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
+                className={`p-2 cursor-pointer ${
+                  index === highlightedIndex
+                    ? "bg-blue-100"
+                    : "hover:bg-gray-100"
+                }`}
                 onMouseDown={() => handleSelect(o)}
+                onMouseEnter={() => setHighlightedIndex(index)}
               >
                 {o.name_th} ({o.name_en})
               </li>

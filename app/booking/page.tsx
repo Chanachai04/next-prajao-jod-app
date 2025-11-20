@@ -26,7 +26,6 @@ const EMPTY_MESSAGE = "ไม่พบที่จอดรถบริเวณ
 
 export default function Booking() {
   const searchParams = useSearchParams();
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [dateIn, setDateIn] = useState<Date>();
   const [dateOut, setDateOut] = useState<Date>();
   const [selectedOption, setSelectedOption] = useState<"hourly" | "monthly">(
@@ -109,33 +108,38 @@ export default function Booking() {
       }
     }
 
+    // ใช้ search ก่อน ถ้าไม่มีค่อยใช้ location
+    const initialSearch = searchTermParam || location;
+    const trimmedInitialSearch = initialSearch.trim();
+
     let computedProvince: string | null = null;
+    let computedSearch: string | null = null;
+    let finalSearchText = "";
+
+    // ถ้ามี search/location ให้ใช้เป็น searchText
+    if (trimmedInitialSearch) {
+      computedSearch = trimmedInitialSearch;
+      finalSearchText = trimmedInitialSearch;
+    }
+
+    // ถ้ามี provinceId ให้ใช้เป็น province
     if (provinceIdParam) {
       const idNum = Number(provinceIdParam);
       const province = provinces.find((p) => p.id === idNum);
       if (province) {
         computedProvince = province.name_th;
-        setSearchText(province.name_th);
+        // ถ้ายังไม่มี searchText ให้ใช้ชื่อจังหวัด
+        if (!finalSearchText) {
+          finalSearchText = province.name_th;
+        }
       }
     }
 
-    const initialSearch = searchTermParam || location;
-    const trimmedInitialSearch = initialSearch.trim();
-    let computedSearch: string | null = null;
-    if (trimmedInitialSearch) {
-      computedSearch = trimmedInitialSearch;
-      setSearchText(trimmedInitialSearch);
-    }
-
-    if (!computedProvince && !computedSearch && location) {
-      const province = provinces.find((p) => p.name_th === location);
-      if (province) {
-        computedProvince = province.name_th;
-      }
-    }
-
-    if (location) {
-      void geocodeAndCenterRef(location);
+    // Set searchText ครั้งเดียว
+    if (finalSearchText) {
+      setSearchText(finalSearchText);
+      // Geocode เพื่อแสดง marker บน map
+      void geocodeAndCenterWith(finalSearchText);
     }
 
     firstFetchRef.current = Boolean(trimmedInitialSearch);
@@ -143,6 +147,7 @@ export default function Booking() {
     setAppliedProvince(computedProvince);
     setAppliedSearchKeyword(computedSearch);
     setIsInitialised(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const geocodeAndCenter = useCallback(async () => {
@@ -175,7 +180,7 @@ export default function Booking() {
     }
   }, [searchText]);
 
-  const geocodeAndCenterWith = async (text: string) => {
+  const geocodeAndCenterWith = useCallback(async (text: string) => {
     const q = text.trim();
     if (!q) return;
     try {
@@ -201,8 +206,7 @@ export default function Booking() {
     } catch {
       // ignore
     }
-  };
-  const geocodeAndCenterRef = useMemo(() => geocodeAndCenterWith, []);
+  }, []);
 
   const fetchParkingSpots = useCallback(
     async (override?: {
@@ -333,7 +337,7 @@ export default function Booking() {
     setSelectedProvince(payload.provinceName);
     setSelectedDistrict(payload.districtName);
     setSelectedSubdistrict(payload.subdistrictName);
-    setMarkerAt(null);
+    // ไม่ต้อง clear marker เพราะจะ update ตอนกดค้นหา
   };
 
   const handleSearch = async () => {
@@ -375,7 +379,7 @@ export default function Booking() {
           height="100vh"
           center={mapCenter}
           markerAt={markerAt}
-          onMapReady={() => setIsMapLoaded(true)}
+          onMapReady={() => {}}
           interactive={false}
         />
       </div>

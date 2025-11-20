@@ -11,6 +11,7 @@ export interface ProvinceSearchProps {
     districtId: number | null,
     subDistrictId: number | null
   ) => void;
+  onQueryChange?: (query: string) => void;
   initialQuery?: string;
   mode?: "province" | "district" | "subDistrict" | "all";
   hideLabel?: boolean;

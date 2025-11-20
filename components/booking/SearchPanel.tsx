@@ -45,6 +45,7 @@ export default function SearchPanel({
   useEffect(() => {
     const mode = searchParams.get("mode");
     const location = searchParams.get("location");
+    const search = searchParams.get("search");
     const dateInParam = searchParams.get("dateIn");
     const dateOutParam = searchParams.get("dateOut");
     const timeInParam = searchParams.get("timeIn");
@@ -52,7 +53,10 @@ export default function SearchPanel({
 
     if (mode === "monthly") setSelectedOption("monthly");
     else if (mode === "daily" || mode === "hourly") setSelectedOption("hourly");
-    if (location) setSearchText(location);
+
+    // ใช้ search ก่อน ถ้าไม่มีค่อยใช้ location
+    const searchValue = search || location;
+    if (searchValue) setSearchText(searchValue);
 
     // ตั้งค่าเวลาก่อน
     if (timeInParam) setTimeIn(timeInParam);
@@ -153,34 +157,48 @@ export default function SearchPanel({
         {/* Province Search */}
         <ProvinceSearch
           initialQuery={searchText}
+          onQueryChange={(newQuery) => {
+            // Update searchText เมื่อ user พิมพ์
+            setSearchText(newQuery);
+          }}
           onChange={(pId, dId, sId) => {
-            let displayText = "";
-            const matchedSubdistrict = sId
-              ? subDistricts.find((s) => s.id === sId)
-              : undefined;
-            const matchedDistrict = dId
-              ? districts.find((d) => d.id === dId)
-              : undefined;
-            const matchedProvince = pId
-              ? provinces.find((p) => p.id === pId)
-              : undefined;
+            // ถ้าเลือกจาก dropdown
+            if (pId || dId || sId) {
+              let displayText = "";
+              const matchedSubdistrict = sId
+                ? subDistricts.find((s) => s.id === sId)
+                : undefined;
+              const matchedDistrict = dId
+                ? districts.find((d) => d.id === dId)
+                : undefined;
+              const matchedProvince = pId
+                ? provinces.find((p) => p.id === pId)
+                : undefined;
 
-            if (matchedSubdistrict) {
-              displayText = matchedSubdistrict.name_th;
-            } else if (matchedDistrict) {
-              displayText = matchedDistrict.name_th;
-            } else if (matchedProvince) {
-              displayText = matchedProvince.name_th;
+              if (matchedSubdistrict) {
+                displayText = matchedSubdistrict.name_th;
+              } else if (matchedDistrict) {
+                displayText = matchedDistrict.name_th;
+              } else if (matchedProvince) {
+                displayText = matchedProvince.name_th;
+              }
+
+              setSearchText(displayText);
+              onLocationChange({
+                provinceName: matchedProvince?.name_th ?? null,
+                districtName: matchedDistrict?.name_th ?? null,
+                subdistrictName: matchedSubdistrict?.name_th ?? null,
+                displayText,
+              });
             } else {
-              displayText = "";
+              // ถ้า clear ให้ clear location ด้วย
+              onLocationChange({
+                provinceName: null,
+                districtName: null,
+                subdistrictName: null,
+                displayText: "",
+              });
             }
-            setSearchText(displayText);
-            onLocationChange({
-              provinceName: matchedProvince?.name_th ?? null,
-              districtName: matchedDistrict?.name_th ?? null,
-              subdistrictName: matchedSubdistrict?.name_th ?? null,
-              displayText,
-            });
           }}
         />
 
