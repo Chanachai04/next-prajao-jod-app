@@ -117,7 +117,7 @@ export default function ParkingCard({
                   availablePriceTags.map(({ key, label }) => (
                     <span
                       key={key}
-                      className="text-sm sm:text-base lg:text-lg bg-blue-600 px-1.5 sm:px-2 py-0.5 sm:py-1 text-white rounded-sm"
+                      className="text-sm   bg-blue-600 px-1.5 sm:px-2 py-0.5 sm:py-1 text-white rounded-sm"
                     >
                       {label}
                     </span>

@@ -366,7 +366,7 @@ export default function Booking() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Map Section - Hidden on mobile and tablet */}
-      <div className="max-sm:hidden  lg:flex-1 relative">
+      <div className="max-sm:hidden md:hidden lg:flex-1 relative">
         <MapPicker
           zoom={13}
           height="100vh"
@@ -381,7 +381,7 @@ export default function Booking() {
       <div className="w-full   lg:w-auto flex flex-col lg:flex-row">
         {/* Detail Panel - Full width on mobile, slides in on desktop */}
         {isShowing && selectedSpot && (
-          <div className="fixed h-full lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
+          <div className="fixed h-full  lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
             <DetailPanel
               spot={selectedSpot}
               currentIndex={currentIndex}

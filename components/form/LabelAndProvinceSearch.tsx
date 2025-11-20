@@ -134,7 +134,7 @@ export default function LabelAndProvinceSearch({
     if (placeholder) return placeholder;
     if (mode === "province") return "พิมพ์ชื่อจังหวัด";
     if (mode === "district") return "พิมพ์ชื่อเขต/อำเภอ";
-    if (mode === "subDistrict") return "พิมพ์ชื่อตำบล/แขวง";
+    if (mode === "subDistrict") return "พิมพ์ชื่อแขว/ตำบล";
     return "พิมพ์จังหวัดหรือบริเวณใกล้เคียง";
   };
 

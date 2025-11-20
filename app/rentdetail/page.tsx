@@ -14,7 +14,7 @@ import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
-import useRentDetail from "@/types/useRentDetail";
+import useRentDetail from "@/hook/useRentDetail";
 import LabelAndProvinceSearch from "@/components/form/LabelAndProvinceSearch";
 
 export default function RentDetail() {
@@ -144,9 +144,9 @@ export default function RentDetail() {
               onChange={handleFieldChange("province")}
             />
 
-            {/* แขวง / เขต */}
+            {/*  เขต */}
             <LabelAndProvinceSearch
-              title="แขวง / เขต *"
+              title="เขต / อำเภอ *"
               mode="district"
               id="district"
               value={formValues.district}
@@ -154,7 +154,7 @@ export default function RentDetail() {
             />
 
             <LabelAndProvinceSearch
-              title="ตำบล *"
+              title="แขวง / ตำบล *"
               mode="subDistrict"
               id="subdistrict"
               value={formValues.subdistrict}
