@@ -221,8 +221,8 @@ export default function Home() {
                     id="dateIn"
                   />
                   <SelectForm
-                    title="จํานวนวัน"
-                    placeholder="เลือกจํานวนวัน"
+                    title="จํานวนเดือน"
+                    placeholder="เลือกจํานวนเดือน"
                     itemList={timeOption}
                     leadingIcon={<Minimize2 />}
                     value={monthDurationKey}
