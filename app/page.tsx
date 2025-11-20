@@ -15,7 +15,12 @@ export default function Home() {
   const router = useRouter();
   const [selectedOption, setSelectedOption] = useState("hourly");
   const [dateIn, setDateIn] = useState<Date>(new Date());
-  const [dateOut, setDateOut] = useState<Date>(new Date());
+  // ตั้งค่าวันที่นำรถออกเป็นวันพรุ่งนี้
+  const [dateOut, setDateOut] = useState<Date>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
   const [timeIn, setTimeIn] = useState<string>("00:00");
   const [timeOut, setTimeOut] = useState<string>("01:00");
   const [location, setLocation] = useState("");

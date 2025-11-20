@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Image from "next/image";
 import AlertModal from "@/components/ui/modal";
+import ConfirmModal from "@/components/ui/confirm";
 
 export default function Detail() {
   const router = useRouter();
@@ -29,6 +30,7 @@ export default function Detail() {
   const [modalDescription, setModalDescription] = useState<string | undefined>(
     undefined
   );
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleModalClose = () => {
     setModalOpen(false);
@@ -80,7 +82,7 @@ export default function Detail() {
     fileInputRef.current?.click();
   };
 
-  const handleSave = async () => {
+  const handleSaveClick = () => {
     if (!firstName) {
       setError("กรุณากรอกชื่อ");
       return;
@@ -100,7 +102,11 @@ export default function Detail() {
       setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
       return;
     }
+    setError(null);
+    setConfirmOpen(true);
+  };
 
+  const handleSave = async () => {
     try {
       setLoading(true);
 
@@ -234,7 +240,7 @@ export default function Detail() {
           <div className="flex justify-start">
             <Button
               className="w-full sm:w-auto text-sm sm:text-base"
-              onClick={handleSave}
+              onClick={handleSaveClick}
               disabled={loading}
             >
               {loading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
@@ -282,6 +288,13 @@ export default function Detail() {
           type={modalType}
           title={modalTitle}
           description={modalDescription}
+        />
+        <ConfirmModal
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={handleSave}
+          title="ยืนยันการบันทึกข้อมูล"
+          description="คุณต้องการบันทึกข้อมูลโปรไฟล์ใช่หรือไม่?"
         />
       </div>
     </div>

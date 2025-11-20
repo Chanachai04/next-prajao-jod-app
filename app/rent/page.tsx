@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import { useRouter } from "next/navigation";
+import ConfirmModal from "@/components/ui/confirm";
 
 export default function Rent() {
   const router = useRouter();
@@ -14,6 +15,8 @@ export default function Rent() {
   const [lineId, setLineId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   useEffect(() => {
     const fetchContact = async () => {
       try {
@@ -35,27 +38,32 @@ export default function Rent() {
     fetchContact();
   }, []);
 
+  const handleSaveClick = () => {
+    if (!firstName) {
+      setError("กรุณากรอกชื่อ");
+      return;
+    } else if (!lastName) {
+      setError("กรุณากรอกนามสกุล");
+      return;
+    } else if (!email) {
+      setError("กรุณากรอกอีเมล");
+      return;
+    } else if (!citizenId || citizenId.length !== 13) {
+      setError("กรุณากรอกรหัสประจำตัวประชาชน 13 หลัก");
+      return;
+    } else if (!lineId) {
+      setError("กรุณากรอก Line ID");
+      return;
+    } else if (!phone || phone.length !== 10) {
+      setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
+      return;
+    }
+    setError(null);
+    setConfirmOpen(true);
+  };
+
   const handleSave = async () => {
     try {
-      if (!firstName) {
-        setError("กรุณากรอกชื่อ");
-        return;
-      } else if (!lastName) {
-        setError("กรุณากรอกนามสกุล");
-        return;
-      } else if (!email) {
-        setError("กรุณากรอกอีเมล");
-        return;
-      } else if (!citizenId || citizenId.length !== 13) {
-        setError("กรุณากรอกรหัสประจำตัวประชาชน 13 หลัก");
-        return;
-      } else if (!lineId) {
-        setError("กรุณากรอก Line ID");
-        return;
-      } else if (!phone || phone.length !== 10) {
-        setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
-        return;
-      }
       const res = await fetch("/api/rent", {
         method: "POST",
         credentials: "include",
@@ -164,12 +172,20 @@ export default function Rent() {
           <Button
             className="cursor-pointer w-full sm:w-auto px-6 sm:px-10 text-white bg-blue-600 hover:bg-blue-700 text-base sm:text-lg font-light"
             disabled={loading}
-            onClick={handleSave}
+            onClick={handleSaveClick}
           >
             {loading ? "กําลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleSave}
+        title="ยืนยันการบันทึกข้อมูล"
+        description="คุณต้องการบันทึกข้อมูลการปล่อยเช่าใช่หรือไม่?"
+      />
     </div>
   );
 }

@@ -149,6 +149,7 @@ export async function POST(req: Request) {
           citizen_id: citizenId,
           phone: phone,
           line_id: lineId || null,
+          is_checked: true, // ตั้งค่า is_checked เป็น true เมื่อชำระเงิน
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -157,9 +158,21 @@ export async function POST(req: Request) {
         console.error("Error updating user:", updateError);
         throw updateError;
       }
-    }
+    } else if (existingUser) {
+      // ถ้ามีข้อมูลครบแล้ว ให้อัปเดตเฉพาะ is_checked
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({
+          is_checked: true, // ตั้งค่า is_checked เป็น true เมื่อชำระเงิน
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
 
-    // ✅ ลบการตรวจสอบการจองซ้ำออก - อนุญาตให้จองได้หลายครั้ง
+      if (updateError) {
+        console.error("Error updating user is_checked:", updateError);
+        throw updateError;
+      }
+    }
 
     // สร้าง object ข้อมูลสำหรับบันทึกลง rent_history
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
