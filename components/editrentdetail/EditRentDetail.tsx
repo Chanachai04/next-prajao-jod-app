@@ -13,9 +13,9 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import AlertModal from "@/components/ui/modal";
-import useEditRentDetail from "@/types/editRentDetail";
 import { useSearchParams } from "next/navigation";
 import LabelAndProvinceSearch from "../form/LabelAndProvinceSearch";
+import useEditRentDetail from "@/hook/useEditRentDetail";
 
 export default function EditRentDetail() {
   const searchParams = useSearchParams();
