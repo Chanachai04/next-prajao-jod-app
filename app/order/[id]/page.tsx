@@ -32,6 +32,7 @@ export default function Page() {
   const isLoading = !rentDetail || !price || !facilities || !schedule;
   const [displayPrice, setDisplayPrice] = useState<number | null>(null);
   const [priceSuffix, setPriceSuffix] = useState<string>("");
+  const [totalPrice, setTotalPrice] = useState<number | null>(null);
 
   const [selectedMonthKey, setSelectedMonthKey] =
     useState<string>("threeMonths");
@@ -59,6 +60,73 @@ export default function Page() {
     if (selectedMonthKey === "oneYears") return 12;
     return 3; // Default
   }, [selectedMonthKey]);
+
+  // คำนวณราคารวม
+  useEffect(() => {
+    if (!displayPrice) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTotalPrice(null);
+      return;
+    }
+
+    if (isShow === "hour") {
+      // คำนวณชั่วโมง
+      if (!dateIn || !dateOut || !timeIn || !timeOut) {
+        setTotalPrice(displayPrice);
+        return;
+      }
+
+      const startDateTime = new Date(dateIn);
+      const [startHour, startMinute] = timeIn.split(":").map(Number);
+      startDateTime.setHours(startHour, startMinute, 0, 0);
+
+      const endDateTime = new Date(dateOut);
+      const [endHour, endMinute] = timeOut.split(":").map(Number);
+      endDateTime.setHours(endHour, endMinute, 0, 0);
+
+      const diffMs = endDateTime.getTime() - startDateTime.getTime();
+      const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+
+      if (diffHours > 0) {
+        setTotalPrice(displayPrice * diffHours);
+      } else {
+        setTotalPrice(displayPrice);
+      }
+    } else if (isShow === "day") {
+      // คำนวณวัน
+      if (!dateIn || !dateOut) {
+        setTotalPrice(displayPrice);
+        return;
+      }
+
+      const start = new Date(dateIn);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(dateOut);
+      end.setHours(0, 0, 0, 0);
+
+      const diffMs = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 0) {
+        setTotalPrice(displayPrice * diffDays);
+      } else {
+        setTotalPrice(displayPrice);
+      }
+    } else if (isShow === "month") {
+      // คำนวณเดือน
+      setTotalPrice(displayPrice * selectedMonthDuration);
+    } else {
+      setTotalPrice(displayPrice);
+    }
+  }, [
+    displayPrice,
+    isShow,
+    dateIn,
+    dateOut,
+    timeIn,
+    timeOut,
+    selectedMonthDuration,
+  ]);
 
   // อ่านค่าจาก URL params
   useEffect(() => {
@@ -238,13 +306,20 @@ export default function Page() {
     days: string[];
     button?: ReactNode;
   }) => (
-    <div key={`${group.open}-${group.close}`} className="flex items-center">
-      <Clock size={16} className="mr-2" />
-      <span>
-        เปิด {formatDays(group.days)}: {formatTime(group.open, group.close)}
-      </span>
+    <div
+      key={`${group.open}-${group.close}`}
+      className="flex flex-col sm:flex-row sm:items-center"
+    >
+      <div className="flex items-start sm:items-center">
+        <Clock size={16} className="mr-2 mt-0.5 sm:mt-0 shrink-0" />
+        <span className="text-sm sm:text-base lg:text-lg">
+          เปิด {formatDays(group.days)}: {formatTime(group.open, group.close)}
+        </span>
+      </div>
       {group.button && (
-        <span className={`${showAll ? "mt-1" : "ml-2"}`}>{group.button}</span>
+        <span className={`${showAll ? "mt-1 ml-6 sm:ml-2" : "ml-6 sm:ml-2"}`}>
+          {group.button}
+        </span>
       )}
     </div>
   );
@@ -300,143 +375,152 @@ export default function Page() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Main Image */}
-        <div className="relative w-full lg:w-2/4">
-          <Image
-            src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
-            alt={rentDetail?.name ?? "รูปที่จอดรถ"}
-            width={800}
-            height={250}
-            className="w-full h-[250px] sm:h-[350px] lg:h-[400px] object-cover cursor-pointer rounded-2xl"
-          />
-
-          {imageUrls.length > 1 && (
-            <>
-              <button
-                onClick={() => onNavigate("prev")}
-                className="absolute top-1/2 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
-              >
-                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-
-              <button
-                onClick={() => onNavigate("next")}
-                className="absolute top-1/2 right-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
-              >
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-              </button>
-            </>
-          )}
-        </div>
-        {/* Thumbnails */}
-        <div className="h-[50px] sm:h-[100px] w-full lg:w-2/4 flex justify-start lg:justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4 mt-3 sm:mt-4">
-          {imageUrls.map((img, idx) => (
+        {/* Main Content */}
+        <div className="w-full lg:w-2/3">
+          <div className="relative w-full">
             <Image
-              key={`${img}-${idx}`}
-              src={img}
-              width={80}
-              height={100}
-              alt=""
-              className={`h-12 w-16 sm:h-16 sm:w-20 object-cover border-2 rounded-lg cursor-pointer shrink-0 ${
-                idx === currentIndex
-                  ? "border-blue-500 scale-105"
-                  : "border-transparent"
-              }`}
-              onClick={() => onSelectImage(idx)}
+              src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
+              alt={rentDetail?.name ?? "รูปที่จอดรถ"}
+              width={800}
+              height={250}
+              className="w-full h-[250px] sm:h-[350px] lg:h-[450px] object-cover cursor-pointer rounded-2xl"
             />
-          ))}
-        </div>
 
-        <div>
+            {imageUrls.length > 1 && (
+              <>
+                <button
+                  onClick={() => onNavigate("prev")}
+                  className="absolute top-1/2 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
+                >
+                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+
+                <button
+                  onClick={() => onNavigate("next")}
+                  className="absolute top-1/2 right-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow cursor-pointer hover:bg-gray-100"
+                >
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+              </>
+            )}
+          </div>
+          {/* Thumbnails - แสดงเฉพาะเมื่อมีรูปมากกว่า 1 รูป */}
+          {imageUrls.length > 1 && (
+            <div className="h-[60px] sm:h-[80px] lg:h-[100px] w-full flex justify-start items-center space-x-2 overflow-x-auto px-1 sm:px-2 mt-3 sm:mt-4 scrollbar-hide">
+              {imageUrls.map((img, idx) => (
+                <Image
+                  key={`${img}-${idx}`}
+                  src={img}
+                  width={80}
+                  height={100}
+                  alt=""
+                  className={`h-14 w-20 sm:h-16 sm:w-24 lg:h-20 lg:w-28 object-cover border-2 rounded-lg cursor-pointer shrink-0 transition-all ${
+                    idx === currentIndex
+                      ? "border-blue-500 scale-105"
+                      : "border-transparent"
+                  }`}
+                  onClick={() => onSelectImage(idx)}
+                />
+              ))}
+            </div>
+          )}
+          {/* Detail */}
           <div className="mt-4 sm:mt-6">
-            <h1 className="text-xl sm:text-2xl mb-2 font-semibold">
-              {rentDetail?.name}
-            </h1>
-            <div className="flex items-center text-sm sm:text-base">
-              <MapPin
-                size={16}
-                className="mr-2 shrink-0 sm:w-[18px] sm:h-[18px]"
-              />
-              <span className="wrap-break-word text-sm sm:text-base lg:text-lg">
-                เขต{rentDetail?.district} แขวง{rentDetail?.subdistrict}{" "}
-                {rentDetail?.province}
-              </span>
-            </div>
-
-            {/* Schedule */}
-            <div
-              className={`mb-6 sm:mb-8 mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg ${
-                showAll ? "flex flex-col" : "flex items-center"
-              }`}
-            >
-              {allGroups.length > 0 &&
-                allGroups
-                  .map((g, index) => {
-                    const showButton = index === 0 && allGroups.length > 1;
-
-                    return renderScheduleGroup({
-                      ...g,
-                      button: showButton ? (
-                        <button
-                          onClick={() => setShowAll(!showAll)}
-                          className="text-blue-500 underline ml-2 text-sm sm:text-base"
-                        >
-                          {showAll ? "ย่อ" : "เพิ่มเติม"}
-                        </button>
-                      ) : undefined,
-                    });
-                  })
-                  .filter((_, i) => showAll || i === 0)}
-            </div>
-          </div>
-
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-base sm:text-lg font-semibold">
-              เกี่ยวกับลานจอด
-            </h1>
-            <p className="my-2 text-sm sm:text-base lg:text-lg wrap-break-word">
-              {rentDetail?.description}
-            </p>
-          </div>
-
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-base sm:text-lg font-semibold">จุดสังเกตุ</h1>
-            <p className="my-2 text-sm sm:text-base lg:text-lg wrap-break-word">
-              {rentDetail?.landmark}
-            </p>
-          </div>
-
-          <div className="mb-6 sm:mb-8 pb-4">
-            <h1 className="text-base sm:text-lg font-semibold">
-              สิ่งอำนวยความสะดวก
-            </h1>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {facilities && facilities.length > 0 ? (
-                facilities.map((f) => (
-                  <span
-                    key={f.id}
-                    className="bg-gray-100 rounded-full  sm:px-3 py-1 text-sm sm:text-base lg:text-lg"
-                  >
-                    {f.name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm sm:text-base lg:text-lg">
-                  ไม่มีข้อมูลสิ่งอำนวยความสะดวก
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl mb-2 sm:mb-3 font-semibold">
+                {rentDetail?.name}
+              </h1>
+              <div className="flex items-start sm:items-center text-sm sm:text-base">
+                <MapPin
+                  size={16}
+                  className="mr-2 mt-1 sm:mt-0 shrink-0 sm:w-[18px] sm:h-[18px] lg:w-5 lg:h-5"
+                />
+                <span className="wrap-break-word text-sm sm:text-base lg:text-lg">
+                  เขต{rentDetail?.district} แขวง{rentDetail?.subdistrict}{" "}
+                  {rentDetail?.province}
                 </span>
-              )}
+              </div>
+
+              {/* Schedule */}
+              <div
+                className={`mb-4 sm:mb-6 mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg ${
+                  showAll
+                    ? "flex flex-col space-y-2"
+                    : "flex flex-col sm:flex-row sm:items-center"
+                }`}
+              >
+                {allGroups.length > 0 &&
+                  allGroups
+                    .map((g, index) => {
+                      const showButton = index === 0 && allGroups.length > 1;
+
+                      return renderScheduleGroup({
+                        ...g,
+                        button: showButton ? (
+                          <button
+                            onClick={() => setShowAll(!showAll)}
+                            className="text-blue-500 underline ml-0 sm:ml-2 mt-1 sm:mt-0 text-sm sm:text-base inline-block"
+                          >
+                            {showAll ? "ย่อ" : "เพิ่มเติม"}
+                          </button>
+                        ) : undefined,
+                      });
+                    })
+                    .filter((_, i) => showAll || i === 0)}
+              </div>
+            </div>
+
+            <div className="mb-4 sm:mb-6 lg:mb-8">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
+                เกี่ยวกับลานจอด
+              </h1>
+              <p className="text-sm sm:text-base lg:text-lg wrap-break-word leading-relaxed">
+                {rentDetail?.description}
+              </p>
+            </div>
+
+            <div className="mb-4 sm:mb-6 lg:mb-8">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
+                จุดสังเกตุ
+              </h1>
+              <p className="text-sm sm:text-base lg:text-lg wrap-break-word leading-relaxed">
+                {rentDetail?.landmark}
+              </p>
+            </div>
+
+            <div className="mb-4 sm:mb-6 lg:mb-8 pb-4">
+              <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-3">
+                สิ่งอำนวยความสะดวก
+              </h1>
+              <div className="flex flex-wrap gap-2">
+                {facilities && facilities.length > 0 ? (
+                  facilities.map((f) => (
+                    <span
+                      key={f.id}
+                      className="text-sm sm:text-base lg:text-lg"
+                    >
+                      {f.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm sm:text-base lg:text-lg">
+                    ไม่มีข้อมูลสิ่งอำนวยความสะดวก
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
+
         {/* Price Box */}
-        <div className="mb-4 bg-white h-full w-full lg:w-1/3 p-4 sm:p-6 rounded-2xl border border-gray-300 shadow-sm">
+        <div className="sticky top-4 mb-4 lg:mb-0 bg-white h-fit w-full lg:w-1/3 p-4 sm:p-5 lg:p-6 rounded-2xl border border-gray-300 shadow-lg">
           {/* Dynamic Price */}
-          <p className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
+          <p className="text-2xl sm:text-3xl lg:text-2xl font-bold mb-4 sm:mb-5">
             {displayPrice !== null ? `฿ ${displayPrice} ${priceSuffix}` : "-"}
           </p>
 
           {/* Tabs */}
-          <div className="flex gap-2 mb-3 sm:mb-4">
+          <div className="flex gap-2 mb-4 sm:mb-5">
             {price?.price_per_hour && (
               <Button
                 variant={isShow === "hour" ? "default" : "outline"}
@@ -445,7 +529,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_hour);
                   setPriceSuffix("/ ชั่วโมง");
                 }}
-                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
+                className="flex-1 cursor-pointer text-xs sm:text-sm lg:text-base h-9 sm:h-10"
               >
                 รายชั่วโมง
               </Button>
@@ -458,7 +542,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_day);
                   setPriceSuffix("/ วัน");
                 }}
-                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
+                className="flex-1 cursor-pointer text-xs sm:text-sm lg:text-base h-9 sm:h-10"
               >
                 รายวัน
               </Button>
@@ -472,7 +556,7 @@ export default function Page() {
                   setDisplayPrice(price.price_per_month);
                   setPriceSuffix("/ เดือน");
                 }}
-                className="flex-1 cursor-pointer text-sm sm:text-base lg:text-lg"
+                className="flex-1 cursor-pointer text-xs sm:text-sm lg:text-base h-9 sm:h-10"
               >
                 รายเดือน
               </Button>
@@ -481,7 +565,7 @@ export default function Page() {
 
           {/* Form Content */}
           {isShow === "day" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
               <DateForm
                 id="dateIn"
                 title="วันที่เข้าจอด"
@@ -502,7 +586,7 @@ export default function Page() {
           )}
 
           {isShow === "month" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
               <DateForm
                 id="dateIn"
                 title="วันที่เข้าจอด"
@@ -523,8 +607,8 @@ export default function Page() {
           )}
 
           {isShow === "hour" && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
+            <div className="space-y-3 sm:space-y-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <DateForm
                   id="dateIn"
                   title="วันที่เข้าจอด"
@@ -541,7 +625,7 @@ export default function Page() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <DateForm
                   id="dateOut"
                   title="วันที่นำรถออก"
@@ -557,15 +641,17 @@ export default function Page() {
                   className="cursor-pointer"
                 />
               </div>
-            </>
+            </div>
           )}
-          <div className="flex justify-between items-center text-base sm:text-lg my-2 sm:my-3 font-semibold">
+          <div className="flex justify-between items-center text-base sm:text-lg lg:text-xl my-3 sm:my-4 font-semibold pt-3 border-t">
             <p>ราคารวม</p>
-            <p>{displayPrice !== null ? `฿ ${displayPrice} ` : "-"}</p>
+            <p>
+              {totalPrice !== null ? `฿ ${totalPrice.toLocaleString()} ` : "-"}
+            </p>
           </div>
           <div>
             <Link href={buildPaymentUrl}>
-              <Button className="w-full cursor-pointer h-9 sm:h-10 text-sm sm:text-base lg:text-lg">
+              <Button className="w-full cursor-pointer h-11 sm:h-12 text-base sm:text-lg font-medium">
                 จองที่จอดนี้
               </Button>
             </Link>

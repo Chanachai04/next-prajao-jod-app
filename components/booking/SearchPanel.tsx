@@ -53,36 +53,51 @@ export default function SearchPanel({
     if (mode === "monthly") setSelectedOption("monthly");
     else if (mode === "daily" || mode === "hourly") setSelectedOption("hourly");
     if (location) setSearchText(location);
-    if (dateInParam) setDateIn(new Date(dateInParam));
-    if (dateOutParam) setDateOut(new Date(dateOutParam));
+
+    // ตั้งค่าเวลาก่อน
     if (timeInParam) setTimeIn(timeInParam);
     if (timeOutParam) setTimeOut(timeOutParam);
+
+    // ตั้งค่าวันที่หลัง
+    if (dateInParam) {
+      const d = new Date(dateInParam);
+      if (!isNaN(d.getTime())) setDateIn(d);
+    }
+    if (dateOutParam) {
+      const d = new Date(dateOutParam);
+      if (!isNaN(d.getTime())) setDateOut(d);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // แยกที่จอดรถตามประเภทราคา
+  const { hourlyDailySpots, monthlySpots } = useMemo(() => {
+    if (!spots.length) return { hourlyDailySpots: [], monthlySpots: [] };
+
+    const hourlyDaily = spots.filter((spot) => {
+      const price = spot.price;
+      if (!price) return false;
+      return (
+        price.price_per_hour !== null ||
+        price.price_per_day !== null ||
+        price.price_per_hour === 0 ||
+        price.price_per_day === 0
+      );
+    });
+
+    const monthly = spots.filter((spot) => {
+      const price = spot.price;
+      if (!price) return false;
+      return price.price_per_month !== null || price.price_per_month === 0;
+    });
+
+    return { hourlyDailySpots: hourlyDaily, monthlySpots: monthly };
+  }, [spots]);
+
+  // เลือก spots ที่จะแสดงตาม selectedOption
   const filteredSpots = useMemo(() => {
-    if (!spots.length) return [];
-    const byMode =
-      selectedOption === "hourly"
-        ? spots.filter((spot) => {
-            const price = spot.price;
-            if (!price) return false;
-            return (
-              price.price_per_hour !== null ||
-              price.price_per_day !== null ||
-              price.price_per_hour === 0 ||
-              price.price_per_day === 0
-            );
-          })
-        : spots.filter((spot) => {
-            const price = spot.price;
-            if (!price) return false;
-            return (
-              price.price_per_month !== null || price.price_per_month === 0
-            );
-          });
-    return byMode.length > 0 ? byMode : spots;
-  }, [spots, selectedOption]);
+    return selectedOption === "hourly" ? hourlyDailySpots : monthlySpots;
+  }, [selectedOption, hourlyDailySpots, monthlySpots]);
 
   // คำนวณ mode ที่แท้จริงตาม UI และเงื่อนไข
   const actualMode = useMemo(() => {
@@ -180,6 +195,7 @@ export default function SearchPanel({
                 className="bg-white"
               />
               <TimeForm
+                key={`timeIn-${timeIn}`}
                 time={timeIn}
                 setTime={setTimeIn}
                 className="bg-white"
@@ -193,6 +209,7 @@ export default function SearchPanel({
                 className="bg-white"
               />
               <TimeForm
+                key={`timeOut-${timeOut}`}
                 time={timeOut}
                 setTime={setTimeOut}
                 className="bg-white"
@@ -266,7 +283,7 @@ export default function SearchPanel({
                 dateOut: dateOut?.toISOString(),
                 timeIn,
                 timeOut,
-                mode: actualMode, // ✅ ใช้ mode ที่คำนวณแล้ว
+                mode: actualMode,
                 monthDurationKey,
               }}
             />

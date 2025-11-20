@@ -162,24 +162,26 @@ export default function DetailPanel({
         )}
       </div>
 
-      {/* Thumbnails */}
-      <div className="bg-[#F9F3F3] h-[80px] sm:h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4">
-        {imageUrls.map((img, index) => (
-          <Image
-            key={`${img}-${index}`}
-            src={img}
-            alt={`thumbnail-${index}`}
-            width={80}
-            height={100}
-            className={`h-12 w-16 sm:h-16 sm:w-20 object-cover cursor-pointer border-2 transition-all rounded-lg shrink-0 ${
-              index === currentIndex
-                ? "border-blue-500 scale-105"
-                : "border-transparent hover:border-gray-300"
-            }`}
-            onClick={() => onSelectImage(index)}
-          />
-        ))}
-      </div>
+      {/* Thumbnails - แสดงเฉพาะเมื่อมีรูปมากกว่า 1 รูป */}
+      {imageUrls.length > 1 && (
+        <div className="bg-[#F9F3F3] h-[80px] sm:h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4">
+          {imageUrls.map((img, index) => (
+            <Image
+              key={`${img}-${index}`}
+              src={img}
+              alt={`thumbnail-${index}`}
+              width={80}
+              height={100}
+              className={`h-12 w-16 sm:h-16 sm:w-20 object-cover cursor-pointer border-2 transition-all rounded-lg shrink-0 ${
+                index === currentIndex
+                  ? "border-blue-500 scale-105"
+                  : "border-transparent hover:border-gray-300"
+              }`}
+              onClick={() => onSelectImage(index)}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Details */}
       <div className="px-3 sm:px-4 max-h-[400px] sm:max-h-[500px]  overflow-y-auto pb-6 sm:pb-8">

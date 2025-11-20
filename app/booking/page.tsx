@@ -93,8 +93,11 @@ export default function Booking() {
       setSelectedOption("hourly");
       setSelectedOptionDetail("hourly");
     }
+
+    // ตั้งค่าเวลาก่อนวันที่
     if (timeInStr) setTimeIn(timeInStr);
     if (timeOutStr) setTimeOut(timeOutStr);
+
     if (dateInStr) {
       const d = new Date(dateInStr);
       if (!isNaN(d.getTime())) setDateIn(d);
@@ -302,7 +305,7 @@ export default function Booking() {
       displayEmptyMessage: false,
     });
     firstFetchRef.current = false;
-  }, [isInitialised]);
+  }, [fetchParkingSpots, isInitialised]);
 
   useEffect(() => {
     setCurrentIndex(0);
