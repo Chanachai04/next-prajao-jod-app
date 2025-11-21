@@ -1,9 +1,10 @@
 import EditRentDetail from "@/components/editrentdetail/EditRentDetail";
 import { Suspense } from "react";
+import Loading from "./loading";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div>กำลังโหลด...</div>}>
+    <Suspense fallback={<Loading />}>
       <EditRentDetail />
     </Suspense>
   );

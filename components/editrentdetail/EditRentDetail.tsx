@@ -16,6 +16,7 @@ import AlertModal from "@/components/ui/modal";
 import { useSearchParams } from "next/navigation";
 import LabelAndProvinceSearch from "../form/LabelAndProvinceSearch";
 import useEditRentDetail from "@/hook/useEditRentDetail";
+import Loading from "./loading";
 
 export default function EditRentDetail() {
   const searchParams = useSearchParams();
@@ -52,14 +53,7 @@ export default function EditRentDetail() {
   } = useEditRentDetail(rentId);
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-lg font-medium text-gray-700">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!rentId) {
