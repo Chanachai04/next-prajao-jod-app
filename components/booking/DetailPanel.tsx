@@ -184,7 +184,7 @@ export default function DetailPanel({
       )}
 
       {/* Details */}
-      <div className="px-3 sm:px-4 max-h-[400px] sm:max-h-[500px]  overflow-y-auto pb-6 sm:pb-8">
+      <div className="px-3 sm:px-4 max-h-full  overflow-y-auto pb-6 sm:pb-8">
         <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">
           {spot.name ?? "-"}
         </p>
