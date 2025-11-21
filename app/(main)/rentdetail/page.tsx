@@ -14,8 +14,10 @@ import Image from "next/image";
 import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
+import ConfirmModal from "@/components/ui/confirm";
 import useRentDetail from "@/hook/useRentDetail";
 import LabelAndProvinceSearch from "@/components/form/LabelAndProvinceSearch";
+
 
 export default function RentDetail() {
   const {
@@ -47,6 +49,9 @@ export default function RentDetail() {
     setFormValues,
     setAgreeTerms,
     setAgreeFee,
+    confirmModalOpen,
+    setConfirmModalOpen,
+    confirmSubmit,
   } = useRentDetail();
 
   return (
@@ -504,6 +509,15 @@ export default function RentDetail() {
         >
           {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
         </Button>
+
+        <ConfirmModal
+          open={confirmModalOpen}
+          onClose={() => setConfirmModalOpen(false)}
+          onConfirm={confirmSubmit}
+          title="ยืนยันการบันทึกข้อมูล"
+          description="คุณแน่ใจหรือไม่ว่าต้องการบันทึกข้อมูลที่จอดรถนี้?"
+        />
+        
         <AlertModal
           open={modalOpen}
           onClose={closeModal}

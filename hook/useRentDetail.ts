@@ -19,6 +19,11 @@ export default function useRentDetail() {
     string | undefined
   >(undefined);
 
+  // Confirm Modal state
+  const [confirmModalOpen, setConfirmModalOpen] = React.useState(false);
+  const [pendingSubmitData, setPendingSubmitData] = React.useState<any>(null);
+
+
   const [formValues, setFormValues] = React.useState({
     name: "",
     type: "",
@@ -138,10 +143,10 @@ export default function useRentDetail() {
 
   const handleFieldChange =
     (field: keyof typeof formValues) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = event.target.value;
-      setFormValues((prev) => ({ ...prev, [field]: value }));
-    };
+      (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = event.target.value;
+        setFormValues((prev) => ({ ...prev, [field]: value }));
+      };
 
   const toggleFacility = (facility: string, checked: boolean) => {
     setSelectedFacilities((prev) => {
@@ -180,12 +185,12 @@ export default function useRentDetail() {
       prev.map((s, i) =>
         i === index
           ? {
-              ...s,
-              allDay: checked,
-              selected: checked ? true : s.selected,
-              open_time: checked ? "00:00" : s.open_time,
-              close_time: checked ? "00:00" : s.close_time,
-            }
+            ...s,
+            allDay: checked,
+            selected: checked ? true : s.selected,
+            open_time: checked ? "00:00" : s.open_time,
+            close_time: checked ? "00:00" : s.close_time,
+          }
           : s
       )
     );
@@ -341,7 +346,7 @@ export default function useRentDetail() {
         message: "กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป",
       });
       return;
-}
+    }
 
     // ต้องเลือกเวลาอย่างน้อย 1 วัน
     const selectedDays = schedules.filter((s) => s.selected);
@@ -351,7 +356,7 @@ export default function useRentDetail() {
         message: "กรุณาเลือกวันที่เปิดทำการอย่างน้อย 1 วัน",
       });
       return;
-}
+    }
 
     const payload = {
       name: formValues.name.trim(),
@@ -375,10 +380,21 @@ export default function useRentDetail() {
         })),
     };
 
+    // เก็บข้อมูลไว้และเปิด confirm modal
+    setPendingSubmitData(payload);
+    setConfirmModalOpen(true);
+  };
+
+  // ฟังก์ชัน submit จริงหลังจากยืนยัน
+  const confirmSubmit = async () => {
+    setConfirmModalOpen(false);
+
+    if (!pendingSubmitData) return;
+
     setIsSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append("payload", JSON.stringify(payload));
+      formData.append("payload", JSON.stringify(pendingSubmitData));
       images.forEach((file) => formData.append("images", file, file.name));
 
       const response = await fetch("/api/rentdetail", {
@@ -471,5 +487,8 @@ export default function useRentDetail() {
     toggleAllDay,
     handleProvinceSearchChange,
     handleSubmit,
+    confirmModalOpen,
+    setConfirmModalOpen,
+    confirmSubmit,
   } as const;
 }
