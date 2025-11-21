@@ -13,6 +13,8 @@ export default function Parking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // ดึงข้อมูลจาก API
   useEffect(() => {
@@ -69,6 +71,79 @@ export default function Parking() {
     }
   };
 
+  // ฟังก์ชันเลือก/ยกเลิกเลือกรายการ
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  // ฟังก์ชันเลือก/ยกเลิกเลือกทั้งหมด
+  const toggleSelectAll = () => {
+    if (selectedIds.length === data.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(data.map((item) => item.id));
+    }
+  };
+
+  // ฟังก์ชันลบหลายรายการ
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+
+    if (
+      !confirm(
+        `คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูล ${selectedIds.length} รายการ?`
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(true);
+    const errors: string[] = [];
+
+    try {
+      // ลบทีละรายการ
+      for (const rentId of selectedIds) {
+        try {
+          const response = await fetch(`/api/parking?rent_id=${rentId}`, {
+            method: "DELETE",
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            errors.push(`${rentId}: ${result.error || "ไม่สามารถลบได้"}`);
+          }
+        } catch (err) {
+          errors.push(
+            `${rentId}: ${err instanceof Error ? err.message : "เกิดข้อผิดพลาด"}`
+          );
+        }
+      }
+
+      // อัปเดต state โดยลบรายการที่ลบสำเร็จ
+      setData((prevData) =>
+        prevData.filter((item) => !selectedIds.includes(item.id) || errors.some(e => e.startsWith(item.id)))
+      );
+
+      // แสดงผลลัพธ์
+      if (errors.length === 0) {
+        alert(`ลบข้อมูลสำเร็จ ${selectedIds.length} รายการ`);
+      } else {
+        alert(
+          `ลบสำเร็จ ${selectedIds.length - errors.length} รายการ\nไม่สำเร็จ ${errors.length} รายการ:\n${errors.join("\n")}`
+        );
+      }
+
+      setSelectedIds([]);
+    } catch (err) {
+      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-4 sm:py-5 bg-gray-50">
       <hr className="border-3 border-gray-600" />
@@ -87,9 +162,33 @@ export default function Parking() {
         <div className="flex-1 w-full overflow-y-auto max-h-[80vh]">
           {/* Desktop Table View */}
           <div className="hidden md:block px-4 lg:px-8">
+            {/* ปุ่มลบที่เลือก */}
+            {selectedIds.length > 0 && (
+              <div className="sticky top-0 bg-blue-50 border-b border-blue-200 px-4 py-3 flex items-center justify-between z-20">
+                <span className="text-sm font-medium text-blue-700">
+                  เลือกแล้ว {selectedIds.length} รายการ
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                >
+                  {isDeleting ? "กำลังลบ..." : "ลบที่เลือก"}
+                </button>
+              </div>
+            )}
+            
             <table className="overflow-x-auto w-full border-collapse">
               <thead className="sticky top-0 bg-white z-10">
                 <tr className="text-gray-700 text-lg sm:text-xl font-semibold border-b">
+                  <th className="py-4 sm:py-6 px-4 sm:px-6 text-center min-w-[80px]">
+                    <input
+                      type="checkbox"
+                      checked={data.length > 0 && selectedIds.length === data.length}
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 cursor-pointer"
+                    />
+                  </th>
                   <th className="py-4 sm:py-6 px-4 sm:px-6 text-center min-w-[200px]">
                     รูปภาพ
                   </th>
@@ -111,7 +210,7 @@ export default function Parking() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="text-center text-gray-400 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       กำลังโหลดข้อมูล...
@@ -120,7 +219,7 @@ export default function Parking() {
                 ) : error ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="text-center text-red-500 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       {error}
@@ -129,7 +228,7 @@ export default function Parking() {
                 ) : data.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="text-center text-gray-400 py-20 text-sm sm:text-base lg:text-lg"
                     >
                       ไม่มีข้อมูล
@@ -141,6 +240,14 @@ export default function Parking() {
                       key={index}
                       className="border-b hover:bg-gray-50 text-sm sm:text-base lg:text-lg"
                     >
+                      <td className="py-4 sm:py-6 px-4 sm:px-6 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.includes(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          className="w-4 h-4 cursor-pointer"
+                        />
+                      </td>
                       <td className="py-4 sm:py-6 px-4 sm:px-6 text-center">
                         {item.image_url ? (
                           <Image
@@ -198,6 +305,21 @@ export default function Parking() {
 
           {/* Mobile Card View */}
           <div className="md:hidden px-4 space-y-4 py-4">
+            {/* ปุ่มลบที่เลือก - Mobile */}
+            {selectedIds.length > 0 && (
+              <div className="sticky top-0 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center justify-between z-20">
+                <span className="text-sm font-medium text-blue-700">
+                  เลือกแล้ว {selectedIds.length} รายการ
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                >
+                  {isDeleting ? "กำลังลบ..." : "ลบ"}
+                </button>
+              </div>
+            )}
             {loading ? (
               <div className="text-center text-gray-400 py-20 text-sm sm:text-base ">
                 กำลังโหลดข้อมูล...
@@ -218,6 +340,12 @@ export default function Parking() {
                 >
                   <div className="flex flex-col space-y-3">
                     <div className="flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                        className="w-4 h-4 cursor-pointer shrink-0"
+                      />
                       {item.image_url ? (
                         <Image
                           src={item.image_url}
