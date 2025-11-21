@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { HistoryItem } from "@/types/history";
 import { Trash } from "lucide-react";
+import ConfirmModal from "@/components/ui/confirm";
+import AlertModal from "@/components/ui/modal";
 
 export default function History() {
   const pathname = usePathname();
@@ -14,6 +16,17 @@ export default function History() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Modal states
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+  const [alertModalType, setAlertModalType] = useState<"success" | "error">("success");
+  const [alertModalTitle, setAlertModalTitle] = useState("");
+  const [alertModalDescription, setAlertModalDescription] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<{
+    type: "single" | "bulk";
+    id?: string;
+  } | null>(null);
 
   useEffect(() => {
     // ฟังก์ชันดึงข้อมูลจาก API
@@ -50,13 +63,15 @@ export default function History() {
     fetchHistory();
   }, []);
 
+  // เปิด confirm modal สำหรับลบรายการเดียว
+  const openDeleteConfirm = (historyId: HistoryItem["id"]) => {
+    setDeleteTarget({ type: "single", id: String(historyId) });
+    setConfirmModalOpen(true);
+  };
+
   // ฟังก์ชันลบข้อมูลประวัติ
   const handleDelete = async (historyId: HistoryItem["id"]) => {
     const idParam = String(historyId);
-
-    if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการจองนี้?")) {
-      return;
-    }
 
     try {
       setDeletingId(idParam);
@@ -71,8 +86,20 @@ export default function History() {
       }
 
       setData((prev) => prev.filter((item) => String(item.id) !== idParam));
+      
+      // แสดง success modal
+      setAlertModalType("success");
+      setAlertModalTitle("ลบประวัติสำเร็จ");
+      setAlertModalDescription("ประวัติการจองถูกลบเรียบร้อยแล้ว");
+      setAlertModalOpen(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการลบข้อมูล");
+      // แสดง error modal
+      setAlertModalType("error");
+      setAlertModalTitle("เกิดข้อผิดพลาด");
+      setAlertModalDescription(
+        err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการลบข้อมูล"
+      );
+      setAlertModalOpen(true);
     } finally {
       setDeletingId(null);
     }
@@ -94,18 +121,15 @@ export default function History() {
     }
   };
 
+  // เปิด confirm modal สำหรับลบหลายรายการ
+  const openBulkDeleteConfirm = () => {
+    if (selectedIds.length === 0) return;
+    setDeleteTarget({ type: "bulk" });
+    setConfirmModalOpen(true);
+  };
+
   // ฟังก์ชันลบหลายรายการ
   const handleBulkDelete = async () => {
-    if (selectedIds.length === 0) return;
-
-    if (
-      !confirm(
-        `คุณแน่ใจหรือไม่ว่าต้องการลบประวัติ ${selectedIds.length} รายการ?`
-      )
-    ) {
-      return;
-    }
-
     setIsDeleting(true);
     const errors: string[] = [];
 
@@ -136,19 +160,41 @@ export default function History() {
 
       // แสดงผลลัพธ์
       if (errors.length === 0) {
-        alert(`ลบประวัติสำเร็จ ${selectedIds.length} รายการ`);
+        setAlertModalType("success");
+        setAlertModalTitle("ลบประวัติสำเร็จ");
+        setAlertModalDescription(`ลบประวัติสำเร็จ ${selectedIds.length} รายการ`);
+        setAlertModalOpen(true);
       } else {
-        alert(
-          `ลบสำเร็จ ${selectedIds.length - errors.length} รายการ\nไม่สำเร็จ ${errors.length} รายการ:\n${errors.join("\n")}`
+        setAlertModalType("error");
+        setAlertModalTitle("ลบประวัติบางส่วนไม่สำเร็จ");
+        setAlertModalDescription(
+          `ลบสำเร็จ ${selectedIds.length - errors.length} รายการ\nไม่สำเร็จ ${errors.length} รายการ`
         );
+        setAlertModalOpen(true);
       }
 
       setSelectedIds([]);
     } catch (err) {
-      alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+      setAlertModalType("error");
+      setAlertModalTitle("เกิดข้อผิดพลาด");
+      setAlertModalDescription("เกิดข้อผิดพลาดในการลบข้อมูล");
+      setAlertModalOpen(true);
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  // ยืนยันการลบ
+  const confirmDelete = async () => {
+    setConfirmModalOpen(false);
+    
+    if (deleteTarget?.type === "single" && deleteTarget.id) {
+      await handleDelete(deleteTarget.id);
+    } else if (deleteTarget?.type === "bulk") {
+      await handleBulkDelete();
+    }
+    
+    setDeleteTarget(null);
   };
 
   // ฟังก์ชันแปลง parkingType เป็นภาษาไทย
@@ -197,7 +243,7 @@ export default function History() {
                   เลือกแล้ว {selectedIds.length} รายการ
                 </span>
                 <button
-                  onClick={handleBulkDelete}
+                  onClick={openBulkDeleteConfirm}
                   disabled={isDeleting}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
@@ -309,7 +355,7 @@ export default function History() {
                       </td>
                       <td className="py-4 sm:py-6 px-4 sm:px-6 text-center">
                         <button
-                          onClick={() => handleDelete(item.id)}
+                          onClick={() => openDeleteConfirm(item.id)}
                           disabled={deletingId === String(item.id)}
                           className={`text-red-500 hover:text-red-700 ${
                             deletingId === String(item.id)
@@ -336,7 +382,7 @@ export default function History() {
                   เลือกแล้ว {selectedIds.length} รายการ
                 </span>
                 <button
-                  onClick={handleBulkDelete}
+                  onClick={openBulkDeleteConfirm}
                   disabled={isDeleting}
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
                 >
@@ -411,7 +457,7 @@ export default function History() {
                         </span>
                       </div>
                       <button
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => openDeleteConfirm(item.id)}
                         disabled={deletingId === String(item.id)}
                         className={`text-red-500 hover:text-red-700 ${
                           deletingId === String(item.id)
@@ -429,6 +475,27 @@ export default function History() {
           </div>
         </div>
       </div>
+            {/* Confirm Modal */}
+      <ConfirmModal
+        open={confirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
+        onConfirm={confirmDelete}
+        title={deleteTarget?.type === "bulk" ? "ยืนยันการลบหลายรายการ" : "ยืนยันการลบ"}
+        description={
+          deleteTarget?.type === "bulk"
+            ? `คุณแน่ใจหรือไม่ว่าต้องการลบประวัติ ${selectedIds.length} รายการ?`
+            : "คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการจองนี้?"
+        }
+      />
+
+      {/* Alert Modal */}
+      <AlertModal
+        open={alertModalOpen}
+        onClose={() => setAlertModalOpen(false)}
+        type={alertModalType}
+        title={alertModalTitle}
+        description={alertModalDescription}
+      />
     </div>
   );
 }
