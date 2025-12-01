@@ -10,6 +10,7 @@ import ConfirmModal from "@/components/ui/confirm";
 import AlertModal from "@/components/ui/modal";
 
 export default function Parking() {
+  //State
   const pathname = usePathname();
   const [data, setData] = useState<ParkingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,11 +18,11 @@ export default function Parking() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Modal states
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
-  const [alertModalType, setAlertModalType] = useState<"success" | "error">("success");
+  const [alertModalType, setAlertModalType] = useState<"success" | "error">(
+    "success"
+  );
   const [alertModalTitle, setAlertModalTitle] = useState("");
   const [alertModalDescription, setAlertModalDescription] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{
@@ -29,7 +30,7 @@ export default function Parking() {
     id?: string;
   } | null>(null);
 
-  // ดึงข้อมูลจาก API
+  //ฟังก์ชันดึงข้อมูลจากapi
   useEffect(() => {
     const fetchParkingData = async () => {
       try {
@@ -57,13 +58,13 @@ export default function Parking() {
     fetchParkingData();
   }, []);
 
-  // เปิด confirm modal สำหรับลบรายการเดียว
+  //เปิดmodalยืนยันสำหรับลบข้อมูลแถวเดียว
   const openDeleteConfirm = (rentId: string) => {
     setDeleteTarget({ type: "single", id: rentId });
     setConfirmModalOpen(true);
   };
 
-  // ฟังก์ชันลบข้อมูล (ไม่ลบไฟล์ภาพจาก storage)
+  //ฟังก์ชันลบข้อมูล
   const handleDelete = async (rentId: string) => {
     try {
       setDeletingId(rentId);
@@ -77,16 +78,13 @@ export default function Parking() {
         throw new Error(result.error || "ไม่สามารถลบข้อมูลได้");
       }
 
-      // ลบข้อมูลออกจาก state
+      //ลบข้อมูลออกจาก State
       setData((prevData) => prevData.filter((item) => item.id !== rentId));
-      
-      // แสดง success modal
       setAlertModalType("success");
       setAlertModalTitle("ลบข้อมูลสำเร็จ");
       setAlertModalDescription("ข้อมูลถูกลบเรียบร้อยแล้ว");
       setAlertModalOpen(true);
     } catch (err) {
-      // แสดง error modal
       setAlertModalType("error");
       setAlertModalTitle("เกิดข้อผิดพลาด");
       setAlertModalDescription(
@@ -98,14 +96,14 @@ export default function Parking() {
     }
   };
 
-  // ฟังก์ชันเลือก/ยกเลิกเลือกรายการ
+  // ฟังก์ชันเลือก/ยกเลิกเลือกรายการ (checkboxของแต่ละแถว)
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
 
-  // ฟังก์ชันเลือก/ยกเลิกเลือกทั้งหมด
+  // ฟังก์ชันเลือก/ยกเลิกเลือกทั้งหมด (checkboxเลือกหลายรายการ)
   const toggleSelectAll = () => {
     if (selectedIds.length === data.length) {
       setSelectedIds([]);
@@ -114,14 +112,14 @@ export default function Parking() {
     }
   };
 
-  // เปิด confirm modal สำหรับลบหลายรายการ
+  //เปิดmodalยืนยันสำหรับลบข้อมูลหลายแถว
   const openBulkDeleteConfirm = () => {
     if (selectedIds.length === 0) return;
     setDeleteTarget({ type: "bulk" });
     setConfirmModalOpen(true);
   };
 
-  // ฟังก์ชันลบหลายรายการ
+  //ฟังก์ชันลบหลายรายการ
   const handleBulkDelete = async () => {
     setIsDeleting(true);
     const errors: string[] = [];
@@ -141,14 +139,19 @@ export default function Parking() {
           }
         } catch (err) {
           errors.push(
-            `${rentId}: ${err instanceof Error ? err.message : "เกิดข้อผิดพลาด"}`
+            `${rentId}: ${
+              err instanceof Error ? err.message : "เกิดข้อผิดพลาด"
+            }`
           );
         }
       }
 
-      // อัปเดต state โดยลบรายการที่ลบสำเร็จ
       setData((prevData) =>
-        prevData.filter((item) => !selectedIds.includes(item.id) || errors.some(e => e.startsWith(item.id)))
+        prevData.filter(
+          (item) =>
+            !selectedIds.includes(item.id) ||
+            errors.some((e) => e.startsWith(item.id))
+        )
       );
 
       // แสดงผลลัพธ์
@@ -161,7 +164,9 @@ export default function Parking() {
         setAlertModalType("error");
         setAlertModalTitle("ลบข้อมูลบางส่วนไม่สำเร็จ");
         setAlertModalDescription(
-          `ลบสำเร็จ ${selectedIds.length - errors.length} รายการ\nไม่สำเร็จ ${errors.length} รายการ`
+          `ลบสำเร็จ ${selectedIds.length - errors.length} รายการ\nไม่สำเร็จ ${
+            errors.length
+          } รายการ`
         );
         setAlertModalOpen(true);
       }
@@ -180,21 +185,19 @@ export default function Parking() {
   // ยืนยันการลบ
   const confirmDelete = async () => {
     setConfirmModalOpen(false);
-    
+
     if (deleteTarget?.type === "single" && deleteTarget.id) {
       await handleDelete(deleteTarget.id);
     } else if (deleteTarget?.type === "bulk") {
       await handleBulkDelete();
     }
-    
+
     setDeleteTarget(null);
   };
 
   return (
     <div className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-4 sm:py-5 bg-gray-50">
       <hr className="border-3 border-gray-600" />
-
-      {/* พื้นหลังขาว ไม่มีขอบโค้ง */}
       <div className="flex flex-col lg:flex-row bg-white shadow-sm overflow-hidden min-h-[80vh]">
         {/* Sidebar */}
         <div className="w-full lg:w-1/3 max-w-[360px] p-4 sm:p-6 flex flex-col items-start min-h-[85vh]">
@@ -204,11 +207,9 @@ export default function Parking() {
           <Sidebar currentPathname={pathname} />
         </div>
 
-        {/* Content Area */}
         <div className="flex-1 w-full overflow-y-auto max-h-[80vh]">
-          {/* Desktop Table View */}
           <div className="hidden md:block px-4 lg:px-8">
-            {/* ปุ่มลบที่เลือก */}
+            {/* เลือกลบหลายรายการ */}
             {selectedIds.length > 0 && (
               <div className="sticky top-0 bg-blue-50 border-b border-blue-200 px-4 py-3 flex items-center justify-between z-20">
                 <span className="text-sm font-medium text-blue-700">
@@ -223,14 +224,16 @@ export default function Parking() {
                 </button>
               </div>
             )}
-            
+            {/* tableแสดงข้อมูลจากsupabase */}
             <table className="overflow-x-auto w-full border-collapse">
               <thead className="sticky top-0 bg-white z-10">
                 <tr className="text-gray-700 text-lg sm:text-xl font-semibold border-b">
                   <th className="py-4 sm:py-6 px-4 sm:px-6 text-center min-w-[80px]">
                     <input
                       type="checkbox"
-                      checked={data.length > 0 && selectedIds.length === data.length}
+                      checked={
+                        data.length > 0 && selectedIds.length === data.length
+                      }
                       onChange={toggleSelectAll}
                       className="w-4 h-4 cursor-pointer"
                     />
@@ -279,6 +282,7 @@ export default function Parking() {
                     >
                       ไม่มีข้อมูล
                     </td>
+                    {/* mapข้อมูลtableจากsupabase */}
                   </tr>
                 ) : (
                   data.map((item, index) => (
@@ -349,14 +353,13 @@ export default function Parking() {
             </table>
           </div>
 
-          {/* Mobile Card View */}
           <div className="md:hidden px-4 space-y-4 py-4">
-            {/* ปุ่มลบที่เลือก - Mobile */}
             {selectedIds.length > 0 && (
               <div className="sticky top-0 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-center justify-between z-20">
                 <span className="text-sm font-medium text-blue-700">
                   เลือกแล้ว {selectedIds.length} รายการ
                 </span>
+                {/* ปุ่มลบหลายรายการ */}
                 <button
                   onClick={openBulkDeleteConfirm}
                   disabled={isDeleting}
@@ -438,6 +441,7 @@ export default function Parking() {
                         >
                           <Pen size={18} />
                         </Link>
+                        {/* ปุ่มลบรายการเดียว */}
                         <button
                           onClick={() => openDeleteConfirm(item.id)}
                           disabled={deletingId === item.id}
@@ -458,11 +462,16 @@ export default function Parking() {
           </div>
         </div>
       </div>
+      {/* Modal ยืนยันการลบหลายรายการ/รายการเดียว */}
       <ConfirmModal
         open={confirmModalOpen}
         onClose={() => setConfirmModalOpen(false)}
         onConfirm={confirmDelete}
-        title={deleteTarget?.type === "bulk" ? "ยืนยันการลบหลายรายการ" : "ยืนยันการลบ"}
+        title={
+          deleteTarget?.type === "bulk"
+            ? "ยืนยันการลบหลายรายการ"
+            : "ยืนยันการลบ"
+        }
         description={
           deleteTarget?.type === "bulk"
             ? `คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูล ${selectedIds.length} รายการ?`
@@ -470,7 +479,7 @@ export default function Parking() {
         }
       />
 
-      {/* Alert Modal */}
+      {/* Modal แจ้งเตือนการลบสำเร็จ */}
       <AlertModal
         open={alertModalOpen}
         onClose={() => setAlertModalOpen(false)}
@@ -479,6 +488,5 @@ export default function Parking() {
         description={alertModalDescription}
       />
     </div>
-
-      );
+  );
 }

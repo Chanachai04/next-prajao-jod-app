@@ -10,6 +10,7 @@ import AlertModal from "@/components/ui/modal";
 import ConfirmModal from "@/components/ui/confirm";
 
 export default function Detail() {
+  //State
   const router = useRouter();
   const pathname = usePathname();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -32,6 +33,7 @@ export default function Detail() {
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  //ฟังก์ชันปิดmodal
   const handleModalClose = () => {
     setModalOpen(false);
     if (modalType === "success") {
@@ -39,6 +41,7 @@ export default function Detail() {
     }
   };
 
+  //UseEffectโหลดข้อมูลจากsupabase
   useEffect(() => {
     const fetchContact = async () => {
       try {
@@ -66,6 +69,7 @@ export default function Detail() {
     fetchContact();
   }, []);
 
+  //set ภาพที่userเลือก
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -78,10 +82,11 @@ export default function Detail() {
     }
   };
 
+  //กดตรงที่เลือกรูปภาพแล้วทำให้เลือกไฟร์ภาพที่จะใช้ได้จากfile explorer
   const handleContainerClick = () => {
     fileInputRef.current?.click();
   };
-
+  //validate
   const handleSaveClick = () => {
     if (!firstName) {
       setError("กรุณากรอกชื่อ");
@@ -106,6 +111,7 @@ export default function Detail() {
     setConfirmOpen(true);
   };
 
+  //ส่งข้อมูลไปยังsupabase
   const handleSave = async () => {
     try {
       setLoading(true);
@@ -230,13 +236,13 @@ export default function Detail() {
 
           <hr className="my-4 sm:my-6" />
           <div></div>
-
+          {/* แจ้งvalidate */}
           {error && (
             <div className="text-red-600 text-sm sm:text-base md:col-span-2">
               {error}
             </div>
           )}
-
+          {/* ปุ่ม */}
           <div className="flex justify-start">
             <Button
               className="w-full sm:w-auto text-sm sm:text-base"
@@ -248,7 +254,7 @@ export default function Detail() {
           </div>
         </div>
 
-        {/* Image Section */}
+        {/* ส่วนของรูป */}
         <div className="w-full lg:w-1/3 p-4 sm:p-6 flex flex-col mt-8 sm:mt-12 lg:mt-20 items-center">
           <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-gray-700">
             รูปภาพ
@@ -258,7 +264,7 @@ export default function Detail() {
                 w-32 h-32 sm:w-40 sm:h-40 cursor-pointer hover:bg-gray-200 transition"
             onClick={handleContainerClick}
           >
-            {/* show preview only for newly selected local file; don't render server image */}
+            {/* ส่วนการแสดงภาพ */}
             {imageFile && image ? (
               <Image
                 src={image}
@@ -282,6 +288,7 @@ export default function Detail() {
             onChange={handleImageChange}
           />
         </div>
+        {/* modalแจ้งการบันทึกสำเร็จ */}
         <AlertModal
           open={modalOpen}
           onClose={handleModalClose}
@@ -289,6 +296,7 @@ export default function Detail() {
           title={modalTitle}
           description={modalDescription}
         />
+        {/* modalยืนยันการบันทึก */}
         <ConfirmModal
           open={confirmOpen}
           onClose={() => setConfirmOpen(false)}
