@@ -164,7 +164,7 @@ export default function DetailPanel({
 
       {/* Thumbnails - แสดงเฉพาะเมื่อมีรูปมากกว่า 1 รูป */}
       {imageUrls.length > 1 && (
-        <div className="bg-[#F9F3F3] h-[80px] sm:h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4">
+        <div className="bg-[#F9F3F3] h-20 sm:h-[100px] flex justify-center items-center space-x-2 overflow-x-auto px-2 sm:px-4">
           {imageUrls.map((img, index) => (
             <Image
               key={`${img}-${index}`}
