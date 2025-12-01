@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import ConfirmModal from "@/components/ui/confirm";
 
 export default function Rent() {
+  // State
   const router = useRouter();
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
@@ -17,6 +18,7 @@ export default function Rent() {
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  //UseEffectนำข้อมูลมาemail+phoneมาแสดง
   useEffect(() => {
     const fetchContact = async () => {
       try {
@@ -38,6 +40,7 @@ export default function Rent() {
     fetchContact();
   }, []);
 
+  //ฟังชันvalidate
   const handleSaveClick = () => {
     if (!firstName) {
       setError("กรุณากรอกชื่อ");
@@ -62,6 +65,7 @@ export default function Rent() {
     setConfirmOpen(true);
   };
 
+  //ฟังชันปุ่มบันทึก
   const handleSave = async () => {
     try {
       const res = await fetch("/api/rent", {
@@ -95,7 +99,7 @@ export default function Rent() {
 
   return (
     <div className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 space-y-4 sm:space-y-5">
-      {/* ส่วนหัว */}
+      {/* header */}
       <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">
         ปล่อยเช่าที่จอดรถ
       </h1>
@@ -103,7 +107,7 @@ export default function Rent() {
         กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการปล่อยเช่าที่จอดรถ
       </h1>
 
-      {/* ฟอร์ม */}
+      {/* ส่วน form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-10 gap-y-4 sm:gap-y-6 mt-4 sm:mt-6">
         <LabelAndInput
           title="ชื่อ *"
@@ -168,6 +172,7 @@ export default function Rent() {
             {error}
           </div>
         )}
+        {/* ปุ่ม */}
         <div className="md:col-start-2 flex justify-end w-full md:w-auto">
           <Button
             className="cursor-pointer w-full sm:w-auto px-6 sm:px-10 text-white bg-blue-600 hover:bg-blue-700 text-base sm:text-lg font-light"
@@ -178,7 +183,7 @@ export default function Rent() {
           </Button>
         </div>
       </div>
-
+      {/* modal แจ้งเตือนก่อนกดบันทึก */}
       <ConfirmModal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}

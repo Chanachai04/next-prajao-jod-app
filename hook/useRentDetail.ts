@@ -5,6 +5,7 @@ import { districts, provinces, subDistricts } from "@/lib/thaiData";
 type SubmitStatus = { type: "success" | "error"; message: string } | null;
 
 export default function useRentDetail() {
+  //State
   const [images, setImages] = React.useState<File[]>([]);
   const [submitStatus, setSubmitStatus] = React.useState<SubmitStatus>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -18,12 +19,10 @@ export default function useRentDetail() {
   const [modalDescription, setModalDescription] = React.useState<
     string | undefined
   >(undefined);
-
-  // Confirm Modal state
   const [confirmModalOpen, setConfirmModalOpen] = React.useState(false);
   const [pendingSubmitData, setPendingSubmitData] = React.useState<any>(null);
 
-
+  //State ของform
   const [formValues, setFormValues] = React.useState({
     name: "",
     type: "",
@@ -41,12 +40,10 @@ export default function useRentDetail() {
     owner_id: "",
   });
 
-  // Read owner id from cookie or API if available and set into formValues
+  // useEffectให้ตรวจสอบowner_id ใช้เพื่อผูกที่จอดรถกับเจ้าของในsupabaseที่เข้าสู่ระบบ
   React.useEffect(() => {
     const fetchUserId = async () => {
       if (typeof document === "undefined") return;
-
-      // ลองอ่านจาก cookie ก่อน
       const cookieValue = document.cookie
         .split("; ")
         .find((row) => row.startsWith("userId="))
@@ -56,8 +53,6 @@ export default function useRentDetail() {
         setFormValues((prev) => ({ ...prev, owner_id: cookieValue }));
         return;
       }
-
-      // ถ้าอ่านจาก cookie ไม่ได้ ลองใช้ API
       try {
         const response = await fetch("/api/me");
         const data = await response.json();
@@ -71,7 +66,7 @@ export default function useRentDetail() {
 
     fetchUserId();
   }, []);
-
+  //ตัวแปร สิ่งอำนวยความสะดวก/term/ประเภทที่จอด/วัน/เวลาทำการ
   const [selectedFacilities, setSelectedFacilities] = React.useState<string[]>(
     []
   );
@@ -132,6 +127,7 @@ export default function useRentDetail() {
     []
   );
 
+  // ฟังก์ชันลบเพิ่มรูปภาพ
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     const updated = [...images, ...files].slice(0, 10);
@@ -141,13 +137,14 @@ export default function useRentDetail() {
   const removeImage = (index: number) =>
     setImages((prev) => prev.filter((_, i) => i !== index));
 
+  // ฟังก์ชันรับค่าinput
   const handleFieldChange =
     (field: keyof typeof formValues) =>
       (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const value = event.target.value;
         setFormValues((prev) => ({ ...prev, [field]: value }));
       };
-
+  //ฟังก์ชันcheck unchecked สิ่งอำนวยความสะดวก
   const toggleFacility = (facility: string, checked: boolean) => {
     setSelectedFacilities((prev) => {
       if (checked) {
@@ -157,7 +154,7 @@ export default function useRentDetail() {
       return prev.filter((item) => item !== facility);
     });
   };
-
+  //ฟังก์ชัน form วัน/เวลา
   const toggleSelectAllDays = (checked: boolean) => {
     setSchedules((prev) => prev.map((s) => ({ ...s, selected: checked })));
   };
@@ -195,7 +192,7 @@ export default function useRentDetail() {
       )
     );
   };
-
+  //autocomplete เลือกจังหวัด อำเภอ ตำบล
   const handleProvinceSearchChange = (
     pId: number | null,
     dId: number | null,
@@ -231,6 +228,7 @@ export default function useRentDetail() {
     return num;
   };
 
+  //ฟังชันก์ส่งข้อมูล
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitStatus(null);
@@ -348,7 +346,6 @@ export default function useRentDetail() {
       return;
     }
 
-    // ต้องเลือกเวลาอย่างน้อย 1 วัน
     const selectedDays = schedules.filter((s) => s.selected);
     if (selectedDays.length === 0) {
       setSubmitStatus({
@@ -380,12 +377,11 @@ export default function useRentDetail() {
         })),
     };
 
-    // เก็บข้อมูลไว้และเปิด confirm modal
     setPendingSubmitData(payload);
     setConfirmModalOpen(true);
   };
 
-  // ฟังก์ชัน submit จริงหลังจากยืนยัน
+  //ส่งข้อมูลหลังจากกดบันทึก
   const confirmSubmit = async () => {
     setConfirmModalOpen(false);
 
@@ -457,6 +453,7 @@ export default function useRentDetail() {
 
   const closeModal = () => setModalOpen(false);
 
+  //returnกลับไปยังหน้าpageเอาไปใช้
   return {
     images,
     removeImage,

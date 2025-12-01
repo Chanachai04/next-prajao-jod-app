@@ -15,11 +15,12 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import Link from "next/link";
 import AlertModal from "@/components/ui/modal";
 import ConfirmModal from "@/components/ui/confirm";
+//import hook เพื่อเรียกมาใช้ในrentdetail
 import useRentDetail from "@/hook/useRentDetail";
 import LabelAndProvinceSearch from "@/components/form/LabelAndProvinceSearch";
 
-
 export default function RentDetail() {
+  //ตัวแปรของstateและฟังชันการทำงานที่อยู่ในhook
   const {
     images,
     removeImage,
@@ -60,7 +61,7 @@ export default function RentDetail() {
         className="min-h-screen container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5"
         onSubmit={handleSubmit}
       >
-        {/* --ส่วนหัว */}
+        {/* header */}
         <div className="space-y-2 sm:space-y-3">
           <h1 className="text-2xl sm:text-3xl pt-3 sm:pt-5 font-semibold">
             ปล่อยเช่าที่จอดรถ
@@ -70,9 +71,8 @@ export default function RentDetail() {
           </h1>
         </div>
 
-        {/* --ฟอร์มข้อมูลทั่วไป */}
+        {/* ส่วนform */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 md:gap-x-8 gap-y-4 sm:gap-y-6 mt-4 sm:mt-5">
-          {/* ชื่อที่จอดรถ */}
           <LabelAndInput
             title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร) *"
             id="parkingname"
@@ -83,7 +83,6 @@ export default function RentDetail() {
             onChange={handleFieldChange("name")}
           />
 
-          {/* ประเภท */}
           <div>
             <Label className="text-lg">ประเภท *</Label>
             <Select
@@ -210,7 +209,7 @@ export default function RentDetail() {
           </div>
         </div>
 
-        {/* --รายการวันจันทร์ - อาทิตย์ */}
+        {/* formเลือกวันและเวลา */}
         <div className="space-y-2 sm:space-y-1">
           {schedules.map((row, index) => (
             <div key={row.day} className="border-b sm:border-0 pb-3 sm:pb-0">
@@ -230,7 +229,7 @@ export default function RentDetail() {
                   </Label>
                 </div>
 
-                {/* เปิด 24 ชม. */}
+                {/* ถ้าเลือก24ชม */}
                 <div className="col-span-1 sm:col-span-2 flex items-center gap-2">
                   <Checkbox
                     id={`${row.day}-24h`}
@@ -307,14 +306,12 @@ export default function RentDetail() {
           ))}
         </div>
 
-        {/* --- ส่วนรูปภาพ --- */}
+        {/* ส่วนรูปภาพ */}
         <div className="py-4 sm:py-5">
           <Label className="text-base sm:text-lg">
             รูปภาพ (ไม่เกิน 10 รูป)
           </Label>
         </div>
-
-        {/* Input จริง ถูกซ่อนและมี ID */}
         <input
           type="file"
           accept="image/*"
@@ -335,7 +332,6 @@ export default function RentDetail() {
 
         {images.length > 0 && (
           <div className="mt-3 sm:mt-4">
-            {/* ปุ่มสำหรับเพิ่มรูปภาพอื่น ๆ เมื่อมีรูปแล้ว */}
             <Label
               htmlFor="file-upload"
               className="inline-flex items-center justify-center px-3 sm:px-4 py-2 border border-gray-300 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
@@ -490,6 +486,7 @@ export default function RentDetail() {
             </div>
           </div>
         </div>
+        {/* แสดงvalidate */}
         {submitStatus && (
           <p
             className={`mt-4 text-sm sm:text-base ${
@@ -501,7 +498,7 @@ export default function RentDetail() {
             {submitStatus.message}
           </p>
         )}
-
+        {/* ปุ่ม */}
         <Button
           className="w-full sm:w-auto px-8 sm:px-12 h-10 sm:h-12 cursor-pointer mt-4 sm:mt-6 mb-6 sm:mb-10 text-sm sm:text-base"
           type="submit"
@@ -509,7 +506,7 @@ export default function RentDetail() {
         >
           {isSubmitting ? "กำลังบันทึก..." : "บันทึก"}
         </Button>
-
+        {/* modal แจ้งเตือนก่อนกดบันทึก */}
         <ConfirmModal
           open={confirmModalOpen}
           onClose={() => setConfirmModalOpen(false)}
@@ -517,7 +514,7 @@ export default function RentDetail() {
           title="ยืนยันการบันทึกข้อมูล"
           description="คุณแน่ใจหรือไม่ว่าต้องการบันทึกข้อมูลที่จอดรถนี้?"
         />
-        
+        {/* modal แจ้งเตือนบันทึกสำเร็จ */}
         <AlertModal
           open={modalOpen}
           onClose={closeModal}
