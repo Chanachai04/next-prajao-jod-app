@@ -1,3 +1,4 @@
+// interface โครงสร้างข้อมูลรายละเอียดหลักของสถานที่จอดรถ
 export interface RentDetail {
   id: string;
   name: string;
@@ -18,6 +19,8 @@ export interface RentDetail {
   image_id: string;
   created_at: string;
 }
+
+// type ข้อมูลราคาค่าเช่า
 export type Price = {
   id: string;
   rent_id: string;
@@ -27,12 +30,14 @@ export type Price = {
   deposit: number;
 };
 
+// type ข้อมูลสิ่งอำนวยความสะดวก
 export type Facility = {
   id: string;
   rent_id: string;
   name: string;
 };
 
+// type ข้อมูลตารางเวลาการเปิด-ปิด
 export type Schedule = {
   id: string;
   rent_id: string;
@@ -41,6 +46,7 @@ export type Schedule = {
   close_time: string;
 };
 
+// type ข้อมูลรูปภาพ
 export type Image = {
   id: string;
   rent_id: string;

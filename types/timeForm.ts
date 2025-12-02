@@ -1,3 +1,4 @@
+// type Props สำหรับ TimeForm Component (Dropdown เลือกเวลา)
 export type TimeProps = {
   title?: string;
   time: string;

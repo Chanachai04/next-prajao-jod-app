@@ -1,5 +1,6 @@
 export default function Page() {
   return (
+    // Container หลักของหน้า (ตั้งค่าพื้นหลังสีเทาอ่อนและ Padding)
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-4xl mx-auto bg-white p-10 rounded-2xl shadow-sm leading-relaxed">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 text-center">
@@ -12,7 +13,7 @@ export default function Page() {
           โปรดอ่านอย่างละเอียดเพื่อทำความเข้าใจว่าข้อมูลของคุณจะถูกจัดการอย่างไร
         </p>
 
-        {/* SECTION 1 */}
+        {/* SECTION 1: ข้อมูลที่เราเก็บ */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           1. ข้อมูลที่เราเก็บ
         </h2>
@@ -22,7 +23,7 @@ export default function Page() {
           <li>ข้อมูลอุปกรณ์ เช่น IP address, เบราว์เซอร์, ระบบปฏิบัติการ</li>
         </ul>
 
-        {/* SECTION 2 */}
+        {/* SECTION 2: วิธีการเก็บและใช้งานข้อมูล */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           2. วิธีการเก็บและใช้งานข้อมูล
         </h2>
@@ -34,7 +35,7 @@ export default function Page() {
           <li>ป้องกันและตรวจสอบกิจกรรมที่ผิดปกติหรือผิดกฎหมาย</li>
         </ul>
 
-        {/* SECTION 3 */}
+        {/* SECTION 3: การเปิดเผยข้อมูล */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           3. การเปิดเผยข้อมูล
         </h2>
@@ -50,7 +51,7 @@ export default function Page() {
           </li>
         </ul>
 
-        {/* SECTION 4 */}
+        {/* SECTION 4: การรักษาความปลอดภัย */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           4. การรักษาความปลอดภัย
         </h2>
@@ -59,7 +60,7 @@ export default function Page() {
           การเปิดเผย หรือการแก้ไขข้อมูลโดยไม่ได้รับอนุญาต
         </p>
 
-        {/* SECTION 5 */}
+        {/* SECTION 5: สิทธิของผู้ใช้งาน */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           5. สิทธิของผู้ใช้งาน
         </h2>
@@ -69,7 +70,7 @@ export default function Page() {
           <li>สามารถปฏิเสธการใช้ข้อมูลเพื่อการตลาดหรือการสื่อสารได้</li>
         </ul>
 
-        {/* SECTION 6 */}
+        {/* SECTION 6: การเก็บข้อมูล */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           6. การเก็บข้อมูล
         </h2>
@@ -78,7 +79,7 @@ export default function Page() {
           การปฏิบัติตามข้อกฎหมาย และการรักษาสิทธิ์ทางกฎหมายของเรา
         </p>
 
-        {/* SECTION 7 */}
+        {/* SECTION 7: การเปลี่ยนแปลงนโยบาย */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           7. การเปลี่ยนแปลงนโยบาย
         </h2>
@@ -88,6 +89,7 @@ export default function Page() {
           การใช้งานต่อถือว่าคุณยอมรับนโยบายใหม่โดยปริยาย
         </p>
 
+        {/* วันที่อัปเดตล่าสุด */}
         <div className="mt-12 text-right text-sm text-gray-500">
           อัปเดตล่าสุด: 17 พฤศจิกายน 2025
         </div>

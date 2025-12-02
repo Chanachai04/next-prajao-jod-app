@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     res.cookies.set({
       name: "userId",
       value: newUser.id,
-      httpOnly: false, // เปลี่ยนเป็น false เพื่อให้ client-side อ่านได้
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       path: "/",
       sameSite: "lax",

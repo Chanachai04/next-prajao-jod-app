@@ -8,9 +8,9 @@ import { X } from "lucide-react";
 
 interface LabelAndProvinceSearchProps {
   title: string;
-  mode?: "province" | "district" | "subDistrict" | "all";
+  mode?: "province" | "district" | "subDistrict" | "all"; // โหมดการค้นหา (ประเภทข้อมูลที่อนุญาต)
   value?: string | number | null;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void; // Handler เมื่อค่า Input เปลี่ยน (ใช้สำหรับส่งค่าออก)
   initialQuery?: string | null;
   className?: string;
   id?: string;
@@ -34,15 +34,15 @@ export default function LabelAndProvinceSearch({
   id,
   placeholder,
 }: LabelAndProvinceSearchProps) {
-  const [query, setQuery] = useState(initialQuery ?? String(value ?? ""));
-  const [dropdown, setDropdown] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
-  const prevValueRef = useRef<string>("");
-  const prevInitialQueryRef = useRef<string>("");
+  const [query, setQuery] = useState(initialQuery ?? String(value ?? "")); // ข้อความที่ผู้ใช้พิมพ์
+  const [dropdown, setDropdown] = useState(false); // สถานะเปิด/ปิด Dropdown
+  const [highlightedIndex, setHighlightedIndex] = useState(-1); // Index ของรายการที่ถูก Highlight
+  const wrapperRef = useRef<HTMLDivElement>(null); // Ref สำหรับตรวจจับการคลิกนอกคอมโพเนนต์
+  const listRef = useRef<HTMLUListElement>(null); // Ref สำหรับรายการ Dropdown เพื่อใช้ Scroll
+  const prevValueRef = useRef<string>(""); // Ref เพื่อติดตามค่า value ล่าสุดจาก Parent
+  const prevInitialQueryRef = useRef<string>(""); // Ref เพื่อติดตามค่า initialQuery ล่าสุดจาก Parent
 
-  // กรอง options ตาม mode
+  // กรอง options ตาม mode ที่กำหนด
   const getOptions = (): Option[] => {
     if (mode === "province") {
       return provinces.map((p) => ({ ...p, type: "province" as const }));
@@ -51,6 +51,7 @@ export default function LabelAndProvinceSearch({
     } else if (mode === "subDistrict") {
       return subDistricts.map((s) => ({ ...s, type: "subDistrict" as const }));
     } else {
+      // โหมด 'all': รวมทุกประเภท (จังหวัด, เขต/อำเภอ, แขวง/ตำบล)
       return [
         ...provinces.map((p) => ({ ...p, type: "province" as const })),
         ...districts.map((d) => ({ ...d, type: "district" as const })),
@@ -61,7 +62,7 @@ export default function LabelAndProvinceSearch({
 
   const options = getOptions();
 
-  // กรองตาม query
+  // กรองรายการตามข้อความที่พิมพ์ (case-insensitive search ทั้งชื่อไทยและอังกฤษ)
   const filteredOptions =
     query === ""
       ? []
@@ -71,12 +72,13 @@ export default function LabelAndProvinceSearch({
             o.name_en.toLowerCase().includes(query.toLowerCase())
         );
 
-  // เลือก option
+  // ฟังก์ชันจัดการเมื่อเลือก option จาก Dropdown
   const handleSelect = (option: Option) => {
-    setQuery(option.name_th);
+    setQuery(option.name_th); // ตั้งค่าช่องค้นหาเป็นชื่อสถานที่
     setDropdown(false);
     setHighlightedIndex(-1);
 
+    // สร้าง Synthetic Event เพื่อเรียก onChange Prop ของ Parent
     const syntheticEvent = {
       target: { value: option.name_th },
     } as React.ChangeEvent<HTMLInputElement>;
@@ -84,7 +86,7 @@ export default function LabelAndProvinceSearch({
     onChange(syntheticEvent);
   };
 
-  // จัดการ keyboard navigation
+  // จัดการ Keyboard Navigation (ลูกศรขึ้น/ลง, Enter, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!dropdown || filteredOptions.length === 0) return;
 
@@ -105,7 +107,7 @@ export default function LabelAndProvinceSearch({
           highlightedIndex >= 0 &&
           highlightedIndex < filteredOptions.length
         ) {
-          handleSelect(filteredOptions[highlightedIndex]);
+          handleSelect(filteredOptions[highlightedIndex]); // เลือกรายการที่ Highlight
         }
         break;
       case "Escape":
@@ -116,7 +118,7 @@ export default function LabelAndProvinceSearch({
     }
   };
 
-  // scroll to highlighted item
+  // Effect สำหรับ Scroll ไปยังรายการที่ถูก Highlight
   useEffect(() => {
     if (highlightedIndex >= 0 && listRef.current) {
       const highlightedElement = listRef.current.children[
@@ -131,13 +133,13 @@ export default function LabelAndProvinceSearch({
     }
   }, [highlightedIndex]);
 
-  // reset highlighted index เมื่อ filtered options เปลี่ยน
+  // Effect สำหรับ Reset highlighted index เมื่อรายการที่ถูกกรองเปลี่ยน
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setHighlightedIndex(-1);
   }, [query]);
 
-  // sync value from parent
+  // Effect สำหรับ Sync ค่า 'value' จาก Parent (กรณีที่ Parent เปลี่ยนค่าภายนอก)
   useEffect(() => {
     const valueStr = typeof value === "string" ? value : String(value ?? "");
     if (valueStr !== prevValueRef.current) {
@@ -148,7 +150,7 @@ export default function LabelAndProvinceSearch({
     }
   }, [value]);
 
-  // sync initialQuery from parent
+  // Effect สำหรับ Sync ค่า 'initialQuery' จาก Parent (ใช้ครั้งแรก)
   useEffect(() => {
     const initialQueryStr =
       typeof initialQuery === "string"
@@ -162,7 +164,7 @@ export default function LabelAndProvinceSearch({
     }
   }, [initialQuery]);
 
-  // click นอก dropdown ปิด dropdown
+  // Effect สำหรับตรวจจับการคลิกนอก Dropdown เพื่อปิด Dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -177,16 +179,19 @@ export default function LabelAndProvinceSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ฟังก์ชันล้างช่องค้นหา (Clear Button)
   const handleClear = () => {
     setQuery("");
     setDropdown(false);
     setHighlightedIndex(-1);
+    // เรียก onChange เพื่อแจ้ง Parent ว่าค่าถูกล้างแล้ว
     const syntheticEvent = {
       target: { value: "" },
     } as React.ChangeEvent<HTMLInputElement>;
     onChange(syntheticEvent);
   };
 
+  // กำหนด Placeholder ตามโหมดที่เลือก
   const getPlaceholder = () => {
     if (placeholder) return placeholder;
     if (mode === "province") return "พิมพ์ชื่อจังหวัด";
@@ -197,10 +202,12 @@ export default function LabelAndProvinceSearch({
 
   return (
     <div className={className ?? ""}>
+      {/* Label */}
       <Label htmlFor={id} className="text-lg">
         {title}
       </Label>
       <div ref={wrapperRef} className="relative mt-2">
+        {/* Input Field */}
         <Input
           type="text"
           id={id}
@@ -208,14 +215,16 @@ export default function LabelAndProvinceSearch({
           placeholder={getPlaceholder()}
           onChange={(e) => {
             setQuery(e.target.value);
-            setDropdown(true);
-            onChange(e);
+            setDropdown(true); // เปิด Dropdown เมื่อพิมพ์
+            onChange(e); // ส่งค่าที่พิมพ์ปัจจุบันไปยัง Parent
           }}
-          onFocus={() => setDropdown(true)}
-          onKeyDown={handleKeyDown}
+          onFocus={() => setDropdown(true)} // เปิด Dropdown เมื่อ Focus
+          onKeyDown={handleKeyDown} // จัดการ Keyboard Navigation
           className="w-full"
           autoComplete="off"
         />
+
+        {/* ปุ่มล้าง (Clear Button) - แสดงเมื่อมีข้อความในช่อง */}
         {query && (
           <button
             type="button"
@@ -226,6 +235,7 @@ export default function LabelAndProvinceSearch({
           </button>
         )}
 
+        {/* Dropdown List (รายการที่ถูกกรอง) */}
         {dropdown && filteredOptions.length > 0 && (
           <ul
             ref={listRef}
@@ -240,8 +250,8 @@ export default function LabelAndProvinceSearch({
                     ? "bg-blue-100"
                     : "hover:bg-gray-100"
                 }`}
-                onMouseDown={() => handleSelect(o)}
-                onMouseEnter={() => setHighlightedIndex(index)}
+                onMouseDown={() => handleSelect(o)} // ใช้ onMouseDown เพื่อให้ทำงานก่อน onBlur ของ Input
+                onMouseEnter={() => setHighlightedIndex(index)} // Highlight เมื่อ Hover
               >
                 {o.name_th} ({o.name_en})
               </li>

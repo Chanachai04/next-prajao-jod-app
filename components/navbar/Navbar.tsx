@@ -8,15 +8,17 @@ import { supabase } from "@/lib/supabaseClient";
 import Image from "next/image";
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [image, setImage] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // สถานะเข้าสู่ระบบ
+  const [image, setImage] = useState<string | null>(null); // URL รูปภาพโปรไฟล์
 
+  // Effect สำหรับตรวจสอบสถานะ Login และดึงรูปภาพ
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // 1. ตรวจสอบสถานะ Login ผ่าน API Route /api/me
         const res = await fetch("/api/me", {
           cache: "no-store",
-          credentials: "include",
+          credentials: "include", // ต้องรวมคุกกี้ในการเรียก API
         });
 
         if (!res.ok) {
@@ -28,8 +30,8 @@ export default function Navbar() {
         const data = await res.json();
         setIsLoggedIn(data.loggedIn);
 
+        // 2. ถ้าเข้าสู่ระบบแล้ว (มี userId) ให้ดึง URL รูปภาพโปรไฟล์จาก Supabase
         if (data.userId) {
-          // ดึงรูปครั้งแรก + กัน cache
           const { data: userData } = await supabase
             .from("users")
             .select("image_url")
@@ -37,6 +39,7 @@ export default function Navbar() {
             .single();
 
           if (userData?.image_url) {
+            // เพิ่ม Query parameter เพื่อป้องกันการ Cache รูปภาพเก่า
             setImage(userData.image_url + `?t=${Date.now()}`);
           }
         }
@@ -49,10 +52,12 @@ export default function Navbar() {
 
     fetchData();
 
-    // login/logout event
+    // 3. Setup Event Listener สำหรับการ Login/Logout
+    // ดักฟัง Custom Event เมื่อสถานะ Login มีการเปลี่ยนแปลง (ถูกเรียกจาก LoginForm/Logout API)
     const handler = () => fetchData();
     window.addEventListener("loginStatusChanged", handler);
 
+    // Cleanup: ลบ Event Listener เมื่อ Component ถูก Unmount
     return () => {
       window.removeEventListener("loginStatusChanged", handler);
     };
@@ -62,6 +67,7 @@ export default function Navbar() {
     <nav className="bg-[#44444E] max-w-full">
       <div className="py-2 sm:py-3 px-3 sm:px-6 mx-auto container">
         <div className="flex justify-between items-center gap-2">
+          {/* ส่วนโลโก้ (ลิงก์กลับหน้าหลัก) */}
           <Link
             href="/"
             className="font-bold text-white text-center flex justify-start items-center"
@@ -77,9 +83,12 @@ export default function Navbar() {
             />
           </Link>
 
+          {/* ปุ่มและลิงก์ฝั่งขวา */}
           <div className="text-white flex gap-2 sm:gap-4">
             {isLoggedIn ? (
+              // ------------------ แสดงเมื่อเข้าสู่ระบบแล้ว ------------------
               <>
+                {/* ปุ่มปล่อยเช่าที่จอดรถ (แสดงบนจอใหญ่) */}
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
@@ -89,6 +98,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
+                {/* ปุ่มเช่าที่จอด (แสดงบนจอมือถือ) */}
                 <Link href="/rent" className="sm:hidden">
                   <Button
                     variant="outline"
@@ -98,6 +108,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
+                {/* รูปโปรไฟล์ / ไอคอน User (ลิงก์ไปหน้า Profile) */}
                 <Link href="/profile/detail">
                   {image ? (
                     <Image
@@ -113,8 +124,9 @@ export default function Navbar() {
                 </Link>
               </>
             ) : (
+              // ------------------ แสดงเมื่อยังไม่เข้าสู่ระบบ ------------------
               <>
-                {/* ✅ ปุ่มเข้าสู่ระบบ - ต้องเป็น Link ธรรมดา */}
+                {/* ปุ่มเข้าสู่ระบบ */}
                 <Link href="/login">
                   <Button
                     variant="outline"
@@ -124,6 +136,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
+                {/* ปุ่มปล่อยเช่าที่จอดรถ (แสดงบนจอใหญ่) */}
                 <Link href="/rent" className="hidden sm:block">
                   <Button
                     variant="outline"
@@ -133,6 +146,7 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
+                {/* ปุ่มเช่าที่จอด (แสดงบนจอมือถือ) */}
                 <Link href="/rent" className="sm:hidden">
                   <Button
                     variant="outline"

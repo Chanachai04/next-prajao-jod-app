@@ -27,9 +27,9 @@ export default function ProvinceSearch({
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-  const isUserTypingRef = useRef(false);
+  const isUserTypingRef = useRef(false); // Flag เพื่อตรวจจับว่าผู้ใช้กำลังพิมพ์อยู่
 
-  // รวม options
+  // รวม options ทั้งหมด (จังหวัด, อำเภอ, ตำบล)
   const options: Option[] = [
     ...provinces.map((p) => ({ ...p, type: "province" as const })),
     ...districts.map((d) => ({ ...d, type: "district" as const })),
@@ -51,7 +51,9 @@ export default function ProvinceSearch({
     setQuery(option.name_th);
     setDropdown(false);
     setHighlightedIndex(-1);
+    isUserTypingRef.current = false; // หยุดการพิมพ์
 
+    // ตั้งค่า ID ของระดับที่เกี่ยวข้องและเคลียร์ ID ระดับอื่น
     if (option.type === "province") {
       setSelectedProvinceId(option.id);
       setSelectedDistrictId(null);
@@ -88,7 +90,7 @@ export default function ProvinceSearch({
           highlightedIndex >= 0 &&
           highlightedIndex < filteredOptions.length
         ) {
-          handleSelect(filteredOptions[highlightedIndex]);
+          handleSelect(filteredOptions[highlightedIndex]); // เลือกรายการที่ Highlight
         }
         break;
       case "Escape":
@@ -152,6 +154,7 @@ export default function ProvinceSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ฟังก์ชันล้างช่องค้นหา
   const handleClear = () => {
     isUserTypingRef.current = true;
     setQuery("");
@@ -160,6 +163,8 @@ export default function ProvinceSearch({
     setSelectedSubDistrictId(null);
     setHighlightedIndex(-1);
     if (onChange) onChange(null, null, null);
+
+    // ตั้งค่า isUserTypingRef กลับเป็น false หลังจากหน่วงเวลา
     setTimeout(() => {
       isUserTypingRef.current = false;
     }, 100);
@@ -167,23 +172,27 @@ export default function ProvinceSearch({
 
   return (
     <div ref={wrapperRef} className="relative">
+      {/* Label (ซ่อนได้ด้วย hideLabel) */}
       {!hideLabel && (
         <Label htmlFor="search" className="text-sm sm:text-base lg:text-lg">
           สถานที่
         </Label>
       )}
       <div className={`relative ${!hideLabel ? "mt-2" : ""}`}>
+        {/* Icon */}
         <MapPin className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 w-6 h-6" />
+        {/* Input Field */}
         <Input
           type="text"
+          id="search"
           value={query}
           placeholder="พิมพ์จังหวัดหรือบริเวณใกล้เคียง"
           onChange={(e) => {
-            isUserTypingRef.current = true;
+            isUserTypingRef.current = true; // ตั้งค่า Flag: ผู้ใช้กำลังพิมพ์
             const newValue = e.target.value;
             setQuery(newValue);
             setDropdown(true);
-            // เรียก callback เพื่อ update parent
+            // เรียก callback เพื่อ update parent's search query
             if (onQueryChange) {
               onQueryChange(newValue);
             }
@@ -191,14 +200,16 @@ export default function ProvinceSearch({
           onFocus={() => setDropdown(true)}
           onKeyDown={handleKeyDown}
           onBlur={() => {
-            // หน่วงเวลาเล็กน้อยก่อน reset flag
+            // หน่วงเวลาเล็กน้อยเพื่อให้ handleSelect/onMouseDown ทำงานก่อน
             setTimeout(() => {
+              // Reset isUserTypingRef เมื่อ blur (ถ้าไม่มีการเลือก item)
               isUserTypingRef.current = false;
             }, 100);
           }}
           className="pl-10 pr-10 w-full text-sm md:text-lg h-10 bg-white"
           autoComplete="off"
         />
+        {/* ปุ่มล้าง (Clear Button) */}
         {query && (
           <button
             type="button"
@@ -209,6 +220,7 @@ export default function ProvinceSearch({
           </button>
         )}
 
+        {/* Dropdown List */}
         {dropdown && filteredOptions.length > 0 && (
           <ul
             ref={listRef}
@@ -223,7 +235,7 @@ export default function ProvinceSearch({
                     ? "bg-blue-100"
                     : "hover:bg-gray-100"
                 }`}
-                onMouseDown={() => handleSelect(o)}
+                onMouseDown={() => handleSelect(o)} // ใช้ onMouseDown เพื่อให้ทำงานก่อน onBlur ของ Input
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
                 {o.name_th} ({o.name_en})

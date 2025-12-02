@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { DetailPanelProps, PriceKey } from "@/types/detailPanel";
 
+// Map สำหรับเชื่อมโยง Key (hourly/daily/monthly) กับ Field ในข้อมูลราคาและ Label ที่แสดง
 const PRICE_KEY_MAP: Record<
   PriceKey,
   {
@@ -21,6 +22,7 @@ const PRICE_KEY_MAP: Record<
 
 const FALLBACK_IMAGE = "/image.jpg";
 
+// ฟังก์ชันช่วยในการจัดรูปแบบตัวเลขให้เป็นสกุลเงินบาท (THB)
 const formatCurrency = (value: number | null | undefined) => {
   if (value === null || value === undefined) return null;
   return new Intl.NumberFormat("th-TH", {
@@ -41,15 +43,18 @@ export default function DetailPanel({
   monthDurationKey,
 }: DetailPanelProps) {
   const searchParams = useSearchParams();
+  // จัดการรูปภาพสำรองหากไม่มีรูปภาพ
   const images = spot.images.length > 0 ? spot.images : [];
   const imageUrls =
     images.length > 0 ? images.map((img) => img.image_url) : [FALLBACK_IMAGE];
 
+  // 1. คำนวณ Key ราคาที่มีอยู่จริง (Available Price Keys)
   const availablePriceKeys = useMemo(() => {
     const entries: Array<{ key: PriceKey; label: string }> = [];
     if (!spot.price) {
       return entries;
     }
+    // วนลูปผ่าน PRICE_KEY_MAP และตรวจสอบว่า field นั้นๆ มีค่าราคาอยู่หรือไม่ (ไม่เป็น null/undefined)
     (Object.keys(PRICE_KEY_MAP) as PriceKey[]).forEach((key) => {
       const { field, label } = PRICE_KEY_MAP[key];
       const value = spot.price ? spot.price[field] : null;
@@ -60,23 +65,29 @@ export default function DetailPanel({
     return entries;
   }, [spot.price]);
 
+  // 2. Effect สำหรับตรวจสอบและตั้งค่า Option ราคาเริ่มต้น
   useEffect(() => {
     if (!availablePriceKeys.length) return;
+    // ตรวจสอบว่า option ที่เลือกปัจจุบัน (selectedOptionDetail) มีอยู่ในรายการราคาที่ใช้งานได้หรือไม่
     const hasSelected = availablePriceKeys.some(
       (item) => item.key === selectedOptionDetail
     );
+    // ถ้าไม่มี ให้เลือก Option แรกที่มีอยู่
     if (!hasSelected) {
       onSelectOption(availablePriceKeys[0].key);
     }
   }, [availablePriceKeys, onSelectOption, selectedOptionDetail]);
 
+  // 3. คำนวณราคาที่ใช้งานอยู่ (Active Price)
   const activePrice = useMemo(() => {
     if (!spot.price) return null;
     const config = PRICE_KEY_MAP[selectedOptionDetail];
     if (!config) return null;
+    // ดึงค่าราคาตาม Option ที่เลือก
     return spot.price[config.field];
   }, [spot.price, selectedOptionDetail]);
 
+  // จัดรูปแบบข้อมูลสำหรับแสดงผล
   const fullAddress = [spot.address, spot.subdistrict, spot.district]
     .filter(Boolean)
     .join(" ");
@@ -88,32 +99,30 @@ export default function DetailPanel({
       ? spot.facilities.map((item) => item.name).join(", ")
       : "-";
 
-  // สร้าง URL พร้อม params
+  // 4. สร้าง URL สำหรับหน้าสั่งจอง (Order Page) พร้อม Query Parameters
   const orderUrl = useMemo(() => {
     const params = new URLSearchParams();
 
-    // ดึงค่าจาก URL ที่เข้ามา (หน้า booking)
+    // ดึง dateIn จาก URL (ที่มาจากหน้า Booking) และตั้งค่าเสมอ
     const dateIn = searchParams.get("dateIn");
-
-    // ใส่ Date In เสมอ
     if (dateIn) params.set("dateIn", dateIn);
 
-    // ใช้ "selectedOptionDetail" (state ของ Panel นี้) เพื่อกำหนด mode ที่จะส่งไป
+    // ใช้ selectedOptionDetail เพื่อกำหนด mode ที่จะส่งไป
     if (selectedOptionDetail === "monthly") {
       params.set("mode", "monthly");
-      // ถ้าเป็นรายเดือน ให้ใช้ "monthDurationKey" (ที่รับมาจาก prop)
+      // ถ้าเป็นรายเดือน ต้องส่ง monthDurationKey ไปด้วย
       if (monthDurationKey) {
         params.set("monthDurationKey", monthDurationKey);
       }
     } else if (selectedOptionDetail === "daily") {
       params.set("mode", "daily");
-      // ถ้าเป็นรายวัน ให้ดึง dateOut จาก searchParams
+      // ถ้าเป็นรายวัน ต้องดึง dateOut จาก searchParams ไปด้วย
       const dateOut = searchParams.get("dateOut");
       if (dateOut) params.set("dateOut", dateOut);
     } else {
-      // "hourly"
+      // โหมด "hourly"
       params.set("mode", "hourly");
-      // ถ้ารายชั่วโมง ให้ดึง timeIn/timeOut/dateOut จาก searchParams
+      // ดึง timeIn, timeOut, dateOut จาก searchParams ไปด้วย
       const dateOut = searchParams.get("dateOut");
       const timeIn = searchParams.get("timeIn");
       const timeOut = searchParams.get("timeOut");
@@ -122,15 +131,17 @@ export default function DetailPanel({
       if (timeOut) params.set("timeOut", timeOut);
     }
 
+    // สร้าง URL ปลายทาง: /order/[spot.id]?params
     return `/order/${spot.id}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
   }, [spot.id, searchParams, selectedOptionDetail, monthDurationKey]);
 
   return (
-    <div className="w-full   lg:w-lg bg-white">
+    <div className="w-full lg:w-lg bg-white">
       {/* Image Gallery */}
       <div className="relative">
+        {/* รูปภาพหลักที่แสดงตาม currentIndex */}
         <Image
           src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
           alt={spot.name ?? "รูปที่จอดรถ"}
@@ -138,12 +149,14 @@ export default function DetailPanel({
           height={250}
           className="w-full h-[200px] sm:h-[250px] object-cover"
         />
+        {/* ปุ่มปิด Detail Panel (X) */}
         <button
           onClick={onClose}
           className="cursor-pointer absolute top-4 sm:top-6 left-2 -translate-y-1/2 bg-white p-1.5 sm:p-2 rounded-full shadow hover:bg-gray-100 transition-colors z-10"
         >
           <X className="w-3 h-3 sm:w-4 sm:h-4" />
         </button>
+        {/* ปุ่มเลื่อนดูรูป (ซ้าย/ขวา) - แสดงเมื่อมีรูปมากกว่า 1 รูป */}
         {imageUrls.length > 1 && (
           <>
             <button
@@ -177,17 +190,19 @@ export default function DetailPanel({
                   ? "border-blue-500 scale-105"
                   : "border-transparent hover:border-gray-300"
               }`}
-              onClick={() => onSelectImage(index)}
+              onClick={() => onSelectImage(index)} // เปลี่ยนรูปภาพหลักเมื่อคลิก
             />
           ))}
         </div>
       )}
 
-      {/* Details */}
-      <div className="px-3 sm:px-4 max-h-full  overflow-y-auto pb-6 sm:pb-8">
+      {/* Details Section */}
+      <div className="px-3 sm:px-4 max-h-full overflow-y-auto pb-6 sm:pb-8">
+        {/* ชื่อสถานที่ */}
         <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">
           {spot.name ?? "-"}
         </p>
+        {/* ที่อยู่ */}
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 shrink-0" />
           <p className="text-sm sm:text-base lg:text-lg text-gray-700 wrap-break-word">
@@ -196,14 +211,17 @@ export default function DetailPanel({
         </div>
         <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
 
+        {/* ข้อมูลราคาและปุ่มจอง */}
         <div>
           <p className="text-lg sm:text-xl mb-2 font-semibold">ข้อมูลราคา</p>
+          {/* ปุ่มเลือก Option ราคา (ชั่วโมง/วัน/เดือน) */}
           <div className="flex flex-wrap gap-2">
             {availablePriceKeys.length > 0 ? (
               availablePriceKeys.map(({ key, label }) => (
                 <Button
                   key={key}
                   onClick={() => onSelectOption(key)}
+                  // เน้นปุ่มที่ถูกเลือกอยู่
                   variant={selectedOptionDetail === key ? "default" : "link"}
                   className={`${
                     selectedOptionDetail === key ? "text-white" : "text-black"
@@ -218,25 +236,28 @@ export default function DetailPanel({
               </span>
             )}
           </div>
+          {/* ราคาปัจจุบันที่เลือก */}
           <div className="text-center">
             <div className="flex justify-between my-3 sm:my-4 text-sm sm:text-base lg:text-lg">
               <p>ราคาค่าจอด</p>
-              <p className="font-bold  text-blue-600">
+              <p className="font-bold text-blue-600">
                 {activePrice !== null && activePrice !== undefined
-                  ? formatCurrency(activePrice as number)
+                  ? formatCurrency(activePrice as number) // แสดงราคาที่จัดรูปแบบแล้ว
                   : "-"}
               </p>
             </div>
+            {/* ปุ่มจองทันที */}
             <Link href={orderUrl}>
               <Button
                 type="button"
-                className="w-full  sm:w-3/4 lg:w-1/2 mt-6 sm:mt-10 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base lg:text-lg"
+                className="w-full sm:w-3/4 lg:w-1/2 mt-6 sm:mt-10 cursor-pointer hover:scale-105 transition-transform text-sm sm:text-base lg:text-lg"
               >
                 จองทันที
               </Button>
             </Link>
           </div>
 
+          {/* ข้อมูลเพิ่มเติม: จุดสังเกตุ, ประเภท, สิ่งอำนวยความสะดวก */}
           <div>
             <hr className="border border-[#7C7C7C] my-3 sm:my-4" />
             <p className="font-medium text-sm sm:text-base lg:text-lg">

@@ -13,8 +13,10 @@ import { useParams, useSearchParams } from "next/navigation";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 
 export default function Page() {
-  const { id } = useParams();
-  const searchParams = useSearchParams();
+  const { id } = useParams(); // ID ของที่จอดรถจาก URL
+  const searchParams = useSearchParams(); // Query Parameters จาก URL
+
+  // สถานะสำหรับข้อมูลที่จอดรถ (จากการ Fetch)
   const [rentDetail, setRentDetail] = useState<RentDetail | null>(null);
   const [price, setPrice] = useState<Price | null>(null);
   const [facilities, setFacilities] = useState<Facility[] | null>(null);
@@ -22,23 +24,26 @@ export default function Page() {
   const [images, setImages] = useState<{ image_url: string }[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // สถานะสำหรับ UI และการคำนวณราคา
   const [showAll, setShowAll] = useState(false);
   const [dateIn, setDateIn] = useState<Date>(new Date());
   const [dateOut, setDateOut] = useState<Date>(new Date());
   const [timeIn, setTimeIn] = useState<string>("00:00");
   const [timeOut, setTimeOut] = useState<string>("01:00");
 
-  const [isShow, setIsShow] = useState<"day" | "month" | "hour" | "">("");
-  const isLoading = !rentDetail || !price || !facilities || !schedule;
-  const [displayPrice, setDisplayPrice] = useState<number | null>(null);
-  const [priceSuffix, setPriceSuffix] = useState<string>("");
-  const [totalPrice, setTotalPrice] = useState<number | null>(null);
+  const [isShow, setIsShow] = useState<"day" | "month" | "hour" | "">(""); // โหมดราคาที่เลือก
+  const isLoading = !rentDetail || !price || !facilities || !schedule; // สถานะโหลดรวม
+  const [displayPrice, setDisplayPrice] = useState<number | null>(null); // ราคาต่อหน่วย
+  const [priceSuffix, setPriceSuffix] = useState<string>(""); // หน่วยราคา
+  const [totalPrice, setTotalPrice] = useState<number | null>(null); // ราคารวม
 
+  // สถานะสำหรับโหมดรายเดือน
   const [selectedMonthKey, setSelectedMonthKey] =
     useState<string>("threeMonths");
   const [userId, setUserId] = useState<string>("");
   const FALLBACK_IMAGE = "/image.jpg";
 
+  // ข้อมูลวันในสัปดาห์สำหรับจัดการตารางเวลา
   const daysInfo: Record<string, { index: number }> = {
     วันอาทิตย์: { index: 0 },
     วันจันทร์: { index: 1 },
@@ -49,19 +54,21 @@ export default function Page() {
     วันเสาร์: { index: 6 },
   };
 
+  // ตัวเลือกสำหรับ Dropdown ระยะเวลาจองรายเดือน
   const timeOption = {
     threeMonths: "3 เดือน",
     sixMonths: "6 เดือน",
     oneYears: "1 ปี",
   };
 
+  // คำนวณจำนวนเดือนจริงจาก Key ที่เลือก
   const selectedMonthDuration = useMemo(() => {
     if (selectedMonthKey === "sixMonths") return 6;
     if (selectedMonthKey === "oneYears") return 12;
     return 3; // Default
   }, [selectedMonthKey]);
 
-  // คำนวณราคารวม
+  // คำนวณราคารวมตามโหมดที่เลือก (ชั่วโมง, วัน, เดือน)
   useEffect(() => {
     if (!displayPrice) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -85,7 +92,7 @@ export default function Page() {
       endDateTime.setHours(endHour, endMinute, 0, 0);
 
       const diffMs = endDateTime.getTime() - startDateTime.getTime();
-      const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+      const diffHours = Math.ceil(diffMs / (1000 * 60 * 60)); // ปัดเศษขึ้น
 
       if (diffHours > 0) {
         setTotalPrice(displayPrice * diffHours);
@@ -105,7 +112,7 @@ export default function Page() {
       end.setHours(0, 0, 0, 0);
 
       const diffMs = end.getTime() - start.getTime();
-      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24)); // ปัดเศษขึ้น
 
       if (diffDays > 0) {
         setTotalPrice(displayPrice * diffDays);
@@ -128,7 +135,7 @@ export default function Page() {
     selectedMonthDuration,
   ]);
 
-  // อ่านค่าจาก URL params
+  // อ่านค่าเริ่มต้นจาก URL params
   useEffect(() => {
     if (!searchParams) return;
 
@@ -137,10 +144,10 @@ export default function Page() {
     const timeInParam = searchParams.get("timeIn");
     const timeOutParam = searchParams.get("timeOut");
     const mode = searchParams.get("mode");
-    // --- v v v อ่านค่า Key และ Number(เผื่อไว้) จาก URL v v v ---
     const monthDurationKeyParam = searchParams.get("monthDurationKey");
     const monthDurationParam = searchParams.get("monthDuration");
 
+    // ตั้งค่า Date/Time
     if (dateInParam) {
       const d = new Date(dateInParam);
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -153,13 +160,13 @@ export default function Page() {
     if (timeInParam) setTimeIn(timeInParam);
     if (timeOutParam) setTimeOut(timeOutParam);
 
-    // ตั้งค่า mode จาก URL
+    // ตั้งค่าโหมดและระยะเวลา (สำหรับ Monthly)
     if (mode === "monthly") {
       setIsShow("month");
       if (monthDurationKeyParam) {
         setSelectedMonthKey(monthDurationKeyParam);
       } else if (monthDurationParam) {
-        // ถ้าไม่มี Key ให้ใช้ Number (จาก link เก่า หรือจากหน้า payment)
+        // รองรับค่า duration ที่เป็น Number (จาก link เก่า)
         const duration = parseInt(monthDurationParam);
         if (duration === 6) setSelectedMonthKey("sixMonths");
         else if (duration === 12) setSelectedMonthKey("oneYears");
@@ -172,6 +179,7 @@ export default function Page() {
     }
   }, [searchParams]);
 
+  // Fetch ข้อมูลที่จอดรถจาก API
   useEffect(() => {
     const fetchOrder = async () => {
       const res = await fetch(`/api/order?id=${id}`, {
@@ -180,7 +188,7 @@ export default function Page() {
       });
       const data = await res.json();
       console.log(data);
-      setUserId(data.userId);
+      setUserId(data.userId); // ดึง userId จาก API (ถ้ามี)
       setRentDetail(data.rentDetail);
       setPrice(data.price);
       setFacilities(data.facilities);
@@ -195,9 +203,9 @@ export default function Page() {
     if (!price) return;
 
     const timer = setTimeout(() => {
-      // ถ้ามี mode จาก URL ให้ใช้ตาม mode
+      // 1. ถ้ามี mode จาก URL ให้พยายามใช้ mode นั้นก่อน
       if (isShow) {
-        // ตรวจสอบว่า mode ที่เลือกมีราคาไหม
+        // ตรวจสอบว่า mode ที่เลือกมีราคาหรือไม่ และตั้งค่า
         if (isShow === "day" && price.price_per_day) {
           setDisplayPrice(price.price_per_day);
           setPriceSuffix("/ วัน");
@@ -208,7 +216,7 @@ export default function Page() {
           setDisplayPrice(price.price_per_hour);
           setPriceSuffix("/ ชั่วโมง");
         } else {
-          // ถ้า mode ที่เลือกไม่มีราคา ให้เลือกราคาที่มี
+          // ถ้า mode ที่เลือกไม่มีราคา ให้ fallback ไปหาราคาที่มี
           if (price.price_per_day) {
             setIsShow("day");
             setDisplayPrice(price.price_per_day);
@@ -226,7 +234,7 @@ export default function Page() {
         return;
       }
 
-      // ถ้าไม่มี isShow จาก URL ให้เลือกราคาที่มี
+      // 2. ถ้าไม่มี isShow จาก URL ให้เลือกราคาที่มีอยู่ (Day > Month > Hour)
       if (price.price_per_day) {
         setIsShow("day");
         setDisplayPrice(price.price_per_day);
@@ -245,9 +253,12 @@ export default function Page() {
     return () => clearTimeout(timer);
   }, [price, isShow]);
 
+  // Helper Functions
+
   const imageUrls =
     images.length > 0 ? images.map((img) => img.image_url) : [FALLBACK_IMAGE];
 
+  // นำทางภาพหลัก (Prev/Next)
   const onNavigate = (dir: "prev" | "next") =>
     setCurrentIndex((prev) =>
       dir === "prev"
@@ -259,14 +270,17 @@ export default function Page() {
         : prev + 1
     );
 
+  // เลือกภาพหลักจาก Thumbnail
   const onSelectImage = (index: number) => setCurrentIndex(index);
 
+  // จัดรูปแบบเวลา
   const formatTime = (open?: string, close?: string) => {
     if (!open || !close) return "";
     if (open === "00:00:00" && close === "00:00:00") return "เปิด 24 ชม.";
     return `${open.slice(0, 5)} - ${close.slice(0, 5)}`;
   };
 
+  // จัดรูปแบบวันในสัปดาห์
   const formatDays = (days: string[]) => {
     if (!days || days.length === 0) return "";
     const validDays = days.filter((d) => d in daysInfo);
@@ -277,6 +291,7 @@ export default function Page() {
     if (indices.length === 7) return "วันจันทร์ - วันอาทิตย์";
     if (indices.length === 1) return validDays[0];
 
+    // พยายามแสดงช่วงวัน (เช่น จันทร์ - ศุกร์)
     const firstDay = validDays.find((d) => daysInfo[d].index === indices[0]);
     const lastDay = validDays.find(
       (d) => daysInfo[d].index === indices[indices.length - 1]
@@ -284,6 +299,7 @@ export default function Page() {
     return `${firstDay} - ${lastDay}`;
   };
 
+  // จัดกลุ่มตารางเวลาที่มีเวลาเปิด-ปิดเหมือนกัน
   const groupedSchedules = () => {
     if (!schedule) return [];
     const groups: Record<string, string[]> = {};
@@ -300,6 +316,7 @@ export default function Page() {
     });
   };
 
+  // คอมโพเนนต์ย่อยสำหรับแสดงตารางเวลา 1 กลุ่ม
   const renderScheduleGroup = (group: {
     open: string;
     close: string;
@@ -326,28 +343,33 @@ export default function Page() {
 
   const allGroups = groupedSchedules();
 
-  // สร้าง URL สำหรับไปหน้า payment
+  // สร้าง URL สำหรับไปหน้า Payment
   const buildPaymentUrl = useMemo(() => {
     const params = new URLSearchParams();
 
+    // ส่ง Date/Time
     if (dateIn) params.set("dateIn", dateIn.toISOString());
     if (dateOut) params.set("dateOut", dateOut.toISOString());
     if (timeIn) params.set("timeIn", timeIn);
     if (timeOut) params.set("timeOut", timeOut);
 
+    // ส่ง Mode และ Duration (ถ้าเป็น Monthly)
     if (isShow === "month") {
       params.set("mode", "monthly");
-      // --- v v v ใช้ตัวแปร number ที่คำนวณจาก useMemo v v v ---
+      // ใช้ตัวเลขระยะเวลาที่คำนวณแล้ว
       params.set("monthDuration", String(selectedMonthDuration));
     } else if (isShow === "day") {
       params.set("mode", "daily");
     } else if (isShow === "hour") {
       params.set("mode", "hourly");
     }
+
+    // ส่ง userId ไปด้วย (ถ้ามี)
     if (userId) {
       params.set("userId", userId);
     }
 
+    // URL ปลายทาง: /payment/[id]?params
     return `/payment/${id}${params.toString() ? `?${params.toString()}` : ""}`;
   }, [
     id,
@@ -360,8 +382,8 @@ export default function Page() {
     selectedMonthDuration,
   ]);
 
-  if (isLoading) return <Loading />;
-
+  // ------------------ Rendering ------------------
+  if (isLoading) return <Loading />; // แสดง Loading ระหว่างดึงข้อมูล
   return (
     <div className="container mx-auto min-h-screen px-4 sm:px-6 lg:px-8">
       {/* Breadcrumb */}
@@ -375,8 +397,9 @@ export default function Page() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        {/* Main Content */}
+        {/* Main Content (รายละเอียดที่จอดรถ) */}
         <div className="w-full lg:w-2/3">
+          {/* Image Gallery */}
           <div className="relative w-full">
             <Image
               src={imageUrls[currentIndex] ?? FALLBACK_IMAGE}
@@ -386,6 +409,7 @@ export default function Page() {
               className="w-full h-[250px] sm:h-[350px] lg:h-[450px] object-cover cursor-pointer rounded-2xl"
             />
 
+            {/* ปุ่มนำทางภาพ */}
             {imageUrls.length > 1 && (
               <>
                 <button
@@ -404,7 +428,8 @@ export default function Page() {
               </>
             )}
           </div>
-          {/* Thumbnails - แสดงเฉพาะเมื่อมีรูปมากกว่า 1 รูป */}
+
+          {/* Thumbnails */}
           {imageUrls.length > 1 && (
             <div className="h-[60px] sm:h-[80px] lg:h-[100px] w-full flex justify-start items-center space-x-2 overflow-x-auto px-1 sm:px-2 mt-3 sm:mt-4 scrollbar-hide">
               {imageUrls.map((img, idx) => (
@@ -424,7 +449,8 @@ export default function Page() {
               ))}
             </div>
           )}
-          {/* Detail */}
+
+          {/* รายละเอียดเพิ่มเติม */}
           <div className="mt-4 sm:mt-6">
             <div>
               <h1 className="text-xl sm:text-2xl lg:text-3xl mb-2 sm:mb-3 font-semibold">
@@ -441,7 +467,7 @@ export default function Page() {
                 </span>
               </div>
 
-              {/* Schedule */}
+              {/* ตารางเวลา (Schedule) */}
               <div
                 className={`mb-4 sm:mb-6 mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg ${
                   showAll
@@ -454,6 +480,7 @@ export default function Page() {
                     .map((g, index) => {
                       const showButton = index === 0 && allGroups.length > 1;
 
+                      // ใช้ renderScheduleGroup แสดงผลตารางเวลา
                       return renderScheduleGroup({
                         ...g,
                         button: showButton ? (
@@ -466,10 +493,12 @@ export default function Page() {
                         ) : undefined,
                       });
                     })
+                    // กรอง: แสดงทั้งหมด (showAll) หรือแสดงแค่กลุ่มแรก (i === 0)
                     .filter((_, i) => showAll || i === 0)}
               </div>
             </div>
 
+            {/* เกี่ยวกับลานจอด */}
             <div className="mb-4 sm:mb-6 lg:mb-8">
               <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
                 เกี่ยวกับลานจอด
@@ -479,6 +508,7 @@ export default function Page() {
               </p>
             </div>
 
+            {/* จุดสังเกตุ */}
             <div className="mb-4 sm:mb-6 lg:mb-8">
               <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-2">
                 จุดสังเกตุ
@@ -488,6 +518,7 @@ export default function Page() {
               </p>
             </div>
 
+            {/* สิ่งอำนวยความสะดวก */}
             <div className="mb-4 sm:mb-6 lg:mb-8 pb-4">
               <h1 className="text-base sm:text-lg lg:text-xl font-semibold mb-3">
                 สิ่งอำนวยความสะดวก
@@ -512,14 +543,14 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Price Box */}
+        {/* Price Box (ส่วนจอง) */}
         <div className="sticky top-4 mb-4 lg:mb-0 bg-white h-fit w-full lg:w-1/3 p-4 sm:p-5 lg:p-6 rounded-2xl border border-gray-300 shadow-lg">
-          {/* Dynamic Price */}
+          {/* Dynamic Price (ราคาต่อหน่วย) */}
           <p className="text-2xl sm:text-3xl lg:text-2xl font-bold mb-4 sm:mb-5">
             {displayPrice !== null ? `฿ ${displayPrice} ${priceSuffix}` : "-"}
           </p>
 
-          {/* Tabs */}
+          {/* Tabs สำหรับเลือกโหมดราคา */}
           <div className="flex gap-2 mb-4 sm:mb-5">
             {price?.price_per_hour && (
               <Button
@@ -547,7 +578,6 @@ export default function Page() {
                 รายวัน
               </Button>
             )}
-
             {price?.price_per_month && (
               <Button
                 variant={isShow === "month" ? "default" : "outline"}
@@ -563,7 +593,7 @@ export default function Page() {
             )}
           </div>
 
-          {/* Form Content */}
+          {/* Form Content (แสดงตามโหมดที่เลือก) */}
           {isShow === "day" && (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
               <DateForm
@@ -643,12 +673,16 @@ export default function Page() {
               </div>
             </div>
           )}
+
+          {/* ราคารวมสุดท้าย */}
           <div className="flex justify-between items-center text-base sm:text-lg lg:text-xl my-3 sm:my-4 font-semibold pt-3 border-t">
             <p>ราคารวม</p>
             <p>
               {totalPrice !== null ? `฿ ${totalPrice.toLocaleString()} ` : "-"}
             </p>
           </div>
+
+          {/* ปุ่มจองที่จอดนี้ */}
           <div>
             <Link href={buildPaymentUrl}>
               <Button className="w-full cursor-pointer h-11 sm:h-12 text-base sm:text-lg font-medium">

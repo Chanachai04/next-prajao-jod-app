@@ -10,25 +10,26 @@ import Loading from "../loading";
 import { PaymentData } from "@/types/payment";
 
 export default function Page() {
-  const { id } = useParams();
+  const { id } = useParams(); // ID ของที่จอดรถ (Rent ID)
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isConfirm, setIsConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  // สถานะควบคุม Modal และกระบวนการ
+  const [isOpen, setIsOpen] = useState(false); // Alert Modal (สำเร็จ)
+  const [isConfirm, setIsConfirm] = useState(false); // Confirm Modal
+  const [isLoading, setIsLoading] = useState(true); // สถานะโหลดข้อมูล API
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null); // ข้อมูลที่จอดรถและผู้ใช้
+  const [isProcessing, setIsProcessing] = useState(false); // สถานะกำลังประมวลผลการชำระเงิน
 
-  // Form states
+  // สถานะสำหรับฟอร์มข้อมูลผู้จอง
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [citizenId, setCitizenId] = useState("");
   const [phone, setPhone] = useState("");
   const [lineId, setLineId] = useState("");
-  const [isUserDataExisting, setIsUserDataExisting] = useState(false);
+  const [isUserDataExisting, setIsUserDataExisting] = useState(false); // แฟล็กตรวจสอบว่ามีข้อมูลผู้ใช้เดิมอยู่แล้วหรือไม่
 
-  // Booking details from URL params
+  // รายละเอียดการจองจาก URL params
   const [dateIn, setDateIn] = useState<Date | null>(null);
   const [dateOut, setDateOut] = useState<Date | null>(null);
   const [timeIn, setTimeIn] = useState<string>("");
@@ -40,9 +41,9 @@ export default function Page() {
 
   const FALLBACK_IMAGE = "/image.jpg";
 
-  const userId = searchParams.get("userId");
+  const userId = searchParams.get("userId"); // User ID จาก URL
 
-  // ดึงข้อมูลจาก URL params
+  // ดึงข้อมูลการจองจาก URL params
   useEffect(() => {
     if (!searchParams) return;
 
@@ -53,6 +54,7 @@ export default function Page() {
     const modeParam = searchParams.get("mode");
     const monthDurationParam = searchParams.get("monthDuration");
 
+    // ตั้งค่า Date/Time
     if (dateInParam) {
       const d = new Date(dateInParam);
       if (!isNaN(d.getTime())) setDateIn(d);
@@ -64,9 +66,9 @@ export default function Page() {
     if (timeInParam) setTimeIn(timeInParam);
     if (timeOutParam) setTimeOut(timeOutParam);
 
+    // ตั้งค่าโหมดและระยะเวลา (สำหรับ Monthly)
     if (modeParam === "monthly") {
       setMode("monthly");
-      // อ่านจำนวนเดือนจาก URL
       if (monthDurationParam) {
         const duration = parseInt(monthDurationParam);
         if (!isNaN(duration) && duration > 0) {
@@ -80,7 +82,7 @@ export default function Page() {
     }
   }, [searchParams]);
 
-  // ดึงข้อมูลจาก API
+  // ดึงข้อมูลที่จอดรถและข้อมูลผู้ใช้จาก API
   useEffect(() => {
     const fetchData = async () => {
       if (!id || !userId) return;
@@ -97,6 +99,8 @@ export default function Page() {
         const data: PaymentData = await res.json();
         setPaymentData(data);
         console.log(data);
+
+        // นำข้อมูลผู้ใช้เดิมมาใส่ในฟอร์ม (ถ้ามี)
         if (data.user) {
           setFirstName(data.user.first_name || "");
           setLastName(data.user.last_name || "");
@@ -104,12 +108,13 @@ export default function Page() {
           setPhone(data.user.phone || "");
           setLineId(data.user.line_id || "");
 
+          // ตรวจสอบว่าข้อมูลพื้นฐานจำเป็นครบถ้วนหรือไม่
           const hasCompleteData =
             data.user.first_name &&
             data.user.last_name &&
             data.user.citizen_id &&
             data.user.phone;
-          setIsUserDataExisting(!!hasCompleteData);
+          setIsUserDataExisting(!!hasCompleteData); // ตั้งค่าเพื่อ Disabled ฟอร์ม
         }
       } catch (error) {
         console.error("Error fetching payment data:", error);
@@ -122,7 +127,7 @@ export default function Page() {
     fetchData();
   }, [id, userId]);
 
-  // คำนวณราคาและระยะเวลา
+  // คำนวณราคาและระยะเวลาสำหรับการชำระเงิน
   const calculatePayment = () => {
     if (!paymentData) {
       return {
@@ -139,13 +144,15 @@ export default function Page() {
     let duration = 0;
     let unit = "";
 
+    // กำหนดราคาต่อหน่วยและคำนวณระยะเวลาตามโหมด
     if (mode === "monthly") {
       pricePerUnit = price.price_per_month || 0;
-      duration = monthDuration;
+      duration = monthDuration; // ระยะเวลาเป็นเดือน
       unit = "เดือน";
     } else if (mode === "daily") {
       pricePerUnit = price.price_per_day || 0;
       if (dateIn && dateOut) {
+        // คำนวณจำนวนวัน
         const days = Math.ceil(
           (dateOut.getTime() - dateIn.getTime()) / (1000 * 60 * 60 * 24)
         );
@@ -157,7 +164,7 @@ export default function Page() {
     } else if (mode === "hourly") {
       pricePerUnit = price.price_per_hour || 0;
       if (dateIn && dateOut && timeIn && timeOut) {
-        // รวมวันที่กับเวลา
+        // คำนวณจำนวนชั่วโมง
         const [inHour, inMin] = timeIn.split(":").map(Number);
         const [outHour, outMin] = timeOut.split(":").map(Number);
 
@@ -178,12 +185,13 @@ export default function Page() {
     }
 
     const deposit = price.deposit || 0;
+    // ราคารวม = (ราคาต่อหน่วย * ระยะเวลา) + เงินประกัน
     const total = pricePerUnit * duration + deposit;
 
     return { pricePerUnit, duration, total, unit, deposit };
   };
 
-  const payment = calculatePayment();
+  const payment = calculatePayment(); // เรียกใช้ฟังก์ชันคำนวณ
 
   // จัดรูปแบบวันที่ (วัน เดือน ค.ศ.)
   const formatDate = (date: Date | null) => {
@@ -201,7 +209,7 @@ export default function Page() {
     return `${time} น.`;
   };
 
-  // แสดงประเภทการจอง
+  // แสดงประเภทการจอง (Label)
   const getModeLabel = () => {
     switch (mode) {
       case "monthly":
@@ -215,7 +223,7 @@ export default function Page() {
     }
   };
 
-  // สร้างรายละเอียดการจอง
+  // สร้างรายละเอียดการจองตามโหมด (JSX)
   const renderBookingDetails = () => {
     if (mode === "hourly") {
       return (
@@ -277,13 +285,14 @@ export default function Page() {
     }
   };
 
-  // จัดการการชำระเงิน
+  // จัดการการชำระเงิน (เรียก API /api/payment ด้วยเมธอด POST)
   const handlePayment = async () => {
     if (!userId) {
       setError("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
       return;
     }
 
+    // Client-side validation: ตรวจสอบความครบถ้วนของข้อมูล
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -295,12 +304,14 @@ export default function Page() {
       return;
     }
 
+    // Client-side validation: ตรวจสอบเลขบัตรประชาชน
     if (citizenId.length !== 13 || !/^\d+$/.test(citizenId)) {
       setError("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
       setIsConfirm(false);
       return;
     }
 
+    // Client-side validation: ตรวจสอบเบอร์โทรศัพท์
     if (phone.length !== 10 || !/^0\d{9}$/.test(phone)) {
       setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง");
       setIsConfirm(false);
@@ -324,7 +335,7 @@ export default function Page() {
           phone: phone.trim(),
           lineId: lineId.trim() || null,
 
-          // [เพิ่มส่วนนี้]
+          // ส่งรายละเอียดการจอง/ราคาที่คำนวณแล้วไป Server
           totalPrice: payment.total,
           duration: payment.duration,
           mode: mode,
@@ -337,6 +348,7 @@ export default function Page() {
         throw new Error(data.message || "เกิดข้อผิดพลาดในการชำระเงิน");
       }
 
+      // แสดง Modal สำเร็จและเปลี่ยนเส้นทาง
       setIsConfirm(false);
       setIsOpen(true);
 
@@ -366,10 +378,10 @@ export default function Page() {
 
   return (
     <div className="container mx-auto min-h-screen py-4 px-4 sm:px-6 md:py-10">
-      {/* Breadcrumb */}
+      {/* Breadcrumb - (ถูกซ่อนในโค้ดต้นฉบับ) */}
 
       <div className="flex flex-col lg:flex-row justify-between gap-6 lg:gap-10">
-        {/* ซ้าย - สรุปการจอง */}
+        {/* ซ้าย - สรุปการจอง (Order Summary) */}
         <div className="w-full lg:w-1/3">
           {/* ข้อมูลที่จอด */}
           <div className="border border-gray-300 rounded-2xl p-3 sm:p-4 shadow hover:shadow-lg">
@@ -392,13 +404,14 @@ export default function Page() {
                   {paymentData.rentDetail.district && ", "}
                   {paymentData.rentDetail.province}
                 </p>
+                {/* แสดงประเภทการจองปัจจุบัน */}
                 <span className="inline-block py-1 px-2 sm:px-3 bg-blue-400 text-white rounded-lg text-xs mt-2">
                   {getModeLabel()}
                 </span>
               </div>
             </div>
 
-            {/* รายละเอียดการจอง */}
+            {/* รายละเอียดการจอง (วัน/เวลา/ระยะเวลา) */}
             {renderBookingDetails()}
 
             {/* เกี่ยวกับราคา */}
@@ -428,12 +441,14 @@ export default function Page() {
 
             <hr className="border-t border-gray-300 my-3 sm:my-4" />
 
+            {/* ราคารวมสุดท้าย */}
             <div className="flex justify-between items-center">
               <p className="font-semibold text-base sm:text-lg">ราคารวม</p>
               <p className="font-bold text-lg sm:text-xl text-blue-600">
                 ฿ {payment.total.toLocaleString()}
               </p>
             </div>
+            {/* หมายเหตุ */}
             <p className="text-center text-[10px] sm:text-xs text-gray-500 mt-3 sm:mt-4 leading-relaxed">
               *ชำระเงินประกันก็ต่อเมื่อได้รับการยืนยันการเข้าจอดจากเจ้าของพื้นที่แล้ว
               เมื่อสิ้นสุดสัญญาผู้เช่าจะได้รับเงินประกันคืน
@@ -441,7 +456,7 @@ export default function Page() {
           </div>
         </div>
 
-        {/* ขวา - ข้อมูลผู้จอง */}
+        {/* ขวา - ข้อมูลผู้จอง (Booking User Information) */}
         <div className="w-full lg:w-2/3">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-4 sm:mb-6">
             ข้อมูลผู้จอง
@@ -473,6 +488,7 @@ export default function Page() {
                 id="citizen_id"
                 value={citizenId}
                 onChange={(e) => {
+                  // กรองให้เหลือเฉพาะตัวเลข และจำกัดความยาว 13 หลัก
                   const value = e.target.value.replace(/\D/g, "");
                   if (value.length <= 13) {
                     setCitizenId(value);
@@ -487,6 +503,7 @@ export default function Page() {
                 id="phone"
                 value={phone}
                 onChange={(e) => {
+                  // กรองให้เหลือเฉพาะตัวเลข และจำกัดความยาว 10 หลัก
                   const value = e.target.value.replace(/\D/g, "");
                   if (value.length <= 10) {
                     setPhone(value);
@@ -510,9 +527,12 @@ export default function Page() {
               <div></div>
             </div>
           </div>
+
+          {/* แสดงข้อผิดพลาดของฟอร์ม */}
           {error && (
             <div className="text-red-600 my-2 text-xs sm:text-sm">{error}</div>
           )}
+          {/* แจ้งเตือนเมื่อข้อมูลผู้ใช้มีอยู่แล้ว */}
           {isUserDataExisting && (
             <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-xs sm:text-sm text-blue-700">
@@ -521,10 +541,12 @@ export default function Page() {
             </div>
           )}
 
+          {/* ปุ่มชำระเงิน */}
           <div className="flex justify-end mt-6 sm:mt-8">
             <Button
               className="cursor-pointer w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg"
               onClick={() => {
+                // Client-side validation ก่อนเปิด Confirm Modal
                 if (
                   !firstName.trim() ||
                   !lastName.trim() ||
@@ -542,7 +564,7 @@ export default function Page() {
                   setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
                   return;
                 }
-                setIsConfirm(true);
+                setIsConfirm(true); // เปิด Confirm Modal
               }}
               disabled={isProcessing}
             >
@@ -550,11 +572,13 @@ export default function Page() {
             </Button>
           </div>
 
+          {/* Confirm Modal (ก่อนเรียก handlePayment) */}
           <ConfirmModal
             open={isConfirm}
             onClose={() => !isProcessing && setIsConfirm(false)}
-            onConfirm={handlePayment}
+            onConfirm={handlePayment} // เมื่อยืนยัน ให้เรียกฟังก์ชันชำระเงิน
           />
+          {/* Alert Modal (ชำระเงินสำเร็จ) */}
           <AlertModal
             open={isOpen}
             onClose={() => setIsOpen(false)}

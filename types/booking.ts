@@ -1,3 +1,4 @@
+// interface ข้อมูลราคา
 export interface PriceInfo {
   id: string;
   rent_id: string;
@@ -7,12 +8,14 @@ export interface PriceInfo {
   deposit: number | null;
 }
 
+// interface ข้อมูลสิ่งอำนวยความสะดวก
 export interface FacilityInfo {
   id: string;
   rent_id: string;
   name: string;
 }
 
+// interface ข้อมูลตารางเวลาการเปิด-ปิด
 export interface ScheduleInfo {
   id: string;
   rent_id: string;
@@ -21,12 +24,14 @@ export interface ScheduleInfo {
   close_time: string | null;
 }
 
+// interface ข้อมูลรูปภาพ
 export interface ImageInfo {
   id: string;
   rent_id: string;
   image_url: string;
 }
 
+// interface ข้อมูลสถานที่จอดรถแบบรวม (สำหรับ Client/Component)
 export interface RentSpot {
   id: string;
   name: string | null;
@@ -46,6 +51,7 @@ export interface RentSpot {
   images: ImageInfo[];
 }
 
+// interface ข้อมูล Payload การเปลี่ยนแปลงสถานที่ (สำหรับ Search Component)
 export interface LocationChangePayload {
   provinceName: string | null;
   districtName: string | null;
@@ -53,6 +59,7 @@ export interface LocationChangePayload {
   displayText: string;
 }
 
+// interface Props สำหรับ Search Panel Component
 export interface SearchPanelProps {
   dateIn: Date | undefined;
   setDateIn: React.Dispatch<React.SetStateAction<Date | undefined>>;
@@ -81,6 +88,7 @@ export interface SearchPanelProps {
   loading?: boolean;
 }
 
+// type ข้อมูลแถวราคา (สำหรับ API/Database)
 export type PriceRow = {
   id: string;
   rent_id: string;
@@ -90,12 +98,14 @@ export type PriceRow = {
   deposit: number | null;
 };
 
+// type ข้อมูลแถวสิ่งอำนวยความสะดวก (สำหรับ API/Database)
 export type FacilityRow = {
   id: string;
   rent_id: string;
   name: string;
 };
 
+// type ข้อมูลแถวตารางเวลา (สำหรับ API/Database)
 export type ScheduleRow = {
   id: string;
   rent_id: string;
@@ -104,12 +114,14 @@ export type ScheduleRow = {
   close_time: string | null;
 };
 
+// type ข้อมูลแถวรูปภาพ (สำหรับ API/Database)
 export type ImageRow = {
   id: string;
   rent_id: string;
   image_url: string;
 };
 
+// type ข้อมูลแถวรายละเอียดหลักของสถานที่จอดรถ (สำหรับ API/Database)
 export type RentDetailRow = {
   id: string;
   name: string | null;

@@ -1,3 +1,4 @@
+// type โครงสร้าง Payload สำหรับการแก้ไขรายละเอียดที่จอดรถ (ใช้ส่งข้อมูลไปยัง API)
 export type EditRentDetailPayload = {
   name?: string;
   type?: string;
@@ -22,11 +23,13 @@ export type EditRentDetailPayload = {
   }>;
 };
 
+// type สำหรับสถานะผลลัพธ์ของการส่งข้อมูล (Success/Error Message)
 export type SubmitStatus = {
   type: "success" | "error";
   message: string;
 } | null;
 
+// type โครงสร้างข้อมูลตารางเวลาที่ใช้จัดการภายใน Component State
 export type ScheduleItem = {
   day: string;
   selected: boolean;

@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import DetailPanel from "@/components/booking/DetailPanel";
 import SearchPanel from "@/components/booking/SearchPanel";
 import { useSearchParams } from "next/navigation";
@@ -11,48 +11,59 @@ import Loading from "./loading";
 
 type LatLng = [number, number];
 
+// คอมโพเนนต์แผนที่ที่โหลดแบบ Dynamic (Client-side Only) พร้อม Loading fallback
 const MapPicker = dynamic(() => import("@/components/map/MapPicker"), {
-  ssr: false,
+  ssr: false, // ป้องกันการเรนเดอร์บน Server Side (เพราะ MapPicker ใช้ window/DOM)
   loading: () => <Loading />,
 });
 
+// ตัวเลือกช่วงเวลาการจองรายเดือน
 const TIME_OPTIONS = {
   threeMonths: "3 เดือน",
   sixMonths: "6 เดือน",
   oneYears: "1 ปี",
 };
 
+// ข้อความแสดงเมื่อไม่พบที่จอดรถ
 const EMPTY_MESSAGE = "ไม่พบที่จอดรถบริเวณนี้";
 
 export default function Booking() {
   const searchParams = useSearchParams();
+
+  // <strong>สถานะสำหรับจัดการข้อมูลการจอง (Date/Time/Mode)</strong>
   const [dateIn, setDateIn] = useState<Date>();
   const [dateOut, setDateOut] = useState<Date>();
   const [selectedOption, setSelectedOption] = useState<"hourly" | "monthly">(
     "hourly"
-  );
+  ); // โหมดหลักในการจอง (รายชั่วโมง/รายเดือน)
   const [timeIn, setTimeIn] = useState("00:00");
   const [timeOut, setTimeOut] = useState("01:00");
-  const [monthDurationKey, setMonthDurationKey] = useState("threeMonths");
+  const [monthDurationKey, setMonthDurationKey] = useState("threeMonths"); // ตัวเลือกระยะเวลารายเดือน
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // <strong>สถานะสำหรับจัดการ Detail Panel (รายละเอียดที่จอดรถที่เลือก)</strong>
+  const [currentIndex, setCurrentIndex] = useState(0); // Index รูปภาพที่แสดง
   const [selectedOptionDetail, setSelectedOptionDetail] = useState<
     "hourly" | "daily" | "monthly"
-  >("hourly");
-  const [isShowing, setIsShowing] = useState(false);
-  const [searchText, setSearchText] = useState("");
-  const [mapCenter, setMapCenter] = useState<LatLng | undefined>(undefined);
-  const [markerAt, setMarkerAt] = useState<LatLng | null>(null);
-  const [spots, setSpots] = useState<RentSpot[]>([]);
-  const [isLoadingSpots, setIsLoadingSpots] = useState(false);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
-  const [selectedSpot, setSelectedSpot] = useState<RentSpot | null>(null);
-  const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  >("hourly"); // โหมดการจองที่เลือกใน Detail Panel
+  const [isShowing, setIsShowing] = useState(false); // สถานะเปิด/ปิด Detail Panel
+  const [selectedSpot, setSelectedSpot] = useState<RentSpot | null>(null); // ข้อมูลที่จอดรถที่ถูกเลือก
+
+  // <strong>สถานะสำหรับจัดการการค้นหาและตำแหน่ง (Search/Location Input)</strong>
+  const [searchText, setSearchText] = useState(""); // ข้อความในช่องค้นหา
+  const [selectedProvince, setSelectedProvince] = useState<string | null>(null); // จังหวัดที่เลือกใน Input
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null); // เขต/อำเภอที่เลือกใน Input
   const [selectedSubdistrict, setSelectedSubdistrict] = useState<string | null>(
     null
-  );
+  ); // แขวง/ตำบลที่เลือกใน Input
+
+  // <strong>สถานะสำหรับจัดการ Map และ Data Fetching (Applied Filters)</strong>
+  const [mapCenter, setMapCenter] = useState<LatLng | undefined>(undefined); // จุดศูนย์กลางของแผนที่
+  const [markerAt, setMarkerAt] = useState<LatLng | null>(null); // ตำแหน่ง Marker บนแผนที่
+  const [spots, setSpots] = useState<RentSpot[]>([]); // รายการที่จอดรถที่ค้นพบ
+  const [isLoadingSpots, setIsLoadingSpots] = useState(false); // สถานะโหลดผลการค้นหา
+  const [fetchError, setFetchError] = useState<string | null>(null); // ข้อความผิดพลาดจากการ Fetch
+  const [emptyMessage, setEmptyMessage] = useState<string | null>(null); // ข้อความเมื่อไม่พบผลลัพธ์
+  // สถานะ Location/Search ที่ถูก *นำไปใช้* ในการ fetch (ค่าที่ถูก commit)
   const [appliedProvince, setAppliedProvince] = useState<string | null>(null);
   const [appliedDistrict, setAppliedDistrict] = useState<string | null>(null);
   const [appliedSubdistrict, setAppliedSubdistrict] = useState<string | null>(
@@ -61,12 +72,14 @@ export default function Booking() {
   const [appliedSearchKeyword, setAppliedSearchKeyword] = useState<
     string | null
   >(null);
-  const [isInitialised, setIsInitialised] = useState(false);
-  const firstFetchRef = useRef(true);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // initialize from URL params once
+  // <strong>สถานะควบคุมการทำงาน</strong>
+  const [isInitialised, setIsInitialised] = useState(false); // แฟล็กตรวจสอบว่าโหลดค่าเริ่มต้นจาก URL เสร็จแล้วหรือไม่
+  const firstFetchRef = useRef(true); // แฟล็กควบคุมการ Fetch ข้อมูลครั้งแรก
+  const [error, setError] = useState<string | null>(null); // ข้อผิดพลาดของฟอร์มหลัก
+  const [loading, setLoading] = useState(false); // สถานะโหลดรวมเมื่อกดปุ่มค้นหา
+
+  // <strong>Effect สำหรับการตั้งค่าเริ่มต้นจาก URL parameters</strong>
   useEffect(() => {
     if (!searchParams) return;
     const mode = searchParams.get("mode") || undefined;
@@ -79,6 +92,7 @@ export default function Booking() {
     const provinceIdParam = searchParams.get("provinceId");
     const monthDurationKeyParam = searchParams.get("monthDurationKey");
 
+    // ตั้งค่าโหมดการจอง
     if (mode === "monthly") {
       setSelectedOption("monthly");
       setSelectedOptionDetail("monthly");
@@ -97,6 +111,7 @@ export default function Booking() {
     if (timeInStr) setTimeIn(timeInStr);
     if (timeOutStr) setTimeOut(timeOutStr);
 
+    // ตั้งค่าวันที่
     if (dateInStr) {
       const d = new Date(dateInStr);
       if (!isNaN(d.getTime())) setDateIn(d);
@@ -108,7 +123,7 @@ export default function Booking() {
       }
     }
 
-    // ใช้ search ก่อน ถ้าไม่มีค่อยใช้ location
+    // ประมวลผล Search Term / Location / Province
     const initialSearch = searchTermParam || location;
     const trimmedInitialSearch = initialSearch.trim();
 
@@ -122,26 +137,25 @@ export default function Booking() {
       finalSearchText = trimmedInitialSearch;
     }
 
-    // ถ้ามี provinceId ให้ใช้เป็น province
+    // ถ้ามี provinceId ให้ใช้เป็น province และอาจใช้เป็น searchText
     if (provinceIdParam) {
       const idNum = Number(provinceIdParam);
       const province = provinces.find((p) => p.id === idNum);
       if (province) {
         computedProvince = province.name_th;
-        // ถ้ายังไม่มี searchText ให้ใช้ชื่อจังหวัด
         if (!finalSearchText) {
           finalSearchText = province.name_th;
         }
       }
     }
 
-    // Set searchText ครั้งเดียว
+    // ตั้งค่า searchText ครั้งเดียวและ Geocode เพื่อให้แผนที่แสดงผลตำแหน่งเริ่มต้น
     if (finalSearchText) {
       setSearchText(finalSearchText);
-      // Geocode เพื่อแสดง marker บน map
       void geocodeAndCenterWith(finalSearchText);
     }
 
+    // ตั้งค่าสถานะที่ใช้ในการ fetch ครั้งแรก
     firstFetchRef.current = Boolean(trimmedInitialSearch);
     setSelectedProvince(computedProvince);
     setAppliedProvince(computedProvince);
@@ -150,10 +164,12 @@ export default function Booking() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // <strong>ฟังก์ชัน Geocoding: แปลงข้อความค้นหาไปเป็นพิกัด (ใช้สำหรับ Map Picker)</strong>
   const geocodeAndCenter = useCallback(async () => {
     const q = searchText.trim();
     if (!q) return;
     try {
+      // เรียก Nominatim API ของ OpenStreetMap
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
         q + " Thailand"
       )}&countrycodes=th&limit=1&addressdetails=1`;
@@ -167,6 +183,7 @@ export default function Booking() {
       if (!data || data.length === 0) {
         return;
       }
+      // ตั้งค่าจุดศูนย์กลางของแผนที่และ Marker
       const { lat, lon } = data[0];
       const latNum = Number(lat);
       const lonNum = Number(lon);
@@ -180,6 +197,7 @@ export default function Booking() {
     }
   }, [searchText]);
 
+  // ฟังก์ชัน Geocoding ที่รับค่าค้นหาโดยตรง
   const geocodeAndCenterWith = useCallback(async (text: string) => {
     const q = text.trim();
     if (!q) return;
@@ -208,6 +226,7 @@ export default function Booking() {
     }
   }, []);
 
+  // <strong>ฟังก์ชันสำหรับเรียก API เพื่อดึงข้อมูลที่จอดรถ (Data Fetching)</strong>
   const fetchParkingSpots = useCallback(
     async (override?: {
       province?: string | null;
@@ -216,6 +235,7 @@ export default function Booking() {
       search?: string | null;
       displayEmptyMessage?: boolean;
     }) => {
+      // ดึงค่า filter ที่จะใช้ โดยให้ความสำคัญกับค่า override ก่อน
       const provinceName =
         override?.province !== undefined ? override.province : appliedProvince;
       const districtName =
@@ -238,6 +258,7 @@ export default function Booking() {
       const hasSubdistrict = Boolean(subdistrictName);
       const hasSearch = Boolean(trimmedSearch);
 
+      // ถ้าไม่มีเงื่อนไขการค้นหาเลย ให้ล้างข้อมูล
       if (!hasProvince && !hasDistrict && !hasSubdistrict && !hasSearch) {
         setSpots([]);
         setEmptyMessage(displayEmpty ? EMPTY_MESSAGE : null);
@@ -251,6 +272,7 @@ export default function Booking() {
       setIsLoadingSpots(true);
       setFetchError(null);
       try {
+        // สร้าง Query Parameters สำหรับ API Call
         const params = new URLSearchParams();
         if (provinceName) {
           params.set("province", provinceName);
@@ -265,6 +287,8 @@ export default function Booking() {
           params.set("search", trimmedSearch);
         }
         const queryString = params.toString();
+
+        // เรียก API /api/booking
         const res = await fetch(
           `/api/booking${queryString ? `?${queryString}` : ""}`,
           {
@@ -277,6 +301,8 @@ export default function Booking() {
         }
         const result = await res.json();
         const data = (result?.data ?? []) as RentSpot[];
+
+        // อัปเดตสถานะของ Spots ที่ค้นพบ
         setSpots(data);
         if (!data.length) {
           setEmptyMessage(displayEmpty ? EMPTY_MESSAGE : null);
@@ -284,6 +310,7 @@ export default function Booking() {
           setIsShowing(false);
         } else {
           setEmptyMessage(null);
+          // อัปเดต selectedSpot หากข้อมูลถูก refresh แล้วยังมี Spot เดิมอยู่
           setSelectedSpot((prev) => {
             if (!prev) return null;
             const found = data.find((item) => item.id === prev.id);
@@ -303,18 +330,22 @@ export default function Booking() {
     [appliedProvince, appliedDistrict, appliedSubdistrict, appliedSearchKeyword]
   );
 
+  // Effect เพื่อเรียก fetchParkingSpots ครั้งแรกเมื่อ initialized
   useEffect(() => {
+    // ต้องรอให้ initialized เสร็จ และเป็นครั้งแรกของการ fetch (มาจาก URL search)
     if (!isInitialised || !firstFetchRef.current) return;
     void fetchParkingSpots({
-      displayEmptyMessage: false,
+      displayEmptyMessage: false, // ไม่แสดงข้อความ "ไม่พบ" ในการโหลดครั้งแรก
     });
-    firstFetchRef.current = false;
+    firstFetchRef.current = false; // ปิดแฟล็กหลังจาก fetch ครั้งแรก
   }, [fetchParkingSpots, isInitialised]);
 
+  // Effect เพื่อรีเซ็ต Index รูปภาพเมื่อเปลี่ยน Spot ที่เลือก
   useEffect(() => {
     setCurrentIndex(0);
   }, [selectedSpot?.id]);
 
+  // ฟังก์ชันเลื่อนดูรูปภาพใน Detail Panel
   const navigateImage = (direction: "prev" | "next") => {
     const images = selectedSpot?.images ?? [];
     if (!images.length) return;
@@ -326,20 +357,23 @@ export default function Booking() {
     });
   };
 
+  // ฟังก์ชันจัดการเมื่อผู้ใช้เลือกที่จอดรถจากรายการ
   const handleSelectSpot = (spot: RentSpot) => {
     setSelectedSpot(spot);
-    setIsShowing(true);
-    setCurrentIndex(0);
-    setSelectedOptionDetail("hourly");
+    setIsShowing(true); // เปิด Detail Panel
+    setCurrentIndex(0); // รีเซ็ต index รูปภาพ
+    setSelectedOptionDetail("hourly"); // ตั้งค่าโหมดเริ่มต้นใน Detail Panel
   };
 
+  // ฟังก์ชันจัดการการเปลี่ยนแปลง Location ใน Search Panel
   const handleLocationChange = (payload: LocationChangePayload) => {
     setSelectedProvince(payload.provinceName);
     setSelectedDistrict(payload.districtName);
     setSelectedSubdistrict(payload.subdistrictName);
-    // ไม่ต้อง clear marker เพราะจะ update ตอนกดค้นหา
+    // marker จะถูก update เมื่อกดค้นหา
   };
 
+  // <strong>ฟังก์ชันหลักที่ทำงานเมื่อผู้ใช้กดปุ่มค้นหา</strong>
   const handleSearch = async () => {
     const trimmed = searchText.trim();
     if (trimmed === "") {
@@ -350,11 +384,17 @@ export default function Booking() {
     try {
       setError("");
       setLoading(true);
+
+      // ตั้งค่า Applied Filters ใหม่
       setAppliedProvince(selectedProvince);
       setAppliedDistrict(selectedDistrict);
       setAppliedSubdistrict(selectedSubdistrict);
       setAppliedSearchKeyword(normalizedSearch);
+
+      // 1. Geocode และตั้งค่า Marker บนแผนที่
       await geocodeAndCenter();
+
+      // 2. Fetch ข้อมูลที่จอดรถ
       await fetchParkingSpots({
         province: selectedProvince,
         district: selectedDistrict,
@@ -370,25 +410,26 @@ export default function Booking() {
     }
   };
 
+  // <strong>โครงสร้าง UI (JSX)</strong>
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Map Section - Hidden on mobile and tablet */}
-      <div className="max-sm:hidden  lg:flex-1 relative">
+      {/* Map Section - ซ่อนบนมือถือและแท็บเล็ต, แสดงผลแบบ Flex-1 บนเดสก์ท็อป */}
+      <div className="max-sm:hidden lg:flex-1 relative">
         <MapPicker
           zoom={13}
           height="100vh"
           center={mapCenter}
           markerAt={markerAt}
           onMapReady={() => {}}
-          interactive={false}
+          interactive={false} // แผนที่ไม่ให้โต้ตอบได้
         />
       </div>
 
-      {/* Content Section */}
-      <div className="w-full   lg:w-auto flex flex-col lg:flex-row">
-        {/* Detail Panel - Full width on mobile, slides in on desktop */}
+      {/* Content Section - ประกอบด้วย Detail Panel และ Search Panel */}
+      <div className="w-full lg:w-auto flex flex-col lg:flex-row">
+        {/* Detail Panel - แสดงแบบ Fixed ครึ่งหน้าจอหรือเต็มหน้าจอบนมือถือ/แท็บเล็ต */}
         {isShowing && selectedSpot && (
-          <div className="fixed h-full  lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
+          <div className="fixed h-full lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
             <DetailPanel
               spot={selectedSpot}
               currentIndex={currentIndex}
@@ -402,8 +443,9 @@ export default function Booking() {
           </div>
         )}
 
-        {/* Search Panel - Always visible */}
+        {/* Search Panel - ส่วนควบคุมการค้นหาและแสดงรายการผลลัพธ์ */}
         <div
+          // ซ่อน Search Panel เมื่อ Detail Panel ถูกเปิดอยู่บนจอขนาดใหญ่ (เพื่อประหยัดพื้นที่)
           className={`w-full lg:w-lg ${
             isShowing ? "hidden lg:block" : "block"
           }`}
@@ -422,11 +464,11 @@ export default function Booking() {
             timeOptions={TIME_OPTIONS}
             searchText={searchText}
             setSearchText={setSearchText}
-            onSearch={handleSearch}
+            onSearch={handleSearch} // ผูกฟังก์ชันค้นหา
             error={error}
             loading={loading}
             spots={spots}
-            onSelectSpot={handleSelectSpot}
+            onSelectSpot={handleSelectSpot} // ผูกฟังก์ชันเลือก Spot
             activeSpotId={selectedSpot?.id ?? null}
             isLoading={isLoadingSpots}
             errorMessage={fetchError}

@@ -1,3 +1,4 @@
+// interface โครงสร้างข้อมูลสำหรับตัวเลือกสถานที่ (Province, District, Subdistrict)
 export interface Option {
   id: number;
   name_th: string;
@@ -5,6 +6,7 @@ export interface Option {
   type: "province" | "district" | "subDistrict";
 }
 
+// interface Props สำหรับ ProvinceSearch Component
 export interface ProvinceSearchProps {
   onChange?: (
     provinceId: number | null,

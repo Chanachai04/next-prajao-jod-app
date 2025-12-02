@@ -1,5 +1,6 @@
 export default function Page() {
   return (
+    // Container หลักของหน้า (ตั้งค่าพื้นหลังสีเทาอ่อนและ Padding)
     <div className="min-h-screen bg-gray-50 py-12 px-6">
       <div className="max-w-4xl mx-auto bg-white p-10 rounded-2xl shadow-sm leading-relaxed">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 text-center">
@@ -15,7 +16,7 @@ export default function Page() {
           ถือว่าคุณยอมรับและตกลงปฏิบัติตามเงื่อนไขทั้งหมดในหน้านี้
         </p>
 
-        {/* SECTION 1 */}
+        {/* SECTION 1: การยอมรับข้อกำหนด */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           1. การยอมรับข้อกำหนด
         </h2>
@@ -25,7 +26,7 @@ export default function Page() {
           หากคุณไม่เห็นด้วยกับข้อใดข้อหนึ่งในเอกสารนี้ กรุณาหยุดการใช้งานทันที
         </p>
 
-        {/* SECTION 2 */}
+        {/* SECTION 2: การสมัครและบัญชีผู้ใช้งาน */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           2. การสมัครและบัญชีผู้ใช้งาน
         </h2>
@@ -41,7 +42,7 @@ export default function Page() {
           </li>
         </ul>
 
-        {/* SECTION 3 */}
+        {/* SECTION 3: การใช้บริการจองที่จอดรถ */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           3. การใช้บริการจองที่จอดรถ
         </h2>
@@ -64,7 +65,7 @@ export default function Page() {
           </li>
         </ul>
 
-        {/* SECTION 4 */}
+        {/* SECTION 4: การชำระเงิน */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           4. การชำระเงิน
         </h2>
@@ -78,7 +79,7 @@ export default function Page() {
           <li>หากมีปัญหาในการชำระเงิน กรุณาติดต่อทีมสนับสนุนทันที</li>
         </ul>
 
-        {/* SECTION 5 */}
+        {/* SECTION 5: สิทธิและหน้าที่ของเจ้าของพื้นที่จอดรถ */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           5. สิทธิและหน้าที่ของเจ้าของพื้นที่จอดรถ
         </h2>
@@ -95,7 +96,7 @@ export default function Page() {
           </li>
         </ul>
 
-        {/* SECTION 6 */}
+        {/* SECTION 6: ความเป็นส่วนตัวและการเก็บข้อมูล */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           6. ความเป็นส่วนตัวและการเก็บข้อมูล
         </h2>
@@ -109,7 +110,7 @@ export default function Page() {
           ของเรา
         </p>
 
-        {/* SECTION 7 */}
+        {/* SECTION 7: การจำกัดความรับผิด */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           7. การจำกัดความรับผิด
         </h2>
@@ -120,7 +121,7 @@ export default function Page() {
           ที่เกิดจากเจ้าของพื้นที่หรือผู้เช่าด้วยกันเอง
         </p>
 
-        {/* SECTION 8 */}
+        {/* SECTION 8: ทรัพย์สินทางปัญญา */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           8. ทรัพย์สินทางปัญญา
         </h2>
@@ -131,7 +132,7 @@ export default function Page() {
           หรือใช้งานในเชิงพาณิชย์โดยไม่ได้รับอนุญาตเป็นลายลักษณ์อักษร
         </p>
 
-        {/* SECTION 9 */}
+        {/* SECTION 9: การระงับข้อพิพาท */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           9. การระงับข้อพิพาท
         </h2>
@@ -141,7 +142,7 @@ export default function Page() {
           ให้เป็นไปตามกฎหมายของประเทศไทย
         </p>
 
-        {/* SECTION 10 */}
+        {/* SECTION 10: การแก้ไขเงื่อนไข */}
         <h2 className="text-2xl font-semibold mt-10 mb-3 text-gray-900">
           10. การแก้ไขเงื่อนไข
         </h2>
@@ -151,6 +152,7 @@ export default function Page() {
           การใช้งานต่อหลังจากนั้นถือว่าคุณยอมรับเงื่อนไขใหม่โดยปริยาย
         </p>
 
+        {/* วันที่อัปเดตล่าสุด */}
         <div className="mt-12 text-right text-sm text-gray-500">
           อัปเดตล่าสุด: 8 พฤศจิกายน 2025
         </div>

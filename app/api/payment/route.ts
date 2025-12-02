@@ -6,9 +6,10 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
   const cookieStore = await cookies();
   const { searchParams } = new URL(req.url);
-  const rentId = searchParams.get("rentId");
-  const userId = cookieStore.get("userId")?.value;
+  const rentId = searchParams.get("rentId"); // ID ที่จอดรถจาก URL
+  const userId = cookieStore.get("userId")?.value; // User ID จากคุกกี้
 
+  // ตรวจสอบค่าที่จำเป็น
   if (!rentId) {
     return NextResponse.json(
       { message: "rentId is required" },
@@ -17,7 +18,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    // ดึงข้อมูล rent_detail
+    // ดึงข้อมูล rent_detail (รายละเอียดสถานที่จอดรถ)
     const { data: rentDetail, error: rentError } = await supabase
       .from("rent_detail")
       .select("id, name, district, subdistrict, province")
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 
     if (rentError) throw rentError;
 
-    // ดึงข้อมูล price
+    // ดึงข้อมูล price (ราคาต่อชั่วโมง/วัน/เดือน และเงินประกัน)
     const { data: price, error: priceError } = await supabase
       .from("price")
       .select("price_per_hour, price_per_day, price_per_month, deposit")
@@ -35,7 +36,7 @@ export async function GET(req: Request) {
 
     if (priceError) throw priceError;
 
-    // ดึงรูปภาพแรก
+    // ดึงรูปภาพแรก (สำหรับแสดงในส่วนสรุป)
     const { data: images, error: imageError } = await supabase
       .from("rent_images")
       .select("image_url")
@@ -44,7 +45,7 @@ export async function GET(req: Request) {
 
     if (imageError) throw imageError;
 
-    // ดึงข้อมูล user ถ้ามี userId
+    // ดึงข้อมูล user (ถ้ามี userId) เพื่อนำมาเติมในฟอร์มผู้จอง
     let userData = null;
     if (userId) {
       const { data: user, error: userError } = await supabase
@@ -58,8 +59,10 @@ export async function GET(req: Request) {
       }
     }
 
+    // ส่งข้อมูลทั้งหมดกลับไป
     return NextResponse.json({
       rentDetail,
+      // แปลงค่าราคาที่ดึงมาเป็นตัวเลขทศนิยม (Float) ก่อนส่ง
       price: {
         price_per_hour: price.price_per_hour
           ? parseFloat(price.price_per_hour)
@@ -101,7 +104,7 @@ export async function POST(req: Request) {
       mode,
     } = body;
 
-    // ตรวจสอบค่าที่จำเป็น
+    // ตรวจสอบค่าที่จำเป็นสำหรับบันทึกประวัติการจอง
     if (
       !userId ||
       !rentId ||
@@ -118,7 +121,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ตรวจสอบข้อมูลที่จำเป็น (ข้อมูล user)
+    // ตรวจสอบข้อมูลผู้จองที่จำเป็น (สำหรับการอัปเดต User Profile)
     if (!firstName || !lastName || !citizenId || !phone) {
       return NextResponse.json(
         { message: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน" },
@@ -126,14 +129,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // ตรวจสอบว่ามีข้อมูล user แล้วหรือไม่
+    // 1. ตรวจสอบข้อมูล User เดิม
     const { data: existingUser } = await supabase
       .from("users")
       .select("id, citizen_id, first_name, last_name, phone")
       .eq("id", userId)
       .single();
 
-    // ถ้ายังไม่มีข้อมูลส่วนตัวครบ ให้อัปเดต
+    // 2. ถ้า User มีอยู่และข้อมูลส่วนตัวยังไม่ครบ ให้อัปเดตข้อมูลทั้งหมด
     if (
       existingUser &&
       (!existingUser.citizen_id ||
@@ -149,7 +152,7 @@ export async function POST(req: Request) {
           citizen_id: citizenId,
           phone: phone,
           line_id: lineId || null,
-          is_checked: true, // ตั้งค่า is_checked เป็น true เมื่อชำระเงิน
+          is_checked: true, // ตั้งค่า is_checked เป็น true
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -159,11 +162,11 @@ export async function POST(req: Request) {
         throw updateError;
       }
     } else if (existingUser) {
-      // ถ้ามีข้อมูลครบแล้ว ให้อัปเดตเฉพาะ is_checked
+      // 3. ถ้า User มีอยู่และมีข้อมูลครบอยู่แล้ว ให้อัปเดตเฉพาะ is_checked
       const { error: updateError } = await supabase
         .from("users")
         .update({
-          is_checked: true, // ตั้งค่า is_checked เป็น true เมื่อชำระเงิน
+          is_checked: true, // ตั้งค่า is_checked เป็น true
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -174,17 +177,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // สร้าง object ข้อมูลสำหรับบันทึกลง rent_history
+    // 4. สร้าง object ข้อมูลสำหรับบันทึกลง rent_history
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const historyData: any = {
       user_id: userId,
       rent_id: rentId,
-      status: true,
+      status: true, // กำหนดสถานะการจองสำเร็จ
       created_at: new Date().toISOString(),
       total_price: totalPrice,
     };
 
-    // เพิ่มคอลัมน์ระยะเวลา ตาม mode
+    // เพิ่มคอลัมน์ระยะเวลา ตาม mode การจอง
     if (mode === "hourly") {
       historyData.parking_time_hour = duration;
     } else if (mode === "daily") {
@@ -193,7 +196,7 @@ export async function POST(req: Request) {
       historyData.parking_time_month = duration;
     }
 
-    // บันทึกข้อมูลการจองลง rent_history
+    // 5. บันทึกข้อมูลการจองลง rent_history
     const { error: historyError } = await supabase
       .from("rent_history")
       .insert(historyData);
@@ -203,6 +206,7 @@ export async function POST(req: Request) {
       throw historyError;
     }
 
+    // 6. ส่งผลลัพธ์สำเร็จ
     return NextResponse.json({
       success: true,
       message: "ชำระเงินสำเร็จ",

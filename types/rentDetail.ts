@@ -1,8 +1,9 @@
+// type โครงสร้าง Payload สำหรับการสร้างหรืออัปเดตรายละเอียดสถานที่จอดรถ
 export type RentDetailPayload = {
   name?: string;
   type?: string;
   description?: string;
-  total_slot?: number ;
+  total_slot?: number;
   address?: string;
   subdistrict?: string;
   district?: string;

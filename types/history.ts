@@ -1,3 +1,4 @@
+// interface โครงสร้างข้อมูลสำหรับรายการประวัติการจองที่จอดรถ
 export interface HistoryItem {
   id: string | number;
   name: string;

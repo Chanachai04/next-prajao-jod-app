@@ -6,7 +6,12 @@ import Loading from "./loading";
 
 export default function Login() {
   return (
-    <Suspense fallback={<Loading />}>
+    // ใช้องค์ประกอบ Suspense สำหรับจัดการการโหลด
+    <Suspense
+      // กำหนดคอมโพเนนต์ที่ใช้แสดงผลระหว่างที่คอมโพเนนต์ลูกกำลังโหลด
+      fallback={<Loading />}
+    >
+      {/* แสดงฟอร์มเข้าสู่ระบบจริง */}
       <LoginForm />
     </Suspense>
   );
