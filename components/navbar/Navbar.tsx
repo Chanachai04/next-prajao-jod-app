@@ -146,13 +146,13 @@ export default function Navbar() {
                   </Button>
                 </Link>
 
-                {/* ปุ่มเช่าที่จอด (แสดงบนจอมือถือ) */}
+                {/* ปุ่มปล่อยเช่า (แสดงบนจอมือถือ) */}
                 <Link href="/rent" className="sm:hidden">
                   <Button
                     variant="outline"
                     className="px-2 py-1 h-8 text-sm cursor-pointer"
                   >
-                    เช่าที่จอด
+                    ปล่อยเช่า
                   </Button>
                 </Link>
               </>
