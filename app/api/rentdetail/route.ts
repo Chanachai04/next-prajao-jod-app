@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: Request) {
   try {
+    //ตรวจสอบ user จาก cookies
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
 
     // ใช้ owner_id จาก cookie แทนที่จะใช้จาก body (เพื่อความปลอดภัย)
     const owner_id = userId;
-
+    //validate
     if (
       !name ||
       !type ||
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
+    //นำข้อมูลลงตาราง rent_detail
     const { data, error } = await supabase
       .from("rent_detail")
       .insert({
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-
+    //นำข้อมูลลงตาราง price
     const pricePerHour =
       typeof price?.price_per_hour === "number" ? price.price_per_hour : null;
     const pricePerDay =
@@ -139,7 +140,7 @@ export async function POST(req: Request) {
       }
       priceId = priceRows?.id ?? null;
     }
-
+    //นำข้อมูลลงตาราง facilities
     if (Array.isArray(facilities) && facilities.length > 0) {
       const uniqueFacilities = Array.from(new Set(facilities));
       const facilityRows = uniqueFacilities.map((facilityName) => ({
@@ -162,12 +163,11 @@ export async function POST(req: Request) {
       facilityIds =
         facilityData?.map((facility) => facility.id).filter(Boolean) ?? [];
     }
-
+    //นำข้อมูลลงตาราง schedule
     if (Array.isArray(schedule) && schedule.length > 0) {
       const toPgTime = (t: string) => (t?.length === 5 ? `${t}:00` : t);
       const rows = schedule.map((item) => ({
         rent_id: data.id,
-        // If column is text[] in DB, wrap as single-element array
         available_days: [item.day],
         open_time: toPgTime(item.open_time),
         close_time: toPgTime(item.close_time),
@@ -185,7 +185,7 @@ export async function POST(req: Request) {
       }
       scheduleIds = scheduleData?.map((item) => item.id).filter(Boolean) ?? [];
     }
-
+    //ส่วนอัปโหลดรูปภาพ
     if (images.length > 0) {
       const uploadedUrls: string[] = [];
       const uploadedImageIds: string[] = [];
@@ -252,9 +252,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // Update references on rent_detail.
-    // Some DB columns may expect a single uuid while others expect an array.
-    // We'll perform per-field updates and try array first, then fall back to single uuid.
     if (priceId) {
       const { error: priceUpdateErr } = await supabase
         .from("rent_detail")
@@ -268,14 +265,13 @@ export async function POST(req: Request) {
         );
       }
     }
-
+    
     const tryUpdateArrayThenSingle = async (
       column: string,
       ids?: string[] | null
     ) => {
       if (!ids) return null;
       if (ids.length === 0) return null;
-      // Try writing the full array first
       const payloadArray: Record<string, unknown> = {};
       payloadArray[column] = ids;
       let res = await supabase
@@ -283,7 +279,6 @@ export async function POST(req: Request) {
         .update(payloadArray)
         .eq("id", data.id);
       if (!res.error) return null;
-      // If writing array failed, try single uuid (first element)
       const payloadSingle: Record<string, unknown> = {};
       payloadSingle[column] = ids[0];
       res = await supabase
@@ -291,11 +286,9 @@ export async function POST(req: Request) {
         .update(payloadSingle)
         .eq("id", data.id);
       if (!res.error) return null;
-      // return last error
       return res.error;
     };
 
-    // facilities
     if (facilityIds && facilityIds.length > 0) {
       const err = await tryUpdateArrayThenSingle("facilities_id", facilityIds);
       if (err) {
@@ -307,7 +300,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // schedule
     if (scheduleIds && scheduleIds.length > 0) {
       const err = await tryUpdateArrayThenSingle("schedule_id", scheduleIds);
       if (err) {
@@ -319,7 +311,6 @@ export async function POST(req: Request) {
       }
     }
 
-    // images
     if (imageIds && imageIds.length > 0) {
       const err = await tryUpdateArrayThenSingle("image_id", imageIds);
       if (err) {

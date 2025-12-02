@@ -7,6 +7,7 @@ const SECRET_KEY = process.env.SECRET_KEY as string;
 
 export async function GET() {
   try {
+    //เช็คcookieและuserId
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const userId = cookieStore.get("userId")?.value;
@@ -21,7 +22,6 @@ export async function GET() {
         token,
         new TextEncoder().encode(SECRET_KEY)
       );
-      // ถ้า token มี userId ใน payload ให้ตรวจสอบความตรงกัน (ถ้ามี)
       if (payload && typeof payload === "object" && "userId" in payload) {
         if ((payload as { userId?: string }).userId !== userId) {
           return NextResponse.json({ message: "Forbidden" }, { status: 403 });
@@ -58,6 +58,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    //เช็คcookieและuserId
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const userId = cookieStore.get("userId")?.value;
@@ -97,6 +98,7 @@ export async function POST(req: Request) {
       phone: string;
     } = body;
 
+    //Update ข้อมูล
     const { error } = await supabase
       .from("users")
       .update({

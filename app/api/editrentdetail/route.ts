@@ -7,9 +7,10 @@ import { EditRentDetailPayload } from "@/types/editRentDetail";
 
 export const runtime = "nodejs";
 
-// GET - ดึงข้อมูล rent_detail พร้อมข้อมูลที่เกี่ยวข้อง
+
 export async function GET(req: Request) {
   try {
+    // ตรวจสอบการloginของuserด้วยcookies
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "ไม่พบ rent_id" }, { status: 400 });
     }
 
-    // ดึงข้อมูล rent_detail
+    // ดึงข้อมูลจากsupabase ตาราง rent_detail
     const { data: rentDetail, error: rentDetailError } = await supabase
       .from("rent_detail")
       .select("*")
@@ -86,7 +87,7 @@ export async function GET(req: Request) {
   }
 }
 
-// PUT/PATCH - อัปเดตข้อมูล rent_detail
+// PUT/PATCH อัปเดตข้อมูล rent_detail
 export async function PUT(req: Request) {
   try {
     const cookieStore = await cookies();
@@ -236,7 +237,6 @@ export async function PUT(req: Request) {
     }
 
     // อัปเดต facilities - ลบทั้งหมดแล้วเพิ่มใหม่
-    // ขั้นตอนที่ 1: ดึงข้อมูล facilities เก่า
     const { data: existingFacilities } = await supabase
       .from("rent_facilities")
       .select("id, name")
@@ -249,7 +249,6 @@ export async function PUT(req: Request) {
     console.log("Existing facilities:", (existingFacilities || []).map(f => f.name));
     console.log("New facilities:", newFacilities);
 
-    // ขั้นตอนที่ 2: เซ็ต facilities_id ใน rent_detail เป็น null ก่อน (เพื่อหลีกเลี่ยง foreign key constraint)
     if (existingFacilities && existingFacilities.length > 0) {
       console.log("Setting facilities_id to null in rent_detail");
 
@@ -263,7 +262,6 @@ export async function PUT(req: Request) {
       }
     }
 
-    // ขั้นตอนที่ 3: ลบ facilities เก่าทั้งหมด
     if (existingFacilities && existingFacilities.length > 0) {
       console.log("Deleting all existing facilities for rent_id:", rentId);
 
@@ -286,7 +284,6 @@ export async function PUT(req: Request) {
       }
     }
 
-    // ขั้นตอนที่ 4: เพิ่ม facilities ใหม่ทั้งหมด
     if (newFacilities.length > 0) {
       const facilityRows = newFacilities.map((facilityName) => ({
         rent_id: rentId,
@@ -313,7 +310,6 @@ export async function PUT(req: Request) {
       }
     }
 
-    // อัปเดต schedule - ลบเก่าแล้วเพิ่มใหม่
     await supabase.from("rent_schedule").delete().eq("rent_id", rentId);
 
     if (Array.isArray(schedule) && schedule.length > 0) {
@@ -328,7 +324,6 @@ export async function PUT(req: Request) {
       await supabase.from("rent_schedule").insert(rows);
     }
 
-    // ลบรูปภาพที่ถูกลบ (ถ้ามี)
     const deletedImageIdsRaw = formData.get("deleted_image_ids");
     console.log("Deleted image IDs raw:", deletedImageIdsRaw);
 
@@ -340,14 +335,12 @@ export async function PUT(req: Request) {
         if (Array.isArray(deletedImageIds) && deletedImageIds.length > 0) {
           console.log("Deleting images with IDs:", deletedImageIds);
 
-          // ขั้นตอนที่ 1: ตรวจสอบว่า image_id ใน rent_detail ตรงกับรูปที่จะลบหรือไม่
           const { data: currentRentDetail } = await supabase
             .from("rent_detail")
             .select("image_id")
             .eq("id", rentId)
             .single();
 
-          // ถ้า image_id ตรงกับรูปที่จะลบ ให้เซ็ตเป็น null ก่อน
           if (currentRentDetail?.image_id && deletedImageIds.includes(currentRentDetail.image_id)) {
             console.log("Setting image_id to null before deleting");
             await supabase
@@ -356,7 +349,6 @@ export async function PUT(req: Request) {
               .eq("id", rentId);
           }
 
-          // ขั้นตอนที่ 2: ลบรูปภาพ
           const { error: deleteImagesError } = await supabase
             .from("rent_images")
             .delete()
@@ -377,7 +369,6 @@ export async function PUT(req: Request) {
       console.log("No deleted_image_ids provided");
     }
 
-    // เพิ่มรูปภาพใหม่ (ถ้ามี)
     let firstNewImageId: string | null = null;
     console.log("Number of new images to upload:", images.length);
 
@@ -434,7 +425,6 @@ export async function PUT(req: Request) {
         if (insertImagesError) {
           console.error("Insert images error:", insertImagesError);
         } else if (insertedImages && insertedImages.length > 0) {
-          // เก็บ ID ของรูปแรกที่อัปโหลด
           firstNewImageId = insertedImages[0].id;
           console.log("First new image ID:", firstNewImageId);
         }
@@ -444,15 +434,12 @@ export async function PUT(req: Request) {
     }
 
     // อัปเดต image_id ใน rent_detail ให้ชี้ไปที่รูปแรก
-    // ลำดับความสำคัญ: รูปใหม่ที่อัปโหลดรูปแรก > รูปเก่าที่เหลืออยู่รูปแรก
     let imageIdToSet: string | null = null;
 
     if (firstNewImageId) {
-      // ถ้ามีรูปใหม่ที่อัปโหลด ให้ใช้รูปแรกที่อัปโหลด
       console.log("Using first new image ID:", firstNewImageId);
       imageIdToSet = firstNewImageId;
     } else {
-      // ถ้าไม่มีรูปใหม่ ให้ดึงรูปเก่าที่เหลืออยู่รูปแรก (เรียงตาม created_at จากเก่าไปใหม่)
       const { data: remainingImages } = await supabase
         .from("rent_images")
         .select("id, created_at")

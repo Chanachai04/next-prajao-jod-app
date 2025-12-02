@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabaseClient";
 
 export async function GET() {
   try {
+    //เช็คuser_idจากdatabaseด้วยcookies
     const cookieStore = await cookies();
     const userId = cookieStore.get("userId")?.value;
 
@@ -12,7 +13,7 @@ export async function GET() {
         { status: 401 }
       );
     }
-
+    //ดึงข้อมูลประวัติการเช่า
     const { data, error } = await supabase
       .from("rent_history")
       .select(
@@ -130,6 +131,7 @@ export async function DELETE(request: Request) {
       );
     }
 
+    //ลบcolumnจากตารางrent_history
     const { error, count } = await supabase
       .from("rent_history")
       .delete({ count: "exact" })

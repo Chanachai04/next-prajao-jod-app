@@ -15,13 +15,14 @@ import LabelAndInput from "@/components/form/LabelAndInputForm";
 import AlertModal from "@/components/ui/modal";
 import { useSearchParams } from "next/navigation";
 import LabelAndProvinceSearch from "../form/LabelAndProvinceSearch";
+//importจากhookมาใช้งาน
 import useEditRentDetail from "@/hook/useEditRentDetail";
 import Loading from "./loading";
 
 export default function EditRentDetail() {
   const searchParams = useSearchParams();
   const rentId = searchParams.get("rent_id");
-
+  //ตัวแปรของstateและฟังชันการทำงานที่อยู่ในhook
   const {
     images,
     existingImages,
@@ -78,7 +79,6 @@ export default function EditRentDetail() {
 
         {/* --ฟอร์มข้อมูลทั่วไป */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-5">
-          {/* ชื่อที่จอดรถ */}
           <LabelAndInput
             title="ชื่อที่จอดรถ (ไม่เกิน 80 ตัวอักษร) *"
             id="parkingname"
@@ -89,7 +89,6 @@ export default function EditRentDetail() {
             onChange={handleFieldChange("name")}
           />
 
-          {/* ประเภท */}
           <div>
             <Label className="text-lg">ประเภท *</Label>
             <Select
@@ -113,7 +112,6 @@ export default function EditRentDetail() {
             </Select>
           </div>
 
-          {/* คำบรรยาย */}
           <div className="md:col-span-2">
             <LabelAndInput
               title="คำบรรยาย"
@@ -126,7 +124,6 @@ export default function EditRentDetail() {
             />
           </div>
 
-          {/* จำนวนที่จอด + ที่อยู่ */}
           <LabelAndInput
             title="จำนวนที่จอด (คัน) *"
             id="amount"
@@ -173,7 +170,6 @@ export default function EditRentDetail() {
             />
           </div>
 
-          {/* จุดสังเกต */}
           <div className="md:col-span-2">
             <LabelAndInput
               title="จุดสังเกต *"
@@ -187,11 +183,9 @@ export default function EditRentDetail() {
           </div>
         </div>
 
-        {/* --checkbox เวลาเปิดปิด */}
         <div className="py-5">
           <Label className="text-lg">เวลาเปิดปิดที่จอด *</Label>
 
-          {/* หัวข้อ: วัน / เวลาเปิด / เวลาปิด */}
           <div className="grid grid-cols-12 items-center py-2 gap-2">
             <div className="col-span-6 sm:col-span-3 flex items-center gap-2">
               <Checkbox
@@ -303,7 +297,6 @@ export default function EditRentDetail() {
           <Label className="text-lg">รูปภาพ (ไม่เกิน 10 รูป)</Label>
         </div>
 
-        {/* Input จริง ถูกซ่อนและมี ID */}
         <input
           type="file"
           accept="image/*"
@@ -324,7 +317,6 @@ export default function EditRentDetail() {
 
         {images.length > 0 && (
           <div className="mt-4">
-            {/* ปุ่มสำหรับเพิ่มรูปภาพอื่น ๆ เมื่อมีรูปแล้ว */}
             <Label
               htmlFor="file-upload"
               className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
@@ -334,7 +326,6 @@ export default function EditRentDetail() {
           </div>
         )}
 
-        {/* ส่วนแสดงรูปภาพเดิม */}
         {existingImages.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {existingImages.map((img) => (
@@ -362,7 +353,6 @@ export default function EditRentDetail() {
           </div>
         )}
 
-        {/* ส่วนแสดงรูปภาพที่เลือกไว้ใหม่ */}
         {images.length > 0 && (
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {images.map((file, index) => (
@@ -466,6 +456,7 @@ export default function EditRentDetail() {
             })}
           </div>
         </div>
+        {/* แสดงvalidate */}
         {submitStatus && (
           <p
             className={`mt-4 text-sm sm:text-base ${
@@ -477,6 +468,7 @@ export default function EditRentDetail() {
             {submitStatus.message}
           </p>
         )}
+        {/* ปุ่ม */}
         <Button
           className="px-12 h-12 cursor-pointer mt-6 mb-10"
           type="submit"
@@ -484,6 +476,7 @@ export default function EditRentDetail() {
         >
           {isSubmitting ? "กำลังอัปเดต..." : "อัปเดตข้อมูล"}
         </Button>
+        {/* Modalแจ้งเตือนบันทึกสำเร็จ */}
         <AlertModal
           open={modalOpen}
           onClose={closeModal}

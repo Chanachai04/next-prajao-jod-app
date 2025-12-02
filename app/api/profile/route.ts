@@ -7,6 +7,7 @@ const SECRET_KEY = process.env.SECRET_KEY as string;
 
 export async function GET() {
   try {
+    //เช็คtokenและuserId
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const userId = cookieStore.get("userId")?.value;
@@ -25,7 +26,7 @@ export async function GET() {
     } catch {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
-
+    //ดึงข้อมูล user
     const { data, error } = await supabase
       .from("users")
       .select("email, first_name, last_name, citizen_id, line_id, phone, image_url")
@@ -51,7 +52,7 @@ export async function GET() {
   }
 }
 
-// POST route: FormData + upload image to "user_bk"
+//Update ข้อมูลuser
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();

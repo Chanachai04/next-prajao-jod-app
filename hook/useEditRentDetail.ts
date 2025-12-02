@@ -5,6 +5,7 @@ import { districts, provinces, subDistricts } from "@/lib/thaiData";
 import { ScheduleItem, SubmitStatus } from "@/types/editRentDetail";
 
 export default function useEditRentDetail(rentId: string | null) {
+  //State
   const [images, setImages] = React.useState<File[]>([]);
   const [existingImages, setExistingImages] = React.useState<
     Array<{ id: string; image_url: string }>
@@ -42,7 +43,7 @@ export default function useEditRentDetail(rentId: string | null) {
     deposit: "",
     owner_id: "",
   });
-
+  //โหลด userId จาก cookie หรือ /api/me
   React.useEffect(() => {
     const fetchUserId = async () => {
       if (typeof document === "undefined") return;
@@ -70,7 +71,7 @@ export default function useEditRentDetail(rentId: string | null) {
 
     fetchUserId();
   }, []);
-
+  //โหลดข้อมูลที่จอดรถจาก rentId
   React.useEffect(() => {
     if (!rentId) {
       setIsLoading(false);
@@ -114,7 +115,7 @@ export default function useEditRentDetail(rentId: string | null) {
             deposit: price?.deposit ? String(price.deposit) : "",
             owner_id: rentDetail.owner_id || "",
           });
-
+          //ฟังชันก์facilities, schedules, time options
           if (facilities && facilities.length > 0) {
             setSelectedFacilities(
               facilities.map((f: { name: string }) => f.name)
@@ -236,7 +237,7 @@ export default function useEditRentDetail(rentId: string | null) {
     ],
     []
   );
-
+  // ฟังก์ชันจัดการรูปภาพ
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     const updated = [...images, ...files].slice(0, 10);
@@ -306,7 +307,7 @@ export default function useEditRentDetail(rentId: string | null) {
       )
     );
   };
-
+  //ฟังชันก์เลือกจังหวัด/อำเภอ/ตำบล
   const handleProvinceSearchChange = (
     pId: number | null,
     dId: number | null,

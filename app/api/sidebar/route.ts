@@ -3,10 +3,12 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { supabase } from "@/lib/supabaseClient";
 
+//ใช้สำหรับ verify JWT
 const SECRET_KEY = process.env.SECRET_KEY as string;
 
 export async function GET() {
   try {
+    // อ่านtokenและuserIdจากคุกกี้
     const cookieStore = await cookies();
     const token = cookieStore.get("token")?.value;
     const userId = cookieStore.get("userId")?.value;
@@ -14,7 +16,7 @@ export async function GET() {
     if (!token || !userId) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
+    // Verify JWT token
     try {
       const { payload } = await jwtVerify(token, new TextEncoder().encode(SECRET_KEY));
       if (payload && typeof payload === "object" && "userId" in payload) {
@@ -25,7 +27,7 @@ export async function GET() {
     } catch {
       return NextResponse.json({ message: "Invalid token" }, { status: 401 });
     }
-
+    // Query Supabase เพื่อนำข้อมูลผู้ใช้มาแสดง
     const { data, error } = await supabase
       .from("users")
       .select("email, first_name, last_name, image_url")
