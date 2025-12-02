@@ -431,7 +431,7 @@ export default function Page() {
 
           {/* Thumbnails */}
           {imageUrls.length > 1 && (
-            <div className="h-[60px] sm:h-[80px] lg:h-[100px] w-full flex justify-start items-center space-x-2 overflow-x-auto px-1 sm:px-2 mt-3 sm:mt-4 scrollbar-hide">
+            <div className="h-[60px] sm:h-20 lg:h-[100px] w-full flex justify-start items-center space-x-2 overflow-x-auto px-1 sm:px-2 mt-3 sm:mt-4 scrollbar-hide">
               {imageUrls.map((img, idx) => (
                 <Image
                   key={`${img}-${idx}`}

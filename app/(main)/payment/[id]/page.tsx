@@ -391,7 +391,7 @@ export default function Page() {
                 width={100}
                 height={100}
                 alt={paymentData.rentDetail.name}
-                className="rounded-2xl w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] object-cover shrink-0"
+                className="rounded-2xl w-20 h-20 sm:w-[100px] sm:h-[100px] object-cover shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-base sm:text-lg truncate">
