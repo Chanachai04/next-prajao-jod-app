@@ -138,7 +138,7 @@ export default function DetailPanel({
   }, [spot.id, searchParams, selectedOptionDetail, monthDurationKey]);
 
   return (
-    <div className="w-full lg:w-lg bg-white">
+    <div className="w-full lg:w-lg  bg-white">
       {/* Image Gallery */}
       <div className="relative">
         {/* รูปภาพหลักที่แสดงตาม currentIndex */}
@@ -197,7 +197,7 @@ export default function DetailPanel({
       )}
 
       {/* Details Section */}
-      <div className="px-3 sm:px-4 max-h-full overflow-y-auto pb-6 sm:pb-8">
+      <div className="px-3 sm:px-4 h-full lg:h-[60vh] overflow-y-auto pb-6 sm:pb-8">
         {/* ชื่อสถานที่ */}
         <p className="text-lg sm:text-xl mt-3 sm:mt-4 font-semibold">
           {spot.name ?? "-"}

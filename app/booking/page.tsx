@@ -429,7 +429,7 @@ export default function Booking() {
       <div className="w-full lg:w-auto flex flex-col lg:flex-row">
         {/* Detail Panel - แสดงแบบ Fixed ครึ่งหน้าจอหรือเต็มหน้าจอบนมือถือ/แท็บเล็ต */}
         {isShowing && selectedSpot && (
-          <div className="fixed h-full lg:relative inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
+          <div className="fixed  h-full lg:relative  inset-0 lg:inset-auto z-50 lg:z-auto bg-white overflow-y-auto">
             <DetailPanel
               spot={selectedSpot}
               currentIndex={currentIndex}
