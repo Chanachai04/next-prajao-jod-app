@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { User, History, ParkingCircle, LogOut } from "lucide-react";
+import { User, History, ParkingCircle, LogOut , ClipboardList } from "lucide-react";
 import { MenuItem, ProfileState } from "@/types/sidebar";
 
 const DEFAULT_PROFILE: ProfileState = {
@@ -138,6 +138,7 @@ export default function Sidebar({
     { name: "ข้อมูลส่วนตัว", href: "/profile/detail", icon: User },
     { name: "ประวัติการจอง", href: "/profile/history", icon: History },
     { name: "ที่จอดรถของคุณ", href: "/profile/parking", icon: ParkingCircle },
+    { name: "ผู้เช่าที่จอดรถ", href: "/profile/renter", icon: ClipboardList },
     {
       name: isLoggingOut ? "กำลังออกจากระบบ..." : "ออกจากระบบ",
       icon: LogOut,
