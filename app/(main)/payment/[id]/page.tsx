@@ -4,10 +4,11 @@ import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import LabelAndInputForm from "@/components/form/LabelAndInputForm";
 import { Button } from "@/components/ui/button";
-import ConfirmModal from "@/components/ui/confirm";
 import AlertModal from "@/components/ui/modal";
+import PaymentModal from "@/components/ui/payment-modal";
 import Loading from "../loading";
 import { PaymentData } from "@/types/payment";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Page() {
   const { id } = useParams(); // ID ของที่จอดรถ (Rent ID)
@@ -16,10 +17,11 @@ export default function Page() {
 
   // สถานะควบคุม Modal และกระบวนการ
   const [isOpen, setIsOpen] = useState(false); // Alert Modal (สำเร็จ)
-  const [isConfirm, setIsConfirm] = useState(false); // Confirm Modal
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false); // Payment Modal
   const [isLoading, setIsLoading] = useState(true); // สถานะโหลดข้อมูล API
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null); // ข้อมูลที่จอดรถและผู้ใช้
   const [isProcessing, setIsProcessing] = useState(false); // สถานะกำลังประมวลผลการชำระเงิน
+  const [rentHistoryId, setRentHistoryId] = useState<string | null>(null); // เก็บ rent_history_id หลังจากสร้างการจอง
 
   // สถานะสำหรับฟอร์มข้อมูลผู้จอง
   const [firstName, setFirstName] = useState("");
@@ -285,8 +287,8 @@ export default function Page() {
     }
   };
 
-  // จัดการการชำระเงิน (เรียก API /api/payment ด้วยเมธอด POST)
-  const handlePayment = async () => {
+  // จัดการการเปิด Payment Modal และสร้างการจอง
+  const handleOpenPaymentModal = async () => {
     if (!userId) {
       setError("กรุณาเข้าสู่ระบบก่อนทำการชำระเงิน");
       return;
@@ -300,26 +302,24 @@ export default function Page() {
       !phone.trim()
     ) {
       setError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
-      setIsConfirm(false);
       return;
     }
 
     // Client-side validation: ตรวจสอบเลขบัตรประชาชน
     if (citizenId.length !== 13 || !/^\d+$/.test(citizenId)) {
       setError("กรุณากรอกเลขบัตรประชาชน 13 หลักให้ถูกต้อง");
-      setIsConfirm(false);
       return;
     }
 
     // Client-side validation: ตรวจสอบเบอร์โทรศัพท์
     if (phone.length !== 10 || !/^0\d{9}$/.test(phone)) {
       setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง");
-      setIsConfirm(false);
       return;
     }
 
     try {
       setIsProcessing(true);
+      setError(null);
 
       const res = await fetch("/api/payment", {
         method: "POST",
@@ -345,24 +345,85 @@ export default function Page() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "เกิดข้อผิดพลาดในการชำระเงิน");
+        throw new Error(data.message || "เกิดข้อผิดพลาดในการสร้างการจอง");
+      }
+
+      // เก็บ rent_history_id เพื่อใช้ในการอัพโหลด slip
+      setRentHistoryId(data.rentHistoryId);
+
+      // เปิด Payment Modal
+      setIsPaymentModalOpen(true);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "เกิดข้อผิดพลาดในการสร้างการจอง"
+      );
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // จัดการการอัพโหลด slip และบันทึกข้อมูลการชำระเงิน
+  const handleSlipUpload = async (file: File) => {
+    if (!userId || !rentHistoryId) {
+      throw new Error("ข้อมูลไม่ครบถ้วน");
+    }
+
+    try {
+      // สร้างชื่อไฟล์ที่ไม่ซ้ำกัน
+      const timestamp = Date.now();
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${timestamp}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
+
+      // อัพโหลดไฟล์ไปยัง Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from("slip_bk")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw new Error(`ไม่สามารถอัพโหลดไฟล์ได้: ${uploadError.message}`);
+      }
+
+      // ดึง public URL ของไฟล์ที่อัพโหลด
+      const { data: urlData } = supabase.storage
+        .from("slip_bk")
+        .getPublicUrl(filePath);
+
+      const slipImageUrl = urlData.publicUrl;
+
+      // บันทึกข้อมูลการชำระเงินลงตาราง rent_payments
+      const { error: insertError } = await supabase
+        .from("rent_payments")
+        .insert({
+          rent_history_id: rentHistoryId,
+          user_id: userId,
+          slip_image_url: slipImageUrl,
+          amount: payment.total,
+          payment_date: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        throw new Error(
+          `ไม่สามารถบันทึกข้อมูลการชำระเงินได้: ${insertError.message}`
+        );
       }
 
       // แสดง Modal สำเร็จและเปลี่ยนเส้นทาง
-      setIsConfirm(false);
+      setIsPaymentModalOpen(false);
       setIsOpen(true);
 
       setTimeout(() => {
         router.push("/");
       }, 2000);
     } catch (error) {
-      console.error("Error processing payment:", error);
-      setIsConfirm(false);
-      setError(
-        error instanceof Error ? error.message : "เกิดข้อผิดพลาดในการชำระเงิน"
-      );
-    } finally {
-      setIsProcessing(false);
+      console.error("Error uploading slip:", error);
+      throw error;
     }
   };
 
@@ -545,39 +606,21 @@ export default function Page() {
           <div className="flex justify-end mt-6 sm:mt-8">
             <Button
               className="cursor-pointer w-full sm:w-auto px-8 sm:px-12 py-3 sm:py-4 text-base sm:text-lg"
-              onClick={() => {
-                // Client-side validation ก่อนเปิด Confirm Modal
-                if (
-                  !firstName.trim() ||
-                  !lastName.trim() ||
-                  !citizenId.trim() ||
-                  !phone.trim()
-                ) {
-                  setError("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน");
-                  return;
-                }
-                if (citizenId.length !== 13) {
-                  setError("กรุณากรอกเลขบัตรประชาชน 13 หลัก");
-                  return;
-                }
-                if (phone.length !== 10) {
-                  setError("กรุณากรอกเบอร์โทรศัพท์ 10 หลัก");
-                  return;
-                }
-                setIsConfirm(true); // เปิด Confirm Modal
-              }}
+              onClick={handleOpenPaymentModal}
               disabled={isProcessing}
             >
               {isProcessing ? "กำลังดำเนินการ..." : "ชำระเงิน"}
             </Button>
           </div>
 
-          {/* Confirm Modal (ก่อนเรียก handlePayment) */}
-          <ConfirmModal
-            open={isConfirm}
-            onClose={() => !isProcessing && setIsConfirm(false)}
-            onConfirm={handlePayment} // เมื่อยืนยัน ให้เรียกฟังก์ชันชำระเงิน
+          {/* Payment Modal (สำหรับชำระเงินและอัพโหลด slip) */}
+          <PaymentModal
+            open={isPaymentModalOpen}
+            onClose={() => !isProcessing && setIsPaymentModalOpen(false)}
+            onConfirm={handleSlipUpload}
+            amount={payment.total}
           />
+
           {/* Alert Modal (ชำระเงินสำเร็จ) */}
           <AlertModal
             open={isOpen}

@@ -196,20 +196,23 @@ export async function POST(req: Request) {
       historyData.parking_time_month = duration;
     }
 
-    // 5. บันทึกข้อมูลการจองลง rent_history
-    const { error: historyError } = await supabase
+    // 5. บันทึกข้อมูลการจองลง rent_history และดึง id ที่สร้างขึ้น
+    const { data: historyResult, error: historyError } = await supabase
       .from("rent_history")
-      .insert(historyData);
+      .insert(historyData)
+      .select("id")
+      .single();
 
     if (historyError) {
       console.error("Error creating rent history:", historyError);
       throw historyError;
     }
 
-    // 6. ส่งผลลัพธ์สำเร็จ
+    // 6. ส่งผลลัพธ์สำเร็จพร้อม rentHistoryId
     return NextResponse.json({
       success: true,
-      message: "ชำระเงินสำเร็จ",
+      message: "สร้างการจองสำเร็จ",
+      rentHistoryId: historyResult.id,
     });
   } catch (error) {
     console.error("Error processing payment:", error);
